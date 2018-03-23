@@ -46,8 +46,8 @@ class SaleOrder(models.Model):
         })
         if self.env.context.get('is_pos_pricelist'):
             res.update({
-            'price_unit':       line_data['price_unit'],
-            'tax_id':           line_data['tax_ids'],
+                'price_unit':       line_data['price_unit'],
+                'tax_id':           line_data['tax_ids'],
             })
         return res
 

@@ -27,19 +27,19 @@ This module is usefull in many cases, for exemple :
 
 Three options are available:
 
-#. '**Create a draft Order**'
+* '**Create a draft Order**'
   A new sale order in a draft mode will be created that can be changed later.
 
 .. figure:: static/description/pos_create_picking_option_1.png
    :width: 800 px
 
-#. '**Create a Confirmed Order**'
+* '**Create a Confirmed Order**'
   A new sale order will be created and confirmed.
 
 .. figure:: static/description/pos_create_picking_option_2.png
    :width: 800 px
 
-#. '**Create Delivered Picking**' (by default)
+* '**Create Delivered Picking**' (by default)
   A new sale order will be created and confirmed. the associated picking
   will be marked as delivered.
 
