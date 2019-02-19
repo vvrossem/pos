@@ -1,30 +1,23 @@
 <odoo>
     <data>
-        <!--  -->
-        <!--   <record id="object0" model="pos_container.pos_container"> -->
-        <!--     <field name="name">Object 0</field> -->
-        <!--     <field name="value">0</field> -->
-        <!--   </record> -->
-        <!--  -->
-        <!--   <record id="object1" model="pos_container.pos_container"> -->
-        <!--     <field name="name">Object 1</field> -->
-        <!--     <field name="value">10</field> -->
-        <!--   </record> -->
-        <!--  -->
-        <!--   <record id="object2" model="pos_container.pos_container"> -->
-        <!--     <field name="name">Object 2</field> -->
-        <!--     <field name="value">20</field> -->
-        <!--   </record> -->
-        <!--  -->
-        <!--   <record id="object3" model="pos_container.pos_container"> -->
-        <!--     <field name="name">Object 3</field> -->
-        <!--     <field name="value">30</field> -->
-        <!--   </record> -->
-        <!--  -->
-        <!--   <record id="object4" model="pos_container.pos_container"> -->
-        <!--     <field name="name">Object 4</field> -->
-        <!--     <field name="value">40</field> -->
-        <!--   </record> -->
-        <!--  -->
+
+           <record id="container_1" model="pos.container">
+             <field name="name">Container 1</field>
+             <field name="ean13">4987654567897</field>
+             <field name="weight">123</field>
+           </record>
+
+           <record id="container_2" model="pos.container">
+             <field name="name">Container 2</field>
+             <field name="ean13">4909876543567</field>
+             <field name="weight">234</field>
+           </record>
+
+           <record id="container_3" model="pos.container">
+             <field name="name">Container 3</field>
+             <field name="ean13">4909876543987</field>
+             <field name="weight">23.4</field>
+           </record>
+
     </data>
 </odoo>
