@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-extend='ActionpadWidget'>
+        <t t-jquery='.set-customer' t-operation='prepend'>
+            <t t-log="extend actionpadwidget"/>
+            <button class='button set-container'>
+                <i class='fa fa-glass-whiskey' role="img" aria-label="Container" title="Container"/>
+                <span>Container</span>
+            </button>
+        </t>
+    </t>
+
+</templates>
