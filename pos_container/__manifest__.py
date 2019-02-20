@@ -18,10 +18,16 @@
 
     'data': [
         'views/container.xml',
+        # 'templates/templates.xml',
         'security/ir.model.access.csv',
     ],
     'demo': [
         'demo/demo.xml',
     ],
+
+    'qweb': [
+        'static/src/xml/pos.xml',
+    ],
+
     'installable': True,
 }
