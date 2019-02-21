@@ -2,11 +2,10 @@
 <templates id="template" xml:space="preserve">
 
     <t t-extend='ActionpadWidget'>
-        <t t-jquery='.set-customer' t-operation='prepend'>
-            <t t-log="extend actionpadwidget"/>
-            <button class='button set-container'>
-                <i class='fa fa-glass-whiskey' role="img" aria-label="Container" title="Container"/>
-                <span>Container</span>
+        <t t-jquery='.actionpad' t-operation='prepend'>
+            <button class='button set-customer'>
+                <i class='fa fa-icon-glass' role="img" aria-label="Container" title="Container"/>
+                Container
             </button>
         </t>
     </t>
