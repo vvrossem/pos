@@ -15,11 +15,4 @@ odoo.define('pos_container.pos_container', function (require) {
     // example: add field from defined model
     // models.load_fields('res.partner','loyalty_points');
 
-    models.load_models([
-        {
-            model: 'pos.container',
-            fields: ['name','ean13', 'weight'],
-            // domain: function(self){ return [['id','=',self.config.loyalty_id[0]]]; },
-        }]
-    )
 });
