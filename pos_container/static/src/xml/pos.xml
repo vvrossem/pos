@@ -1,13 +1,98 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates id="template" xml:space="preserve">
 
-    <t t-extend='ActionpadWidget'>
-        <t t-jquery='.actionpad' t-operation='prepend'>
-            <button class='button set-customer'>
-                <i class='fa fa-icon-glass' role="img" aria-label="Container" title="Container"/>
-                Container
-            </button>
-        </t>
+    <t t-name="ContainerButton">
+        <button class="control-button">
+            <i class="fa fa-beer" role="img" aria-label="Container" title="Container"/>
+            Container
+        </button>
     </t>
+
+    <t t-name="ContainerDetails">
+         <section class="container-details">
+             <div class="container-details-box clearfix">
+                 <div class="container-details-left">
+                     <div class="container-detail">
+                         <span class="label">Nom</span>
+                         <span class="detail container-name">
+                             <t t-esc="container.display_name"/>
+                         </span>
+                     </div>
+                     <div class="container-detail">
+                         <span class="label">Code-barre</span>
+                         <span class="detail container-barcode">
+                             <t t-esc="container.barcode"/>
+                         </span>
+                     </div>
+                 </div>
+                 <div class="container-details-right">
+                     <div class="container-detail">
+                         <span class="label">Poids</span>
+                         <span class="detail container-weight">
+                             <t t-esc="container.weight"/>
+                         </span>
+                     </div>
+                 </div>
+                 <div class="edit-buttons">
+                     <div class="button edit">
+                         <i class="fa fa-pencil-square"/>
+                     </div>
+                 </div>
+             </div>
+         </section>
+     </t>
+
+    <t t-name="ContainerListScreenWidget">
+         <div class="containerlist-screen screen">
+             <div class="screen-content">
+                 <section class="top-content">
+                     <span class="button back">
+                         <i class="fa fa-angle-double-left"/>
+                         Annuler
+                     </span>
+                     <span class="searchbox">
+                         <input placeholder="Search Containers"/>
+                         <span class="search-clear"/>
+                     </span>
+                     <span class="searchbox"/>
+                     <span class="button new-container">
+                         <i class="fa fa-beer"/>
+                         <i class="fa fa-plus"/>
+                     </span>
+                     <span class="button next oe_hidden highlight">
+                         S&#xE9;lectionne un contenant
+                         <i class="fa fa-angle-double-right"/>
+                     </span>
+                 </section>
+                 <section class="full-content">
+                     <div class="window">
+                         <section class="subwindow collapsed">
+                             <div class="subwindow-container collapsed">
+                                 <div class="subwindow-container-fix container-details-contents">
+                                 </div>
+                             </div>
+                         </section>
+                         <section class="subwindow">
+                             <div class="subwindow-container">
+                                 <div class="subwindow-container-fix touch-scrollable scrollable-y">
+                                     <table class="container-list">
+                                         <thead>
+                                             <tr>
+                                                 <th>Nom</th>
+                                                 <th>Code-barre</th>
+                                                 <th>Poids</th>
+                                             </tr>
+                                         </thead>
+                                         <tbody class="container-list-contents">
+                                         </tbody>
+                                     </table>
+                                 </div>
+                             </div>
+                         </section>
+                     </div>
+                 </section>
+             </div>
+         </div>
+     </t>
 
 </templates>

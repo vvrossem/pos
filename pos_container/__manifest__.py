@@ -18,7 +18,7 @@
 
     'data': [
         'views/container.xml',
-        # 'templates/templates.xml',
+        'templates/templates.xml',
         'security/ir.model.access.csv',
     ],
     'demo': [
