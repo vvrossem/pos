@@ -13,23 +13,22 @@ class Container(models.Model):
     name = fields.Char(
         string='Name',
     )
-    ean13 = fields.Char(
-        'EAN13 Barcode',
+    barcode = fields.Char(
+        'Barcode',
         size=13,
     )
     weight = fields.Float(
         string='Weight (g)',
     )
+    owner_id = fields.Many2one(
+        comodel_name='res.partner',
+        inverse_name='container_ids',
+        string='Owner',
+    )
 
-    @api.multi
-    @api.constrains('ean13')
-    def _check_ean13(self):
-        for container in self:
-            if not container.ean13.startswith('49'):
-                raise ValidationError(
-                    'Container barcode must start with 49 prefix.'
-                )
-            if len(container.ean13) != 13:
-                raise ValidationError(
-                    'Container barcode must be 13 digit long.'
-                )
+    _sql_constraints = [
+        ('barcode_uniq',
+            'unique(barcode)',
+            "A barcode can only be assigned to one container !"),
+    ]
+
