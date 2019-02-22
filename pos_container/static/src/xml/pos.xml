@@ -13,13 +13,13 @@
              <div class="container-details-box clearfix">
                  <div class="container-details-left">
                      <div class="container-detail">
-                         <span class="label">Nom</span>
+                         <span class="label">Name</span>
                          <span class="detail container-name">
-                             <t t-esc="container.display_name"/>
+                             <t t-esc="container.name"/>
                          </span>
                      </div>
                      <div class="container-detail">
-                         <span class="label">Code-barre</span>
+                         <span class="label">Barcode</span>
                          <span class="detail container-barcode">
                              <t t-esc="container.barcode"/>
                          </span>
@@ -27,7 +27,7 @@
                  </div>
                  <div class="container-details-right">
                      <div class="container-detail">
-                         <span class="label">Poids</span>
+                         <span class="label">Weight</span>
                          <span class="detail container-weight">
                              <t t-esc="container.weight"/>
                          </span>
@@ -115,7 +115,7 @@
                 <div class='container-details-left'>
                     <div class='container-detail'>
                         <span class='label'>name</span>
-                        <input class='detail container-name' name='name' t-att-value='container.display_name' placeholder='Nom'></input>
+                        <input class='detail container-name' name='name' t-att-value='container.name' placeholder='Name'></input>
                     </div>
                     <div class='container-detail'>
                         <span class='label'>Barcode</span>
@@ -125,7 +125,7 @@
                 <div class='container-details-right'>
                     <div class='container-detail'>
                         <span class='label'>Weight</span>
-                        <input class='detail container-weight' name='weight' t-att-value='container.weight' placeholder='Poids'></input>
+                        <input class='detail container-weight' name='weight' t-att-value='container.weight' placeholder='Weight'></input>
                     </div>
                 </div>
                 <div class='edit-buttons'>

@@ -69,9 +69,8 @@ odoo.define('pos_container.container', function (require) {
 
             var search_timeout = null;
 
-            if(this.pos.config.iface_vkeyboard &&
-                    this.pos_widget.onscreen_keyboard){
-                this.pos_widget.onscreen_keyboard.connect(
+            if(this.pos.config.iface_vkeyboard && this.chrome.widget.keyboard){
+                this.chrome.widget.keyboard.connect(
                     this.$('.searchbox input')
                 );
             }
@@ -97,7 +96,7 @@ odoo.define('pos_container.container', function (require) {
                 if ( associate_result && containers.length === 1){
                     this.new_container = containers[0];
                     this.save_changes();
-                    this.pos_widget.screen_selector.back();
+                    this.gui.back();
                 }
                 this.render_list(containers);
             }else{
@@ -131,7 +130,7 @@ odoo.define('pos_container.container', function (require) {
             }
         },
         save_changes: function(){
-            this.pos.get('selectedOrder').addContainer(this.new_container);
+            this.pos.get('selectedOrder').add_container(this.new_container);
         },
         has_container_changed: function() {
             if(this.old_container && this.new_container) {
@@ -200,7 +199,7 @@ odoo.define('pos_container.container', function (require) {
                 fields[el.name] = el.value;
             });
             if (!fields.barcode) {
-                this.pos_widget.screen_selector.show_popup('error',{
+                this.gui.show_popup('error',{
                     message: 'A Container Barcode Is Required',
                 });
                 return;
@@ -213,14 +212,14 @@ odoo.define('pos_container.container', function (require) {
             fields.weight = fields.weight || false;
 
             rpc.query({
-                model: 'res.partner',
+                model: 'pos.container',
                 method: 'create_from_ui',
                 args: [fields],
             }).then(function(container_id){
                 self.saved_container_details(container_id);
             },function(err,event){
                 event.preventDefault();
-                self.pos_widget.screen_selector.show_popup('error',{
+                self.gui.show_popup('error',{
                     'message':_t('Error: Could not Save Changes'),
                     'comment':_t('Your Internet connection is probably down.'),
                 });
@@ -248,6 +247,9 @@ odoo.define('pos_container.container', function (require) {
         reload_containers: function(){
             var self = this;
             return this.pos.load_new_containers().then(function(){
+                // containers may have changed in the backend
+                self.container_cache = new screens.DomCache();
+
                 self.render_list(self.pos.db.get_containers_sorted(1000));
 
                 var last_orderline = self.pos.get_order().get_last_orderline();

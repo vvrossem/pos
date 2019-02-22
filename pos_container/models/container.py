@@ -3,7 +3,6 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
 from odoo import models, fields, api
-from odoo.exceptions import ValidationError
 
 
 class Container(models.Model):
@@ -21,7 +20,7 @@ class Container(models.Model):
         string='Weight (g)',
     )
     owner_id = fields.Many2one(
-        comodel_name='res.partner',
+        comodel_name='res.container',
         inverse_name='container_ids',
         string='Owner',
     )
@@ -32,3 +31,11 @@ class Container(models.Model):
             "A barcode can only be assigned to one container !"),
     ]
 
+    @api.model
+    def create_from_ui(self, container):
+        container_id = container.pop('id', False)
+        if container_id:  # Modifying existing container
+            self.browse(container_id).write(container)
+        else:
+            container_id = self.create(container).id
+        return container_id
