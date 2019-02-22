@@ -55,7 +55,7 @@
                          <span class="search-clear"/>
                      </span>
                      <span class="searchbox"/>
-                     <span class="button new-container">
+                     <span class="button new-container" role="img" aria-label="Add a container" title="Add a container">
                          <i class="fa fa-beer"/>
                          <i class="fa fa-plus"/>
                      </span>

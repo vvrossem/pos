@@ -65,3 +65,98 @@
 .pos .containerlist-screen .container-picture > img {
     position: absolute;
     top: -9999px;
+    bottom: -9999px;
+    right: -9999px;
+    left: -9999px;
+    max-height: 64px;
+    margin: auto;
+}
+.pos .containerlist-screen .container-picture > .fa {
+    line-height: 64px;
+    font-size: 32px;
+}
+.pos .containerlist-screen .container-picture .image-uploader {
+    position: absolute;
+    z-index: 1000;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+.pos .containerlist-screen .container-name {
+    font-size: 32px;
+    line-height: 64px;
+    margin-bottom:16px;
+}
+.pos .containerlist-screen .edit-buttons {
+    position: absolute;
+    right: 16px;
+    top: 10px;
+}
+.pos .containerlist-screen .edit-buttons .button{
+    display: inline-block;
+    margin-left: 16px;
+    color: rgb(128,128,128);
+    cursor: pointer;
+    font-size: 36px;
+}
+.pos .containerlist-screen .container-details-box{
+    position: relative;
+    font-size: 16px;
+}
+.pos .containerlist-screen .container-details-left{
+    width: 50%;
+    float: left;
+}
+.pos .containerlist-screen .container-details-right{
+    width: 50%;
+    float: left;
+}
+.pos .containerlist-screen .container-detail{
+    line-height: 24px;
+}
+.pos .containerlist-screen .container-detail > .label{
+    font-weight: bold;
+    display: inline-block;
+    width: 75px;
+    text-align: right;
+    margin-right: 8px;
+}
+.pos .containerlist-screen .container-details input,
+.pos .containerlist-screen .container-details select
+{
+    padding: 4px;
+    border-radius: 3px;
+    border: solid 1px #cecbcb;
+    margin-bottom: 4px;
+    background: white;
+    font-family: "Lato","Lucida Grande", Helvetica, Verdana, Arial;
+    color: #555555;
+    width: 340px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+.pos .containerlist-screen .container-details input.container-name {
+    font-size: 24px;
+    line-height: 24px;
+    margin: 18px 6px;
+    width: 340px;
+}
+.pos .containerlist-screen .container-detail > .empty{
+    opacity: 0.3;
+}
+.pos .containerlist-screen .searchbox{
+    right: auto;
+    margin-left: -90px;
+    margin-top:8px;
+    left: 50%;
+}
+.pos .containerlist-screen .searchbox input{
+    width: 120px;
+}
+.pos .containerlist-screen .button.new-customer {
+    left: 50%;
+    margin-left: 120px;
+}
