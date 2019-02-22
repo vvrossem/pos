@@ -66,6 +66,60 @@ odoo.define('pos_container.models_and_db', function (require) {
         },
     });
 
+    models.Order = models.Order.extend({
+        add_container: function(container, options){
+            if(this._printed){
+                this.destroy();
+                return this.pos.get('selectedOrder').add_container(container, options);
+            }
+            options = options || {};
+            var attr = JSON.parse(JSON.stringify(container));
+            attr.pos = this.pos;
+            attr.order = this;
+            var line = new models.Orderline({}, {pos: this.pos, order: this, product: null});
+            this.get('orderLines').add(line);
+
+            self.pos_widget.reload_products(container.pos_categ_ids)
+
+            line.set_container(container);
+            this.selectLine(this.getLastOrderline());
+            this.pos.get('selectedOrder').display_container(container);
+
+        },
+    });
+    
+    // Add container to order line
+    models.Orderline = models.Orderline.extend({
+        get_container: function(){
+            return this.container;
+        },
+        set_container: function(container){
+            this.container = container;
+        },
+        set_tare: function(tare){
+            this.tare = tare;
+            this.container = null;
+            if(this.tare[0] == '.')
+            {
+                this.tare = '0' + this.tare
+            }
+            if (this.gross_weight && this.gross_weight != 'NaN')
+            {
+                this.set_quantity(this.gross_weight - tare);
+            }
+            else
+            {
+                this.gross_weight = this.quantity;
+                this.set_quantity(this.quantity - tare);
+            }
+            this.trigger('change', this);
+        },
+        get_tare: function(){
+            return this.tare;
+        },
+    });
+
+
     PosDB.include({
         init: function(parent, options) {
             this._super(parent, options);
