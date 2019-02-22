@@ -1,0 +1,67 @@
+/* firefox seems to ignore the relative positionning of the subwindow-container 
+ * putting this inside subwindow-container fixes it.                            
+ */                                                                             
+.pos .containerlist-screen .window,                                                
+.pos .containerlist-screen .full-content .subwindow{                               
+    display: block;                                                             
+}                                                                               
+.pos .containerlist-screen .full-content .subwindow-container{                     
+    display: block;                                                             
+    height: 100%;                                                               
+}                                                                               
+.pos .containerlist-screen .full-content .subwindow.collapsed,                     
+.pos .containerlist-screen .full-content .subwindow-container.collapsed{           
+    height: auto;                                                               
+} 
+
+
+/* e) The Container List Screen */
+
+.pos .containerlist-screen .container-list{
+    font-size: 16px;
+    width: 100%;
+    line-height: 40px;
+}
+.pos .containerlist-screen .container-list th,
+.pos .containerlist-screen .container-list td {
+    padding: 0px 8px;
+}
+.pos .containerlist-screen .container-list tr{
+    transition: all 150ms linear;
+    background: rgb(230,230,230);
+}
+.pos .containerlist-screen .container-list thead > tr,
+.pos .containerlist-screen .container-list tr:nth-child(even) {
+    background: rgb(247,247,247);
+}
+.pos .containerlist-screen .container-list tr.highlight{
+    transition: all 150ms linear;
+    background: rgb(110,200,155) !important;
+    color: white;
+}
+.pos .containerlist-screen .container-list tr.lowlight{
+    transition: all 150ms linear;
+    background: rgb(216, 238, 227);
+}
+.pos .containerlist-screen .container-list tr.lowlight:nth-child(even){
+    transition: all 150ms linear;
+    background: rgb(227, 246, 237);
+}
+.pos .containerlist-screen .container-details{
+    padding: 16px;
+    border-bottom: solid 5px rgb(110,200,155);
+}
+.pos .containerlist-screen .container-picture{
+    height: 64px;
+    width: 64px;
+    border-radius: 32px;
+    overflow: hidden;
+    text-align: center;
+    float: left;
+    margin-right: 16px;
+    background: white;
+    position: relative;
+}
+.pos .containerlist-screen .container-picture > img {
+    position: absolute;
+    top: -9999px;
