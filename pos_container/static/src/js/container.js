@@ -16,6 +16,7 @@ odoo.define('pos_container.container', function (require) {
     var models = require('point_of_sale.models');
 
     var core = require('web.core');
+    var rpc = require('web.rpc');
     var QWeb = core.qweb;
 
 
@@ -208,11 +209,14 @@ odoo.define('pos_container.container', function (require) {
 
             fields.id = container.id || false;
             fields.display_name = container.display_name || false;
-            fields.barcode = fields.barcode ? this.pos.barcode_reader.sanitize_ean(fields.barcode) : false;
+            fields.barcode = fields.barcode ? this.pos.barcode_reader.barcode_parser.sanitize_ean(fields.barcode) : false;
             fields.weight = fields.weight || false;
 
-            new instance.web.Model('pos.container').call(
-                    'create_from_ui',[fields]).then(function(container_id){
+            rpc.query({
+                model: 'res.partner',
+                method: 'create_from_ui',
+                args: [fields],
+            }).then(function(container_id){
                 self.saved_container_details(container_id);
             },function(err,event){
                 event.preventDefault();

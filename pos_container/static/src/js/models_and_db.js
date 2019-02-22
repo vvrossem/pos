@@ -164,7 +164,7 @@ odoo.define('pos_container.models_and_db', function (require) {
             }
             var results = [];
             for(var i = 0; i < this.limit; i++) {
-                r = re.exec(this.container_search_string);
+               var r = re.exec(this.container_search_string);
                 if(r) {
                     var id = Number(r[1]);
                     results.push(this.get_container_by_id(id));
