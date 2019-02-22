@@ -48,7 +48,7 @@
                  <section class="top-content">
                      <span class="button back">
                          <i class="fa fa-angle-double-left"/>
-                         Annuler
+                         Cancel
                      </span>
                      <span class="searchbox">
                          <input placeholder="Search Containers"/>
@@ -60,7 +60,7 @@
                          <i class="fa fa-plus"/>
                      </span>
                      <span class="button next oe_hidden highlight">
-                         S&#xE9;lectionne un contenant
+                         Select a container
                          <i class="fa fa-angle-double-right"/>
                      </span>
                  </section>
@@ -78,9 +78,9 @@
                                      <table class="container-list">
                                          <thead>
                                              <tr>
-                                                 <th>Nom</th>
-                                                 <th>Code-barre</th>
-                                                 <th>Poids</th>
+                                                 <th>Name</th>
+                                                 <th>Barcode</th>
+                                                 <th>Weight</th>
                                              </tr>
                                          </thead>
                                          <tbody class="container-list-contents">
@@ -94,5 +94,47 @@
              </div>
          </div>
      </t>
+
+    <t t-name="ContainerLine">
+        <tr class="container-line" t-att-data-id="container.id">
+            <td>
+                <t t-esc="container.name"/>
+            </td>
+            <td>
+                <t t-esc="container.barcode"/>
+            </td>
+            <td>
+                <t t-esc="container.weight"/>
+            </td>
+        </tr>
+    </t>
+
+    <t t-name="ContainerDetailsEdit">
+        <section class='container-details edit'>
+            <div class='container-details-box clearfix'>
+                <div class='container-details-left'>
+                    <div class='container-detail'>
+                        <span class='label'>name</span>
+                        <input class='detail container-name' name='name' t-att-value='container.display_name' placeholder='Nom'></input>
+                    </div>
+                    <div class='container-detail'>
+                        <span class='label'>Barcode</span>
+                        <input class='detail container-barcode' name='barcode' t-att-value='container.barcode' placeholder='Barcode'></input>
+                    </div>
+                </div>
+                <div class='container-details-right'>
+                    <div class='container-detail'>
+                        <span class='label'>Weight</span>
+                        <input class='detail container-weight' name='weight' t-att-value='container.weight' placeholder='Poids'></input>
+                    </div>
+                </div>
+                <div class='edit-buttons'>
+                    <div class='button undo'><i class='fa fa-undo' /></div>
+                    <div class='button save'><i class='fa fa-floppy-o' /></div>
+                </div>
+            </div>
+        </section>
+    </t>
+
 
 </templates>
