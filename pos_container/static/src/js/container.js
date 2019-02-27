@@ -348,4 +348,59 @@ odoo.define('pos_container.container', function (require) {
         widget: ContainerListScreenWidget
     });
 
+    // add container barcode scan
+    screens.ScreenWidget.include({
+        barcode_container_action: function(code){
+            var self = this;
+            if (self.pos.scan_container(code)) {
+                //self.gui.show_screen(
+                //    self.barcode_container_screen, null, null, true);
+            } else {
+                self.gui.show_screen(
+                    'scale_container', {container: code.base_code});
+            }
+        },
+        show: function(){
+            var self = this;
+            this._super();
+            this.pos.barcode_reader.set_action_callback({
+                'container': _.bind(self.barcode_container_action, self),
+            });
+        },
+    });
+
+    screens.ProductScreenWidget.include({
+        click_product: function(product) {
+            var order = this.pos.get_order();
+            var selected_orderline = order.get_selected_orderline();
+            if (product.to_weight && selected_orderline &&
+                    selected_orderline.product === this.pos.get_container_product()){
+                var container = selected_orderline.get_container();
+                this.gui.show_screen('scale',{
+                    product: product, container: container,
+                    old_orderline: selected_orderline});
+            } else {
+                this._super(product);
+            }
+        },
+    });
+
+    screens.ScaleScreenWidget.include({
+        order_product: function(){
+            this._super();
+            var order = this.pos.get_order();
+            var container = this.gui.get_current_screen_param('container');
+            var old_orderline = this.gui.get_current_screen_param(
+                'old_orderline');
+            if (container){
+                var orderline = order.get_last_orderline();
+                orderline.set_container(container);
+                if (old_orderline){
+                    order.remove_orderline(old_orderline);
+                }
+                orderline.trigger('change', orderline);
+            }
+        },
+    });
+
 });

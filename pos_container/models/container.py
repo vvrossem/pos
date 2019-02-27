@@ -20,7 +20,7 @@ class Container(models.Model):
         string='Weight (g)',
     )
     owner_id = fields.Many2one(
-        comodel_name='res.container',
+        comodel_name='res.partner',
         inverse_name='container_ids',
         string='Owner',
     )
