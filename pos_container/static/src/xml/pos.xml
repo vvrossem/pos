@@ -136,5 +136,46 @@
         </section>
     </t>
 
+    <t t-extend='Orderline'>
+        <t t-jquery='.info-list:last-child' t-operation='prepend'>
+            <t t-if="line.get_container()">
+                <ul class="info-list">
+                    <ul class="info-list">
+                        <i><t t-if="line.get_gross_weight()">
+                            <li class="info">
+                                Gross : <t t-esc="line.get_gross_weight()"/> kg
+                            </li>
+                        </t>
+                        <li class="info">
+                            <i class='fa fa-beer'/> :
+                            <t t-esc="line.get_container().weight"/> kg 
+                            - 
+                            <t t-esc="line.get_container().name"/>
+                        </li></i>
+                    </ul>
+                </ul>
+            </t>
+            <t t-if="line.get_tare()">
+                <ul class="info-list">
+                    <ul class="info-list">
+                        <i><t t-if="line.get_gross_weight()">
+                            <li class="info">
+                                Gross : <t t-esc="line.get_gross_weight()"/> kg
+                            </li>
+                        </t>
+                        <li class="info">
+                            <i class='fa fa-beer'/> :
+                            <t t-esc="line.get_tare()"/> kg 
+                            - Manual tare
+                        </li></i>
+                    </ul>
+                </ul>
+            </t>
+            <!--<div class="pos-right-align">
+                <t t-esc="line.get_tare_manual()"/>
+            </div> -->
+        </t>
+    </t>
+
 
 </templates>
