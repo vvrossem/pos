@@ -12,29 +12,27 @@ odoo.define('pos_container.models_and_db', function (require) {
     var models = require('point_of_sale.models');
     var rpc = require('web.rpc');
 
-    models.load_models({
-        model: 'pos.container',
-        fields: ['name','barcode', 'weight'],
-        // domain: [[]],
-        loaded: function(self, containers){
-            self.containers = containers;
-        },
-    });
-
     // include not available => extend
     models.PosModel = models.PosModel.extend({
-        scan_container: function(parsed_code){
-            var selectedOrder = this.get('selectedOrder');
-            if(parsed_code.encoding === 'barcode'){
-                var container = this.db.get_container_by_barcode(parsed_code.base_code);
+        get_container_product: function(){
+            // assign value if not already assigned.
+            // Avoids rewriting init function
+            if (!this.container_product){
+                this.container_product = this.db.get_product_by_barcode(
+                    'CONTAINER');
             }
+            return this.container_product
+        },
+        scan_container: function(parsed_code){
+            var selected_order = this.get_order();
+            var container = this.db.get_container_by_barcode(
+                parsed_code.base_code);
+
             if(!container){
-                self.pos_widget.screen_selector.set_current_screen('container_scale', {container: parsed_code.base_code});
                 return false;
             }
 
-            selectedOrder.addContainer(container);
-
+            selected_order.add_container(container);
             return true;
         },
         // reload the list of container, returns as a deferred that resolves if there were
@@ -70,21 +68,22 @@ odoo.define('pos_container.models_and_db', function (require) {
         add_container: function(container, options){
             if(this._printed){
                 this.destroy();
-                return this.pos.get('selectedOrder').add_container(container, options);
+                return this.pos.get_order().add_container(container, options);
             }
             options = options || {};
             var attr = JSON.parse(JSON.stringify(container));
             attr.pos = this.pos;
             attr.order = this;
-            var line = new models.Orderline({}, {pos: this.pos, order: this, product: null});
-            this.get('orderLines').add(line);
-
-            self.pos_widget.reload_products(container.pos_categ_ids)
+            var product = this.pos.get_container_product();
+            var line = new models.Orderline({},
+                {pos: this.pos, order: this, product: product});
 
             line.set_container(container);
-            this.selectLine(this.getLastOrderline());
-            this.pos.get('selectedOrder').display_container(container);
+            this.orderlines.add(line);
+            //self.pos_widget.reload_products(container.pos_categ_ids)
 
+            this.select_orderline(this.get_last_orderline());
+            //this.pos.get_order().display_container(container);
         },
     });
     
@@ -117,6 +116,13 @@ odoo.define('pos_container.models_and_db', function (require) {
         get_tare: function(){
             return this.tare;
         },
+        get_gross_weight: function(){
+            return this.gross_weight;
+        },
+        set_gross_weight: function(weight){
+            this.gross_weight = weight;
+            this.trigger('change', this);
+        },
     });
 
 
@@ -129,7 +135,6 @@ odoo.define('pos_container.models_and_db', function (require) {
             this.container_by_barcode = {};
             this.container_search_string = "";
             this.container_write_date = null;
-
         },
         _container_search_string: function(container){
 
@@ -196,7 +201,6 @@ odoo.define('pos_container.models_and_db', function (require) {
             return this.container_by_id[id];
         },
         get_container_by_barcode: function(barcode){
-
             return this.container_by_barcode[barcode];
         },
         get_containers_sorted: function(max_count){
@@ -231,4 +235,14 @@ odoo.define('pos_container.models_and_db', function (require) {
         },
 
     });
+
+    models.load_models({
+        model: 'pos.container',
+        fields: ['name','barcode', 'weight'],
+        // domain: [[]],
+        loaded: function(self, containers){
+            self.db.add_containers(containers);
+        },
+    });
+
 });
