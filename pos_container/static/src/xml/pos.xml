@@ -177,5 +177,30 @@
         </t>
     </t>
 
-
+    <t t-name="ContainerScaleScreenWidget">
+        <div class="scale-screen screen">
+            <div class="screen-content">
+                <div class="top-content">
+                    <span class='button back'>
+                        <i class='fa fa-angle-double-left'></i>
+                        Back
+                    </span>
+                    <h1 class='product-name'>Add a container</h1>
+                </div>
+                <div class="centered-content">
+                    <div class='weight js-weight'>
+                        <t t-esc="widget.get_product_weight_string()" />
+                    </div>
+                    <div class='container-name'>
+                        <span class='label'>Container name: </span><br/>
+                        <input class='detail container-name' name='container_name' placeholder="Container"></input>
+                    </div>
+                    <div class='add-container'>
+                        Save
+                        <i class='fa fa-angle-double-right'></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
 </templates>
