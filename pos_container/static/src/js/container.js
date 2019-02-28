@@ -18,12 +18,16 @@ odoo.define('pos_container.container', function (require) {
     var core = require('web.core');
     var rpc = require('web.rpc');
     var QWeb = core.qweb;
+    var _t = core._t;
 
 
     var ContainerButton = screens.ActionButtonWidget.extend({
         template: 'ContainerButton',
         button_click: function(){
-            this.gui.show_screen('containerlist');
+            var oline = this.pos.get_order().get_selected_orderline();
+            var old_container = oline.get_container();
+            this.gui.show_screen('containerlist',
+                {old_container: old_container});
         }
     });
 
@@ -49,8 +53,7 @@ odoo.define('pos_container.container', function (require) {
             });
 
             this.$('.new-container').click(function(){
-                self.display_container_details('edit',{
-                });
+                self.gui.show_screen('containerscale', {barcode: null});
             });
   
             var containers = this.pos.db.get_containers_sorted(1000);
@@ -130,7 +133,7 @@ odoo.define('pos_container.container', function (require) {
             }
         },
         save_changes: function(){
-            this.pos.get('selectedOrder').add_container(this.new_container);
+            this.pos.get_order().add_container(this.new_container);
         },
         has_container_changed: function() {
             if(this.old_container && this.new_container) {
@@ -187,13 +190,10 @@ odoo.define('pos_container.container', function (require) {
                 this.display_container_details('show', container);
             }
         },
-
-        // What happens when we save the changes on the container edit form -> we fetch the fields, sanitize them,
-        // send them to the backend for update, and call saved_container_details() when the server tells us the
-        // save was successfull.
         save_container_details: function(container){
             var self = this;
 
+            console.log(container);
             var fields = {}
             this.$('.container-details-contents .detail').each(function(idx,el){
                 fields[el.name] = el.value;
@@ -207,8 +207,8 @@ odoo.define('pos_container.container', function (require) {
             fields.weight = fields.weight.replace(',', '.')
 
             fields.id = container.id || false;
-            fields.display_name = container.display_name || false;
-            fields.barcode = fields.barcode ? this.pos.barcode_reader.barcode_parser.sanitize_ean(fields.barcode) : false;
+            fields.name = container.name || false;
+            fields.barcode = fields.barcode || false;
             fields.weight = fields.weight || false;
 
             rpc.query({
@@ -217,15 +217,23 @@ odoo.define('pos_container.container', function (require) {
                 args: [fields],
             }).then(function(container_id){
                 self.saved_container_details(container_id);
-            },function(err,event){
-                event.preventDefault();
-                self.gui.show_popup('error',{
-                    'message':_t('Error: Could not Save Changes'),
-                    'comment':_t('Your Internet connection is probably down.'),
-                });
-            });
+            },function(err,ev){
+                ev.preventDefault();
+                var error_body = _t('Your Internet connection is probably down.');
+                    if (err.data) {
+                        var except = err.data;
+                        error_body = except.arguments && except.arguments[0] || except.message || error_body;
+                    }
+                    self.gui.show_popup('error',{
+                        'title': _t('Error: Could not Save Changes'),
+                        'body': error_body,
+                    });
+                    contents.on('click','.button.save',function(){
+                        self.save_container_details(container);
+                    });
+                }
+            );
         },
-        // What happens when we've just pushed modifications for a container of id container_id
         saved_container_details: function(container_id){
             var self = this;
             this.reload_containers().then(function(){
@@ -239,6 +247,10 @@ odoo.define('pos_container.container', function (require) {
                     // has created, and reload_container() must have loaded the newly created container.
                     self.display_container_details('hide');
                 }
+            }).always(function(){
+                $(".container-details-contents").on('click','.button.save',function(){
+                    self.save_container_details(container);
+                });
             });
         },
 
@@ -281,15 +293,22 @@ odoo.define('pos_container.container', function (require) {
             contents.off('click','.button.edit');
             contents.off('click','.button.save');
             contents.off('click','.button.undo');
-            contents.on('click','.button.edit',function(){self.edit_container_details(container);});
-            contents.on('click','.button.save',function(){self.save_container_details(container);});
-            contents.on('click','.button.undo',function(){self.undo_container_details(container);});
+            contents.on('click','.button.edit',function(){
+                self.edit_container_details(container);
+            });
+            contents.on('click','.button.save',function(){
+                self.save_container_details(container);
+            });
+            contents.on('click','.button.undo',function(){
+                self.undo_container_details(container);
+            });
             this.editing_container = false;
 
             if(visibility === 'show'){
 
                 contents.empty();
-                contents.append($(QWeb.render('ContainerDetails',{widget:this, container:container})));
+                contents.append($(QWeb.render('ContainerDetails',{
+                    widget:this, container:container})));
 
                 var new_height   = contents.height();
 
@@ -309,17 +328,19 @@ odoo.define('pos_container.container', function (require) {
             } else if (visibility === 'edit') {
                 this.editing_container = true;
                 contents.empty();
-                contents.append($(QWeb.render('ContainerDetailsEdit', {widget:this, container:container})));
+                contents.append($(QWeb.render('ContainerDetailsEdit', {
+                    widget:this, container:container})));
                 this.toggle_save_button();
             } else if (visibility === 'add_by_scan') {
                 new_container = {
-                    'display_name': 'Contenant',
+                    'name': 'Contenant',
                     'barcode': container.parsed_code.base_code,
                     'weight': 0
                 }
                 this.editing_container = true;
                 contents.empty();
-                contents.append($(QWeb.render('ContainerDetailsEdit', {widget:this, container:new_container})));
+                contents.append($(QWeb.render('ContainerDetailsEdit', {
+                    widget:this, container:new_container})));
                 this.toggle_save_button();
 
             } else if (visibility === 'hide') {
@@ -353,11 +374,10 @@ odoo.define('pos_container.container', function (require) {
         barcode_container_action: function(code){
             var self = this;
             if (self.pos.scan_container(code)) {
-                //self.gui.show_screen(
-                //    self.barcode_container_screen, null, null, true);
+                // nothing to do now, the container is added
+                // as an orderline if found.
             } else {
-                self.gui.show_screen(
-                    'scale_container', {container: code.base_code});
+                self.gui.show_screen('containerscale', {barcode: code.base_code});
             }
         },
         show: function(){
@@ -386,8 +406,11 @@ odoo.define('pos_container.container', function (require) {
     });
 
     screens.ScaleScreenWidget.include({
+
         order_product: function(){
             this._super();
+            // Replace the orderline if the product is the placeholder
+            // container product.
             var order = this.pos.get_order();
             var container = this.gui.get_current_screen_param('container');
             var old_orderline = this.gui.get_current_screen_param(
@@ -401,6 +424,89 @@ odoo.define('pos_container.container', function (require) {
                 orderline.trigger('change', orderline);
             }
         },
+    });
+
+    var ContainerScaleScreenWidget = screens.ScaleScreenWidget.extend({
+        template: 'ContainerScaleScreenWidget',
+
+        next_screen: 'products',
+        previous_screen: 'products',
+
+        init: function(parent, options){
+            this._super(parent, options);
+        },
+
+        show: function(){
+            this._super();
+            var self = this;
+
+            this.$('.next,.add-container').click(function(){
+                self.create_container();
+            });
+        },
+        get_product: function(){
+            return this.pos.get_container_product();
+        },
+        create_container: function(){
+            var self = this;
+            var fields = {}
+            if (!this.weight)
+            {
+                this.$('.weight').each(function(idx,el){
+                    fields['weight'] = parseFloat(el.textContent);
+                });
+            }
+            else
+            {
+                fields['weight'] = this.weight;
+            }
+
+            this.$('.container-name .detail').each(function(idx,el){
+                fields[el.name] = el.value;
+            });
+
+            fields.barcode = this.gui.get_current_screen_param('barcode') || false;
+            fields.name = fields.name || 'Contenant';
+
+            rpc.query({
+                model: 'pos.container',
+                method: 'create_from_ui',
+                args: [fields],
+            }).then(function(container_id){
+                self.created_container(container_id);
+            },function(err,ev){
+                ev.preventDefault();
+                var error_body = _t('Your Internet connection is probably down.');
+                    if (err.data) {
+                        var except = err.data;
+                        error_body = except.arguments && except.arguments[0] || except.message || error_body;
+                    }
+                    self.gui.show_popup('error',{
+                        'title': _t('Error: Could not Save Changes'),
+                        'body': error_body,
+                    });
+                }
+            );
+        },
+        created_container: function(container_id){
+            var self = this;
+            self.pos.load_new_containers().then(function(){
+                var container = self.pos.db.get_container_by_id(container_id);
+                if (container) {
+                    self.gui.show_screen(self.next_screen);
+                    self.order_container(container);
+                }
+            });
+        },
+        order_container: function(container){
+            this.pos.get_order().add_container(container);
+        },
+
+    });
+
+    gui.define_screen({
+        name:'containerscale',
+        widget: ContainerScaleScreenWidget,
     });
 
 });
