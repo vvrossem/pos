@@ -24,10 +24,7 @@ odoo.define('pos_container.container', function (require) {
     var ContainerButton = screens.ActionButtonWidget.extend({
         template: 'ContainerButton',
         button_click: function(){
-            var oline = this.pos.get_order().get_selected_orderline();
-            var old_container = oline.get_container();
-            this.gui.show_screen('containerlist',
-                {old_container: old_container});
+            this.gui.show_screen('containerlist');
         }
     });
 
@@ -48,8 +45,15 @@ odoo.define('pos_container.container', function (require) {
             var self = this;
             this._super();
         
+            this.renderElement();
+            this.details_visible = false;
             this.$('.back').click(function(){
                 self.gui.back();
+            });
+
+            this.$('.next').click(function(){
+                self.save_changes();
+                self.gui.show_screen('products');
             });
 
             this.$('.new-container').click(function(){
@@ -60,10 +64,6 @@ odoo.define('pos_container.container', function (require) {
             this.render_list(containers);
 
             this.reload_containers();
-
-            if(this.old_container) {
-                this.display_container_details('show', this.old_container, 0);
-            }
 
             this.$('.container-list-contents').delegate('.container-line',
                     'click', function(event){
@@ -97,7 +97,7 @@ odoo.define('pos_container.container', function (require) {
                 var containers = this.pos.db.search_container(query);
                 this.display_container_details('hide');
                 if ( associate_result && containers.length === 1){
-                    this.new_container = containers[0];
+                    this.container = containers[0];
                     this.save_changes();
                     this.gui.back();
                 }
@@ -123,7 +123,7 @@ odoo.define('pos_container.container', function (require) {
                 containerline.innerHTML = containerline_html;
                 containerline = containerline.childNodes[1];
 
-                if(containers === this.new_container) {
+                if(containers === this.container) {
                     containerline.classList.add('highlight');
                 } else {
                     containerline.classList.remove('highlight');
@@ -133,30 +133,19 @@ odoo.define('pos_container.container', function (require) {
             }
         },
         save_changes: function(){
-            this.pos.get_order().add_container(this.new_container);
-        },
-        has_container_changed: function() {
-            if(this.old_container && this.new_container) {
-                return this.old_container.id !== this.new_container.id;
-            } else {
-                return !!this.old_container !== !!this.new_container;
-            }
+            this.pos.get_order().add_container(this.container);
         },
         toggle_save_button: function(){
             var $button = this.$('.button.next');
             if (this.editing_container) {
                 $button.addClass('oe_hidden');
                 return;
-            } else if(this.new_container) {
-                if(!this.old_container) {
-                    $button.text('Set Container');
-                } else {
-                    $button.text('Change Container');
-                }
+            } else if(this.container) {
+                $button.text('Set Container');
             } else {
                 $button.text('Deselect Container');
             }
-            $button.toggleClass('oe_hidden',!this.has_container_changed());
+            $button.toggleClass('oe_hidden', !this.container);
         },
         line_select: function(event,$line,id){
             var container = this.pos.db.get_container_by_id(id);
@@ -165,14 +154,14 @@ odoo.define('pos_container.container', function (require) {
                 $line.removeClass('highlight');
                 $line.addClass('lowlight');
                 this.display_container_details('hide',container);
-                this.new_container = null;
+                // this.container = null;
                 this.toggle_save_button();
             }else{
                 this.$('.container-list .highlight').removeClass('highlight');
                 $line.addClass('highlight');
-                var y = event.pageY - $line.parent().offset().top
+                var y = event.pageY - $line.parent().offset().top;
                 this.display_container_details('show',container,y);
-                this.new_container = container;
+                this.container = container;
                 this.toggle_save_button();
             }
         },
@@ -193,7 +182,6 @@ odoo.define('pos_container.container', function (require) {
         save_container_details: function(container){
             var self = this;
 
-            console.log(container);
             var fields = {}
             this.$('.container-details-contents .detail').each(function(idx,el){
                 fields[el.name] = el.value;
@@ -210,6 +198,9 @@ odoo.define('pos_container.container', function (require) {
             fields.name = container.name || false;
             fields.barcode = fields.barcode || false;
             fields.weight = fields.weight || false;
+
+            var contents = this.$('.container-details-content');
+            contents.off('click', '.button.save');
 
             rpc.query({
                 model: 'pos.container',
@@ -239,7 +230,7 @@ odoo.define('pos_container.container', function (require) {
             this.reload_containers().then(function(){
                 var container = self.pos.db.get_container_by_id(container_id);
                 if (container) {
-                    self.new_container = container;
+                    self.container = container;
                     self.toggle_save_button();
                     self.display_container_details('show',container);
                 } else {
@@ -331,18 +322,6 @@ odoo.define('pos_container.container', function (require) {
                 contents.append($(QWeb.render('ContainerDetailsEdit', {
                     widget:this, container:container})));
                 this.toggle_save_button();
-            } else if (visibility === 'add_by_scan') {
-                new_container = {
-                    'name': 'Contenant',
-                    'barcode': container.parsed_code.base_code,
-                    'weight': 0
-                }
-                this.editing_container = true;
-                contents.empty();
-                contents.append($(QWeb.render('ContainerDetailsEdit', {
-                    widget:this, container:new_container})));
-                this.toggle_save_button();
-
             } else if (visibility === 'hide') {
                 contents.empty();
                 if(height > scroll) {
