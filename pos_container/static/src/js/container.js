@@ -375,9 +375,11 @@ odoo.define('pos_container.container', function (require) {
             if (product.to_weight && selected_orderline &&
                     selected_orderline.product === this.pos.get_container_product()){
                 var container = selected_orderline.get_container();
-                this.gui.show_screen('scale',{
-                    product: product, container: container,
-                    old_orderline: selected_orderline});
+                this.gui.show_screen(
+                    'scale',
+                    {product: product,
+                     container: container,
+                     old_orderline: selected_orderline});
             } else {
                 this._super(product);
             }
@@ -392,14 +394,14 @@ odoo.define('pos_container.container', function (require) {
             // container product.
             var order = this.pos.get_order();
             var container = this.gui.get_current_screen_param('container');
-            var old_orderline = this.gui.get_current_screen_param(
-                'old_orderline');
+            var old_orderline = this.gui.get_current_screen_param('old_orderline');
             if (container){
                 var orderline = order.get_last_orderline();
                 orderline.set_container(container);
                 if (old_orderline){
                     order.remove_orderline(old_orderline);
                 }
+                orderline.set_quantity(orderline.quantity - container.weight);
                 orderline.trigger('change', orderline);
             }
         },
@@ -478,6 +480,7 @@ odoo.define('pos_container.container', function (require) {
             });
         },
         order_container: function(container){
+            // fixme add_container takes a list ?
             this.pos.get_order().add_container(container);
         },
 
