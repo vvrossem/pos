@@ -141,7 +141,10 @@ odoo.define('pos_container.models_and_db', function (require) {
             var str = '';
 
             if(container.barcode){
-                str = '|' + container.barcode;
+                str += '|' + container.barcode;
+            }
+            if(container.name) {
+                str += '|' + container.name;
             }
             str = '' + container.id + ':' + str.replace(':','') + '\n';
 
