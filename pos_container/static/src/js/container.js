@@ -430,20 +430,13 @@ odoo.define('pos_container.container', function (require) {
         },
         create_container: function(){
             var self = this;
-            var fields = {}
-            if (!this.weight)
-            {
-                this.$('.weight').each(function(idx,el){
-                    fields['weight'] = parseFloat(el.textContent);
-                });
-            }
-            else
-            {
-                fields['weight'] = this.weight;
-            }
+            var fields = {};
+
+            fields['weight'] = this.weight;
 
             this.$('.container-name .detail').each(function(idx,el){
-                fields[el.name] = el.value;
+                fields['name'] = el.value;
+
             });
 
             fields.barcode = this.gui.get_current_screen_param('barcode') || false;
