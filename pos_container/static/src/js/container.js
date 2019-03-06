@@ -46,7 +46,6 @@ odoo.define('pos_container.container', function (require) {
             this._super();
         
             this.renderElement();
-            this.details_visible = false;
             this.$('.back').click(function(){
                 self.gui.back();
             });
@@ -56,10 +55,6 @@ odoo.define('pos_container.container', function (require) {
                 self.gui.show_screen('products');
             });
 
-            this.$('.new-container').click(function(){
-                self.gui.show_screen('containerscale', {barcode: null});
-            });
-  
             var containers = this.pos.db.get_containers_sorted(1000);
             this.render_list(containers);
 
@@ -95,7 +90,6 @@ odoo.define('pos_container.container', function (require) {
         perform_search: function(query, associate_result){
             if(query){
                 var containers = this.pos.db.search_container(query);
-                this.display_container_details('hide');
                 if ( associate_result && containers.length === 1){
                     this.container = containers[0];
                     this.save_changes();
@@ -153,96 +147,14 @@ odoo.define('pos_container.container', function (require) {
             if ( $line.hasClass('highlight') ){
                 $line.removeClass('highlight');
                 $line.addClass('lowlight');
-                this.display_container_details('hide',container);
-                // this.container = null;
                 this.toggle_save_button();
             }else{
                 this.$('.container-list .highlight').removeClass('highlight');
                 $line.addClass('highlight');
                 var y = event.pageY - $line.parent().offset().top;
-                this.display_container_details('show',container,y);
                 this.container = container;
                 this.toggle_save_button();
             }
-        },
-
-        // Ui handle for the 'edit selected container' action
-        edit_container_details: function(container){
-            this.display_container_details('edit',container);
-        },
-
-        // Ui handle for the 'cancel container edit changes' action
-        undo_container_details: function(container){
-            if (!container.id) {
-                this.display_container_details('hide');
-            } else {
-                this.display_container_details('show', container);
-            }
-        },
-        save_container_details: function(container){
-            var self = this;
-
-            var fields = {}
-            this.$('.container-details-contents .detail').each(function(idx,el){
-                fields[el.name] = el.value;
-            });
-            if (!fields.barcode) {
-                this.gui.show_popup('error',{
-                    message: 'A Container Barcode Is Required',
-                });
-                return;
-            }
-            fields.weight = fields.weight.replace(',', '.')
-
-            fields.id = container.id || false;
-            fields.name = container.name || false;
-            fields.barcode = fields.barcode || false;
-            fields.weight = fields.weight || false;
-
-            var contents = this.$('.container-details-content');
-            contents.off('click', '.button.save');
-
-            rpc.query({
-                model: 'pos.container',
-                method: 'create_from_ui',
-                args: [fields],
-            }).then(function(container_id){
-                self.saved_container_details(container_id);
-            },function(err,ev){
-                ev.preventDefault();
-                var error_body = _t('Your Internet connection is probably down.');
-                    if (err.data) {
-                        var except = err.data;
-                        error_body = except.arguments && except.arguments[0] || except.message || error_body;
-                    }
-                    self.gui.show_popup('error',{
-                        'title': _t('Error: Could not Save Changes'),
-                        'body': error_body,
-                    });
-                    contents.on('click','.button.save',function(){
-                        self.save_container_details(container);
-                    });
-                }
-            );
-        },
-        saved_container_details: function(container_id){
-            var self = this;
-            this.reload_containers().then(function(){
-                var container = self.pos.db.get_container_by_id(container_id);
-                if (container) {
-                    self.container = container;
-                    self.toggle_save_button();
-                    self.display_container_details('show',container);
-                } else {
-                    // should never happen, because create_from_ui must return the id of the container it
-                    // has created, and reload_container() must have loaded the newly created container.
-                    self.display_container_details('hide');
-                }
-            }).always(function(){
-                $(".container-details-contents").on('click','.button.save',function(){
-                    self.save_container_details(container);
-                });
-            });
         },
 
         // This fetches container changes on the server, and in case of changes,
@@ -269,73 +181,6 @@ odoo.define('pos_container.container', function (require) {
             });
         },
 
-        // Shows,hides or edit the container details box :
-        // visibility: 'show', 'hide' or 'edit'
-        // container:    the container object to show or edit
-        // clickpos:   the height of the click on the list (in pixel), used
-        //             to maintain consistent scroll.
-        display_container_details: function(visibility,container,clickpos){
-            var self = this;
-            var contents = this.$('.container-details-contents');
-            var parent   = this.$('.container-list').parent();
-            var scroll   = parent.scrollTop();
-            var height   = contents.height();
-
-            contents.off('click','.button.edit');
-            contents.off('click','.button.save');
-            contents.off('click','.button.undo');
-            contents.on('click','.button.edit',function(){
-                self.edit_container_details(container);
-            });
-            contents.on('click','.button.save',function(){
-                self.save_container_details(container);
-            });
-            contents.on('click','.button.undo',function(){
-                self.undo_container_details(container);
-            });
-            this.editing_container = false;
-
-            if(visibility === 'show'){
-
-                contents.empty();
-                contents.append($(QWeb.render('ContainerDetails',{
-                    widget:this, container:container})));
-
-                var new_height   = contents.height();
-
-                if(!this.details_visible){
-                    if(clickpos < scroll + new_height + 20 ){
-                        parent.scrollTop( clickpos - 20 );
-                    }else{
-                        parent.scrollTop(parent.scrollTop() + new_height);
-                    }
-                }else{
-                    parent.scrollTop(parent.scrollTop() - height + new_height);
-                }
-
-                this.details_visible = true;
-                this.toggle_save_button();
-
-            } else if (visibility === 'edit') {
-                this.editing_container = true;
-                contents.empty();
-                contents.append($(QWeb.render('ContainerDetailsEdit', {
-                    widget:this, container:container})));
-                this.toggle_save_button();
-            } else if (visibility === 'hide') {
-                contents.empty();
-                if(height > scroll) {
-                    contents.css({height:height+'px'});
-                    contents.animate({height:0},400,function(){
-                        contents.css({height:''});
-                    });
-                } else {
-                    parent.scrollTop(parent.scrollTop() - height);
-                }
-                this.details_visible = false;
-                this.toggle_save_button();
-            }
-        },
         close: function(){
             this._super();
         },
