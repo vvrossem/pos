@@ -55,6 +55,20 @@ odoo.define('pos_container.container', function (require) {
                 self.gui.show_screen('products');
             });
 
+            this.$('.delete-container').click(function(){
+                if (self.container){
+                    self.gui.show_popup('confirm', {
+                        'title': _t('Container deletion'),
+                        'body': _t(
+                            'Do you want to delete this container ?\n').concat(
+                                self.container.name),
+                        confirm: function(){
+                            self.delete_selected_container();
+                        },
+                    });
+                }
+            });
+
             var containers = this.pos.db.get_containers_sorted(1000);
             this.render_list(containers);
 
@@ -86,6 +100,34 @@ odoo.define('pos_container.container', function (require) {
             this.$('.searchbox .search-clear').click(function(){
                 self.clear_search();
             });
+        },
+        delete_selected_container: function(){
+            var self = this;
+
+            rpc.query({
+                model: 'pos.container',
+                method: 'unlink',
+                args: [self.container.id],
+            }).then(function(){
+                self.deleted_container();
+            },function(err,ev){
+                ev.preventDefault();
+                var error_body = _t('Your Internet connection is probably down.');
+                    if (err.data) {
+                        var except = err.data;
+                        error_body = except.arguments && except.arguments[0] || except.message || error_body;
+                    }
+                    self.gui.show_popup('error',{
+                        'title': _t('Error: Could not Save Changes'),
+                        'body': error_body,
+                    });
+                }
+            );
+        },
+        deleted_container: function(){
+            var self = this;
+            this.$('.container-list .highlight').remove()
+            self.container = null;
         },
         perform_search: function(query, associate_result){
             if(query){
@@ -129,15 +171,14 @@ odoo.define('pos_container.container', function (require) {
         save_changes: function(){
             this.pos.get_order().add_container(this.container);
         },
+        toggle_delete_button: function(){
+            var $button = this.$('.button.delete-container');
+            $button.toggleClass('oe_hidden', !this.container);
+        },
         toggle_save_button: function(){
             var $button = this.$('.button.next');
-            if (this.editing_container) {
-                $button.addClass('oe_hidden');
-                return;
-            } else if(this.container) {
+            if (this.container) {
                 $button.text('Set Container');
-            } else {
-                $button.text('Deselect Container');
             }
             $button.toggleClass('oe_hidden', !this.container);
         },
@@ -147,12 +188,14 @@ odoo.define('pos_container.container', function (require) {
             if ( $line.hasClass('highlight') ){
                 $line.removeClass('highlight');
                 $line.addClass('lowlight');
+                this.toggle_delete_button();
                 this.toggle_save_button();
             }else{
                 this.$('.container-list .highlight').removeClass('highlight');
                 $line.addClass('highlight');
                 var y = event.pageY - $line.parent().offset().top;
                 this.container = container;
+                this.toggle_delete_button();
                 this.toggle_save_button();
             }
         },
