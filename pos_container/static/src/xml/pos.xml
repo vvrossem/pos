@@ -8,40 +8,6 @@
         </button>
     </t>
 
-    <t t-name="ContainerDetails">
-         <section class="container-details">
-             <div class="container-details-box clearfix">
-                 <div class="container-details-left">
-                     <div class="container-detail">
-                         <span class="label">Name</span>
-                         <span class="detail container-name">
-                             <t t-esc="container.name"/>
-                         </span>
-                     </div>
-                     <div class="container-detail">
-                         <span class="label">Barcode</span>
-                         <span class="detail container-barcode">
-                             <t t-esc="container.barcode"/>
-                         </span>
-                     </div>
-                 </div>
-                 <div class="container-details-right">
-                     <div class="container-detail">
-                         <span class="label">Weight</span>
-                         <span class="detail container-weight">
-                             <t t-esc="container.weight"/>
-                         </span>
-                     </div>
-                 </div>
-                 <div class="edit-buttons">
-                     <div class="button edit">
-                         <i class="fa fa-pencil-square"/>
-                     </div>
-                 </div>
-             </div>
-         </section>
-     </t>
-
     <t t-name="ContainerListScreenWidget">
          <div class="containerlist-screen screen">
              <div class="screen-content">
@@ -55,10 +21,6 @@
                          <span class="search-clear"/>
                      </span>
                      <span class="searchbox"/>
-                     <span class="button new-container" role="img" aria-label="Add a container" title="Add a container">
-                         <i class="fa fa-beer"/>
-                         <i class="fa fa-plus"/>
-                     </span>
                      <span class="button next oe_hidden highlight">
                          Select a container
                          <i class="fa fa-angle-double-right"/>
@@ -66,12 +28,6 @@
                  </section>
                  <section class="full-content">
                      <div class="window">
-                         <section class="subwindow collapsed">
-                             <div class="subwindow-container collapsed">
-                                 <div class="subwindow-container-fix container-details-contents">
-                                 </div>
-                             </div>
-                         </section>
                          <section class="subwindow">
                              <div class="subwindow-container">
                                  <div class="subwindow-container-fix touch-scrollable scrollable-y">
@@ -107,33 +63,6 @@
                 <t t-esc="container.weight"/>
             </td>
         </tr>
-    </t>
-
-    <t t-name="ContainerDetailsEdit">
-        <section class='container-details edit'>
-            <div class='container-details-box clearfix'>
-                <div class='container-details-left'>
-                    <div class='container-detail'>
-                        <span class='label'>name</span>
-                        <input class='detail container-name' name='name' t-att-value='container.name' placeholder='Name'></input>
-                    </div>
-                    <div class='container-detail'>
-                        <span class='label'>Barcode</span>
-                        <input class='detail container-barcode' name='barcode' t-att-value='container.barcode' placeholder='Barcode'></input>
-                    </div>
-                </div>
-                <div class='container-details-right'>
-                    <div class='container-detail'>
-                        <span class='label'>Weight</span>
-                        <input class='detail container-weight' name='weight' t-att-value='container.weight' placeholder='Weight'></input>
-                    </div>
-                </div>
-                <div class='edit-buttons'>
-                    <div class='button undo'><i class='fa fa-undo' /></div>
-                    <div class='button save'><i class='fa fa-floppy-o' /></div>
-                </div>
-            </div>
-        </section>
     </t>
 
     <t t-extend='Orderline'>
