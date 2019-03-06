@@ -21,6 +21,10 @@
                          <span class="search-clear"/>
                      </span>
                      <span class="searchbox"/>
+                     <span class="button delete-container oe_hidden" role="img" aria-label="Delete container" title="Delete container">
+                         <i class="fa fa-beer"/>
+                         <i class="fa fa-trash"/>
+                     </span>
                      <span class="button next oe_hidden highlight">
                          Select a container
                          <i class="fa fa-angle-double-right"/>

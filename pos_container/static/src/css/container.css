@@ -171,12 +171,12 @@
     right: auto;
     margin-left: -90px;
     margin-top:8px;
-    left: 50%;
+    left: 45%;
 }
 .pos .containerlist-screen .searchbox input{
     width: 120px;
 }
-.pos .containerlist-screen .button.new-customer {
+.pos .containerlist-screen .button.delete-container {
     left: 50%;
     margin-left: 120px;
 }
