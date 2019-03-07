@@ -11,5 +11,6 @@
         </field>
         <field name="list_price">0</field>
         <field name="available_in_pos" eval="True"/>
+        <field name="to_weight" eval="True"/>
     </record>
 </odoo>

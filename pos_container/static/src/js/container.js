@@ -21,6 +21,25 @@ odoo.define('pos_container.container', function (require) {
     var _t = core._t;
 
 
+    var TareButton = screens.ActionButtonWidget.extend({
+        template: 'TareButton',
+    });
+
+    screens.define_action_button({
+        'name': 'tare',
+        'widget': TareButton,
+    });
+
+    screens.NumpadWidget.include({
+        // to put selected-mode on tare button outside the numpadwidget
+        changedMode: function() {
+            this._super();
+            if (this.state.get('mode') === 'tare'){
+                $('.mode-button[data-mode="tare"]').addClass('selected-mode');
+            }
+        },
+    });
+
     var ContainerButton = screens.ActionButtonWidget.extend({
         template: 'ContainerButton',
         button_click: function(){
@@ -257,6 +276,13 @@ odoo.define('pos_container.container', function (require) {
     });
 
     screens.ProductScreenWidget.include({
+        // to use Tare Button from outside the NumpadWidget
+        start: function(){
+            this._super();
+            var tare_button = $('.mode-button[data-mode="tare"]');
+            tare_button.click(_.bind(this.numpad.clickChangeMode, this.numpad));
+        },
+        // to add a product to a container orderline
         click_product: function(product) {
             var order = this.pos.get_order();
             var selected_orderline = order.get_selected_orderline();
@@ -275,21 +301,24 @@ odoo.define('pos_container.container', function (require) {
     });
 
     screens.ScaleScreenWidget.include({
-
         order_product: function(){
             this._super();
             // Replace the orderline if the product is the placeholder
             // container product.
             var order = this.pos.get_order();
             var container = this.gui.get_current_screen_param('container');
-            var old_orderline = this.gui.get_current_screen_param('old_orderline');
             if (container){
                 var orderline = order.get_last_orderline();
                 orderline.set_container(container);
+                var old_orderline = this.gui.get_current_screen_param(
+                    'old_orderline');
                 if (old_orderline){
                     order.remove_orderline(old_orderline);
                 }
                 orderline.set_quantity(orderline.quantity - container.weight);
+                var gross_weight = (this.weight + container.weight).toFixed(3);
+                orderline.set_gross_weight(gross_weight);
+                orderline.set_tare_mode('AUTO');
                 orderline.trigger('change', orderline);
             }
         },
@@ -371,5 +400,24 @@ odoo.define('pos_container.container', function (require) {
         name:'containerscale',
         widget: ContainerScaleScreenWidget,
     });
+
+    screens.OrderWidget.include({
+        set_value: function(val) {
+            this._super(val);
+            var order = this.pos.get_order();
+            var oline = order.get_selected_orderline();
+            if (oline) {
+                var mode = this.numpad_state.get('mode');
+                if( mode === 'tare'){
+                    oline.set_tare_mode('MAN');
+                    oline.set_tare(val);
+                }
+            }
+        },
+    });
+
+    return {
+        ContainerScaleScreenWidget: ContainerScaleScreenWidget,
+    };
 
 });
