@@ -2,9 +2,15 @@
 <templates id="template" xml:space="preserve">
 
     <t t-name="ContainerButton">
-        <button class="control-button">
+        <button class="control-button main">
             <i class="fa fa-beer" role="img" aria-label="Container" title="Container"/>
             Container
+        </button>
+    </t>
+
+    <t t-name="TareButton">
+        <button class="control-button second mode-button" data-mode="tare">
+            Tare
         </button>
     </t>
 
@@ -104,9 +110,9 @@
                     </ul>
                 </ul>
             </t>
-            <!--<div class="pos-right-align">
-                <t t-esc="line.get_tare_manual()"/>
-            </div> -->
+            <div class="pos-right-align">
+                <t t-esc="line.get_tare_mode()"/>
+            </div>
         </t>
     </t>
 
