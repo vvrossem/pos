@@ -180,3 +180,12 @@
     left: 50%;
     margin-left: 120px;
 }
+
+/* Container Action buttons */
+.pos .control-button.main {
+    width: 75%;
+}
+.pos .control-button.second {
+    width: 15%;
+    flex-grow: 0;
+}
