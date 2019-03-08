@@ -11,7 +11,8 @@
 
     "author": "Coop IT Easy SCRLfs, "
               "Odoo Community Association (OCA)",
-    'website': "https://odoo-community.org/",
+    'license': "AGPL-3",
+    'website': "https://github.com/OCA/pos/",
 
     'category': 'Point of Sale',
 
