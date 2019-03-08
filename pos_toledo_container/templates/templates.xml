@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright 2019 Coop IT Easy SCRLfs
+    	    Robin Keunen <robin@coopiteasy.be>
+    	    Vincent Van Rossem <vvrossem@gmail.com>
+    License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
+-->
+
+<odoo>
+    <template id="assets_frontend" inherit_id="pos_container.assets_frontend">
+        <xpath expr="." position="inside">
+            <script type="text/javascript" src="/pos_toledo_container/static/src/js/devices.js"/>
+            <script type="text/javascript" src="/pos_toledo_container/static/src/js/screens.js"/>
+        </xpath>
+    </template>
+</odoo>
