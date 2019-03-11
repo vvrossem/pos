@@ -18,8 +18,7 @@ odoo.define('pos_toledo_product.screens', function (require) {
             this.set_weight(0);
             this.renderElement();
 
-            self.pos.proxy.reset_weight().then(function (response) {
-            });
+            self.pos.proxy.reset_weight();
 
             queue.schedule(function () {
                 return self.pos.proxy.scale_read().then(function (scale_answer) {
