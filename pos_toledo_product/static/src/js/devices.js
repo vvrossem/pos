@@ -14,12 +14,7 @@ odoo.define('pos_toledo_product.devices', function (require) {
 
         // reset the weight on the scale.
         reset_weight: function () {
-            var self = this;
-            var ret = new $.Deferred();
-            this.message('reset_weight')
-                .then(function () {
-                });
-            return ret;
+            return this.message('reset_weight');
         },
     });
 });
