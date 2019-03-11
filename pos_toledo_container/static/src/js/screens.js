@@ -18,14 +18,12 @@ odoo.define('pos_toledo_container.screens', function (require) {
             this.set_weight(0);
             this.renderElement();
 
-            self.pos.proxy.reset_weight().then(function (response) {
-            });
+            self.pos.proxy.reset_weight();
 
             queue.schedule(function () {
 
                 return self.pos.proxy.scale_read().then(function (scale_answer) {
                     self.set_weight(scale_answer.weight);
-                    console.log(scale_answer);
                     if ((scale_answer.info === '30' || scale_answer.info === '31') && scale_answer.weight !== 0) {
                         self.gui.show_screen(self.next_screen);
                         self.create_container();

@@ -18,7 +18,9 @@
             https://www.manualslib.com/manual/861274/Mettler-Toledo-Viva.html?page=42#manual
 
        Once the scale answers with a 30 or 31 status code and the weight value is different than zero, 
-       the products screen is shown with the created container
+       the products screen is shown with the created container.
+       
+       Use pos_toledo_product module to order a weighted product once it is lifted from the scale.
         """,
 
     "author": "Coop IT Easy SCRLfs, "
