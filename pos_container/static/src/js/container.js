@@ -305,9 +305,9 @@ odoo.define('pos_container.container', function (require) {
             this._super();
             // Replace the orderline if the product is the placeholder
             // container product.
-            var order = this.pos.get_order();
             var container = this.gui.get_current_screen_param('container');
             if (container){
+                var order = this.pos.get_order();
                 var orderline = order.get_last_orderline();
                 orderline.set_container(container);
                 var old_orderline = this.gui.get_current_screen_param(
@@ -315,9 +315,8 @@ odoo.define('pos_container.container', function (require) {
                 if (old_orderline){
                     order.remove_orderline(old_orderline);
                 }
-                orderline.set_quantity(orderline.quantity - container.weight);
-                var gross_weight = (this.weight + container.weight).toFixed(3);
-                orderline.set_gross_weight(gross_weight);
+                orderline.set_quantity(this.weight - container.weight);
+                orderline.set_gross_weight(this.weight);
                 orderline.set_tare_mode('AUTO');
                 orderline.trigger('change', orderline);
             }
