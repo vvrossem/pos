@@ -27,8 +27,8 @@ class Container(models.Model):
 
     _sql_constraints = [
         ('barcode_uniq',
-            'unique(barcode)',
-            "A barcode can only be assigned to one container !"),
+         'unique(barcode)',
+         "A barcode can only be assigned to one container !"),
     ]
 
     @api.model
