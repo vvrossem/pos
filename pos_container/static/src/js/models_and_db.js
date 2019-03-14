@@ -85,6 +85,16 @@ odoo.define('pos_container.models_and_db', function (require) {
             this.select_orderline(this.get_last_orderline());
             //this.pos.get_order().display_container(container);
         },
+        has_tare_line: function(mode){
+            var orderlines = this.orderlines.models
+            for(var i=0; i < orderlines.length; i++){
+                var line = orderlines[i];
+                if(line && line.get_tare_mode() === mode){
+                    return true;
+                }
+            }
+            return false;
+        },
     });
     
     // Add container to order line
@@ -96,9 +106,8 @@ odoo.define('pos_container.models_and_db', function (require) {
             this.container = container;
         },
         set_tare_mode: function(mode){
-            if (['MAN', 'AUTO'].indexOf(mode)){
+            if (['MAN', 'AUTO'].indexOf(mode) != -1){
                 this.tare_mode = mode;
-                this.trigger('change', this);
             }
         },
         get_tare_mode: function() {
@@ -133,7 +142,6 @@ odoo.define('pos_container.models_and_db', function (require) {
             this.trigger('change', this);
         },
     });
-
 
     PosDB.include({
         init: function(parent, options) {
