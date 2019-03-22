@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-name="WeighContainerScreenWidget">
+        <div class="wp-weigh-container-screen screen">
+            <div class="screen-content">
+                <h1>WEIGH CONTAINER SCREEN</h1>
+            </div>
+        </div>
+     </t>
+</templates>

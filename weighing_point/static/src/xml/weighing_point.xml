@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-extend="Chrome">
+       <t t-jquery=".pos-content" t-operation="replace">
+           <div class="pos-content"> <!-- TODO(Vincent) refactor as weighing-point-content -->
+               <div class="leftpane">
+                   <div class='window'>
+                       <div class='subwindow'>
+                           <div class='subwindow-container'>
+                               <div class='subwindow-container-fix'>
+                                   <span class="placeholder-ScaleWidget"></span>
+                               </div>
+                           </div>
+                       </div>
+
+                       <div class='subwindow collapsed'>
+                           <div class='subwindow-container'>
+                               <div class='subwindow-container-fix pads'>
+                                   <h1>
+                                       <span class='button previous-screen'>
+                                            <i class='fa fa-angle-double-left'></i>
+                                            Back
+                                        </span>
+                                   </h1>
+                               </div>
+                           </div>
+                       </div>
+                   </div>
+               </div>
+               <div class="rightpane">
+                    <div class='window'>
+                        <div class='subwindow'>
+                            <div class='subwindow-container'>
+                                <div class='subwindow-container-fix screens'>
+                                    <!-- here go the screens -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+               </div>
+           </div>
+       </t>
+    </t>
+</templates>

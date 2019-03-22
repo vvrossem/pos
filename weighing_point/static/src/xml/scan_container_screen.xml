@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-name="ScanContainerScreenWidget">
+        <div class="wp-scan-container-screen screen">
+            <div class="screen-content">
+                <h1>SCAN CONTAINER SCREEN</h1>
+            </div>
+        </div>
+     </t>
+</templates>

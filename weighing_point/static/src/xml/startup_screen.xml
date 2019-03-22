@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-name="StartupScreenWidget">
+        <div class="wp-startup-screen screen">
+            <div class="screen-content">
+                <h1>STARTUP SCREEN</h1>
+                <span class="button weigh-bag">
+                    <h2>Peser un sachet plein</h2>
+                </span>
+                <span class="button weigh-container">
+                    <h2>Peser un contenant vide</h2>
+                </span>
+                <span class="button scan-container">
+                    <h2>Scanner un contenant plein</h2>
+                </span>
+            </div>
+        </div>
+     </t>
+</templates>

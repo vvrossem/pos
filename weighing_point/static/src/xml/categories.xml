@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="CategoriesScreenWidget">
+        <div class="wp-categories-screen screen">
+            <div class="screen-content">
+                <h1>CATEGORIES SCREEN</h1>
+                <table class="layout-table">
+                    <tr class="header-row">
+                        <td class="header-cell">
+                            <span class="placeholder-ProductCategoriesWidget"/>
+                        </td>
+                    </tr>
+
+                    <tr class="content-row">
+                        <td class="content-cell">
+                            <div class="content-container">
+                                <span class="placeholder-ProductListWidget"/>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </t>
+
+</templates>

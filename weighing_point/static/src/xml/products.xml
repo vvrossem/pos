@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="ProductsWidget">
+        <div class='product-list-container'>
+            <div class="product-list-scroller touch-scrollable">
+                <div class="product-list">
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>
