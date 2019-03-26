@@ -213,8 +213,18 @@ odoo.define('pos_container.models_and_db', function (require) {
             }
             return updated_count;
         },
+        remove_containers: function(ids){
+            for(var i = 0; i < ids.length; i++) {
+                var container = this.container_by_id[ids[i]];
+                if (container){
+                    var index_s = this.container_sorted.indexOf(container.id);
+                    this.container_sorted.splice(index_s, 1);
+                    delete this.container_by_id[container.id];
+                    delete this.container_by_barcode[container.barcode];
+                }
+            }
+        },
         get_container_write_date: function(){
-
             return this.container_write_date;
         },
         get_container_by_id: function(id){
