@@ -22,13 +22,16 @@
 
 
 import logging
-import simplejson
+import json as simplejson
 import time
 from threading import Thread, Lock
-from Queue import Queue
-import openerp.addons.hw_proxy.controllers.main as hw_proxy
-from openerp import http
-from openerp.tools.config import config
+try:
+    from queue import Queue
+except ImportError:
+    from Queue import Queue
+import odoo.addons.hw_proxy.controllers.main as hw_proxy
+from odoo import http
+from odoo.tools.config import config
 
 logger = logging.getLogger(__name__)
 
@@ -95,6 +98,7 @@ class CustomerDisplayDriver(Thread):
         lines_ascii = []
         for line in lines:
             lines_ascii.append(unidecode(line))
+
         row = 0
         for dline in lines_ascii:
             row += 1
@@ -149,7 +153,7 @@ class CustomerDisplayDriver(Thread):
             self.setup_customer_display()
             self.clear_customer_display()
             self.display_text(lines)
-        except Exception, e:
+        except Exception as e:
             logger.error('Exception in serial connection: %s' % str(e))
         finally:
             if self.serial:
