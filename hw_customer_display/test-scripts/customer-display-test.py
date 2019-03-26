@@ -7,6 +7,7 @@
 
 import sys
 import logging
+import time
 
 _logger = logging.getLogger(__name__)
 
@@ -16,7 +17,7 @@ try:
 except (ImportError, IOError) as err:
     _logger.debug(err)
 
-DEVICE = '/dev/ttyUSB0'
+DEVICE = '/dev/ttyUSB1'
 DEVICE_RATE = 9600
 DEVICE_COLS = 20
 
@@ -40,18 +41,21 @@ def display_text(ser, line1, line2):
     ser.write(b'\x0C')
     print("clear done")
     print("try to position at start of 1st line")
-    ser.write(b'\x1B\x6C' + bytes(1) + bytes(1))
+    l1 = '\x1B\x6C' + chr(1) + chr(1)
+    print(l1)
+    ser.write(l1.encode())
     print("position done")
     print("try to write 1st line")
     ser.write(line1.encode())
     print("write 1st line done")
+    time.sleep(1)
     print("try to position at start of 2nd line")
-    ser.write(b'\x1B\x6C' + bytes(1) + bytes(2))
+    l2 = '\x1B\x6C' + chr(1) + chr(2)
+    ser.write(l2.encode())
     print("position done")
     print("try to write 2nd line")
     ser.write(line2.encode())
     print("write done")
-
 
 def open_close_display(line1, line2):
     ser = False
@@ -74,6 +78,6 @@ def open_close_display(line1, line2):
 
 
 if __name__ == '__main__':
-    line1 = u'POS Code Sprint'
-    line2 = u'@ Akretion 2014/07'
+    line1 = u'COOP IT EASY'
+    line2 = u'Courage Nico!'
     open_close_display(line1, line2)
