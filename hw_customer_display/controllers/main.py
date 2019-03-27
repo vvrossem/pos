@@ -25,15 +25,16 @@ import logging
 import json as simplejson
 import time
 from threading import Thread, Lock
-try:
-    from queue import Queue
-except ImportError:
-    from Queue import Queue
+from queue import Queue
 import odoo.addons.hw_proxy.controllers.main as hw_proxy
 from odoo import http
 from odoo.tools.config import config
 
 logger = logging.getLogger(__name__)
+
+CLEAR_DISPLAY = b'\x0C'
+MOVE_CURSOR_TO = b'\x1B\x6C'
+CURSOR_OFF = b'\x1F\x5F\x00'
 
 try:
     from serial import Serial
@@ -88,46 +89,41 @@ class CustomerDisplayDriver(Thread):
 
     def move_cursor(self, col, row):
         # Bixolon spec : 11. "Move Cursor to Specified Position"
-        self.cmd_serial_write('\x1B\x6C' + chr(col) + chr(row))
+        position = MOVE_CURSOR_TO + chr(col).encode('ascii') + chr(row).encode('ascii')
+        self.cmd_serial_write(position)
 
     def display_text(self, lines):
         logger.debug(
             "Preparing to send the following lines to LCD: %s" % lines)
         # We don't check the number of rows/cols here, because it has already
         # been checked in the POS client in the JS code
-        lines_ascii = []
-        for line in lines:
-            lines_ascii.append(unidecode(line))
-
-        row = 0
-        for dline in lines_ascii:
-            row += 1
+        for row, line in enumerate(lines, start=1):
             self.move_cursor(1, row)
-            self.serial_write(dline)
+            self.serial_write(unidecode(line).encode('ascii'))
 
     def setup_customer_display(self):
         '''Set LCD cursor to off
         If your LCD has different setup instruction(s), you should
         inherit this function'''
         # Bixolon spec : 35. "Set Cursor On/Off"
-        self.cmd_serial_write('\x1F\x43\x00')
+        self.cmd_serial_write(CURSOR_OFF)
         logger.debug('LCD cursor set to off')
 
     def clear_customer_display(self):
         '''If your LCD has different clearing instruction, you should inherit
         this function'''
         # Bixolon spec : 12. "Clear Display Screen and Clear String Mode"
-        self.cmd_serial_write('\x0C')
+        self.cmd_serial_write(CLEAR_DISPLAY)
         logger.debug('Customer display cleared')
 
     def cmd_serial_write(self, command):
         '''If your LCD requires a prefix and/or suffix on all commands,
         you should inherit this function'''
-        assert isinstance(command, str), 'command must be a string'
+        assert isinstance(command, bytes), 'command must be a bytes string'
         self.serial_write(command)
 
     def serial_write(self, text):
-        assert isinstance(text, str), 'text must be a string'
+        assert isinstance(text, bytes), 'text must be a bytes string'
         self.serial.write(text)
 
     def send_text_customer_display(self, text_to_display):
