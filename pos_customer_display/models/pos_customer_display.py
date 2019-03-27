@@ -11,7 +11,7 @@ class PosConfig(models.Model):
     _inherit = 'pos.config'
 
     iface_customer_display = fields.Boolean(
-        string='Customer Display', help="Display data on the customer display")
+        default=False, string='Customer Display', help="Display data on the customer display")
     customer_display_line_length = fields.Integer(
         string='Line Length of the Customer Display', default=20,
         help="Length of the LEDs lines of the customer display")
@@ -50,7 +50,7 @@ class PosConfig(models.Model):
                 _('POS Closed (bottom line)'):
                 self.customer_display_msg_closed_l2,
             }
-            for field, msg in to_check.iteritems():
+            for field, msg in to_check.items():
                 if msg and len(msg) > maxsize:
                     raise ValidationError(_(
                         "The message for customer display '%s' is too "
