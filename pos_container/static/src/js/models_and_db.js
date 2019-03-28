@@ -75,15 +75,14 @@ odoo.define('pos_container.models_and_db', function (require) {
             attr.pos = this.pos;
             attr.order = this;
             var product = this.pos.get_container_product();
-            var line = new models.Orderline({},
-                {pos: this.pos, order: this, product: product});
+            var line = new models.Orderline({}, {
+                pos: this.pos, order: this,
+                quantity: 0, product: product, });
 
             line.set_container(container);
             this.orderlines.add(line);
-            //self.pos_widget.reload_products(container.pos_categ_ids)
 
             this.select_orderline(this.get_last_orderline());
-            //this.pos.get_order().display_container(container);
         },
         has_tare_line: function(mode){
             var orderlines = this.orderlines.models
