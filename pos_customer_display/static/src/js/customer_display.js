@@ -8,7 +8,7 @@
     License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 */
 
-odoo.define('pos_customer_display', function(require) {
+odoo.define('pos_customer_display.pos_customer_display', function (require) {
     "use strict";
     var chrome = require('point_of_sale.chrome');
     var core = require('web.core');
@@ -17,22 +17,65 @@ odoo.define('pos_customer_display', function(require) {
     var models = require('point_of_sale.models');
     var screens = require('point_of_sale.screens');
     var _t = core._t;
+
     var PosModelSuper = models.PosModel;
 
     models.PosModel = models.PosModel.extend({
-        prepare_text_customer_display: function(type, data){
+
+        /**
+         * Allows the connection to proxy device if iface_customer_display is checked in the POS config
+         * Otherwise, no connection is established
+         *
+         */
+        initialize: function (session, attributes) {
+            // find 'pos.config' in PosModel models list
+            var posConfig = _.find(this.models, function (model) {
+                return model.model === 'pos.config';
+            });
+
+            // override loaded function to add iface_customer_display
+            posConfig.loaded = function (self, configs) {
+                self.config = configs[0];
+                self.config.use_proxy = self.config.iface_payment_terminal ||
+                    self.config.iface_electronic_scale ||
+                    self.config.iface_print_via_proxy ||
+                    self.config.iface_scan_via_proxy ||
+                    self.config.iface_cashdrawer ||
+                    self.config.iface_customer_facing_display ||
+                    self.config.iface_customer_display; // added field
+
+                if (self.config.company_id[0] !== self.user.company_id[0]) {
+                    throw new Error(_t("Error: The Point of Sale User must belong to the same company as the Point of Sale. You are probably trying to load the point of sale as an administrator in a multi-company setup, with the administrator account set to the wrong company."));
+                }
+
+                self.db.set_uuid(self.config.uuid);
+                self.set_cashier(self.get_cashier());
+                // We need to do it here, since only then the local storage has the correct uuid
+                self.db.save('pos_session_id', self.pos_session.id);
+
+                var orders = self.db.get_orders();
+                for (var i = 0; i < orders.length; i++) {
+                    self.pos_session.sequence_number = Math.max(self.pos_session.sequence_number, orders[i].data.sequence_number + 1);
+                }
+            };
+
+            // Inheritance
+            return PosModelSuper.prototype.initialize.call(this, session, attributes);
+        },
+
+        prepare_text_customer_display: function (type, data) {
             if (this.config.iface_customer_display != true)
                 return;
             var line_length = this.config.customer_display_line_length || 20;
             var currency_rounding = this.currency.decimals;
 
-            if (type == 'add_update_line'){
+            if (type == 'add_update_line') {
                 var line = data['line'];
                 var price_unit = line.get_unit_price();
                 var discount = line.get_discount();
                 if (discount) {
                     price_unit = price_unit * (1.0 - (discount / 100.0));
-                    }
+                }
                 price_unit = price_unit.toFixed(currency_rounding);
                 var qty = line.get_quantity();
                 // only display decimals when qty is not an integer
@@ -50,7 +93,7 @@ odoo.define('pos_customer_display', function(require) {
                 var lines_to_send = new Array(
                     this.proxy.align_left(line.get_product().display_name, line_length),
                     this.proxy.align_left(l21, line_length - l22.length) + l22
-                    );
+                );
 
             } else if (type == 'remove_orderline') {
                 // first click on the backspace button set the amount to 0 => we can't precise the deleted qunatity and price
@@ -58,22 +101,22 @@ odoo.define('pos_customer_display', function(require) {
                 var lines_to_send = new Array(
                     this.proxy.align_left(_t("Delete Item"), line_length),
                     this.proxy.align_right(line.get_product().display_name, line_length)
-                    );
+                );
 
             } else if (type == 'add_paymentline') {
                 var total = this.get('selectedOrder').get_total_with_tax().toFixed(currency_rounding);
                 var lines_to_send = new Array(
                     this.proxy.align_left(_t("TOTAL: "), line_length),
                     this.proxy.align_right(total, line_length)
-                    );
+                );
 
             } else if (type == 'remove_paymentline') {
                 var line = data['line'];
                 var amount = line.get_amount().toFixed(currency_rounding);
                 var lines_to_send = new Array(
                     this.proxy.align_left(_t("Cancel Payment"), line_length),
-                    this.proxy.align_right(line.cashregister.journal_id[1] , line_length - 1 - amount.length) + ' ' + amount
-                    );
+                    this.proxy.align_right(line.cashregister.journal_id[1], line_length - 1 - amount.length) + ' ' + amount
+                );
 
             } else if (type == 'update_payment') {
                 var change = data['change'];
@@ -86,19 +129,19 @@ odoo.define('pos_customer_display', function(require) {
                 var lines_to_send = new Array(
                     this.proxy.align_center(this.config.customer_display_msg_next_l1, line_length),
                     this.proxy.align_center(this.config.customer_display_msg_next_l2, line_length)
-                    );
+                );
 
             } else if (type == 'openPOS') {
                 var lines_to_send = new Array(
                     this.proxy.align_center(this.config.customer_display_msg_next_l1, line_length),
                     this.proxy.align_center(this.config.customer_display_msg_next_l2, line_length)
-                    );
+                );
 
             } else if (type = 'closePOS') {
                 var lines_to_send = new Array(
                     this.proxy.align_center(this.config.customer_display_msg_closed_l1, line_length),
                     this.proxy.align_center(this.config.customer_display_msg_closed_l2, line_length)
-                    );
+                );
             } else {
                 console.warn('Unknown message type');
                 return;
@@ -107,85 +150,71 @@ odoo.define('pos_customer_display', function(require) {
             this.proxy.send_text_customer_display(lines_to_send, line_length);
         },
 
-        push_order: function(order){
+        push_order: function (order) {
             var res = PosModelSuper.prototype.push_order.call(this, order);
             if (order) {
-                this.prepare_text_customer_display('push_order', {'order' : order});
+                this.prepare_text_customer_display('push_order', {'order': order});
             }
             return res;
         },
-
     });
 
     devices.ProxyDevice = devices.ProxyDevice.extend({
-        send_text_customer_display: function(data, line_length){
+        send_text_customer_display: function (data, line_length) {
             //FIXME : this function is call twice. The first time, it is not called by prepare_text_customer_display : WHY ?
-            if (_.isEmpty(data) || data.length != 2 || data[0].length != line_length || data[1].length != line_length){
+            if (_.isEmpty(data) || data.length != 2 || data[0].length != line_length || data[1].length != line_length) {
                 console.warn("send_text_customer_display: Bad Data argument. Data=" + data + ' line_length=' + line_length);
             } else {
-//              alert(JSON.stringify(data));
-                return this.message('send_text_customer_display', {'text_to_display' : JSON.stringify(data)});
+                return this.message('send_text_customer_display', {'text_to_display': JSON.stringify(data)});
             }
         },
 
-        align_left: function(string, length){
+        align_left: function (string, length) {
             if (string) {
-                if (string.length > length)
-                {
-                    string = string.substring(0,length);
-                }
-                else if (string.length < length)
-                {
-                    while(string.length < length)
-                        string = string + ' ';
-                }
-            }
-            else {
-                string = ' '
-                while(string.length < length)
-                    string = ' ' + string;
-            }
-            return string;
-        },
-
-        align_right: function(string, length){
-            if (string) {
-                if (string.length > length)
-                {
-                    string = string.substring(0,length);
-                }
-                else if (string.length < length)
-                {
-                    while(string.length < length)
-                        string = ' ' + string;
-                }
-            }
-            else {
-                string = ' '
-                while(string.length < length)
-                    string = ' ' + string;
-            }
-            return string;
-        },
-
-        align_center: function(string, length){
-            if (string) {
-                if (string.length > length)
-                {
+                if (string.length > length) {
                     string = string.substring(0, length);
-                }
-                else if (string.length < length)
-                {
-                    var ini = (length - string.length) / 2;
-                    while(string.length < length - ini)
-                        string = ' ' + string;
-                    while(string.length < length)
+                } else if (string.length < length) {
+                    while (string.length < length)
                         string = string + ' ';
                 }
-            }
-            else {
+            } else {
                 string = ' '
-                while(string.length < length)
+                while (string.length < length)
+                    string = ' ' + string;
+            }
+            return string;
+        },
+
+        align_right: function (string, length) {
+            if (string) {
+                if (string.length > length) {
+                    string = string.substring(0, length);
+                } else if (string.length < length) {
+                    while (string.length < length)
+                        string = ' ' + string;
+                }
+            } else {
+                string = ' '
+                while (string.length < length)
+                    string = ' ' + string;
+            }
+            return string;
+        },
+
+        align_center: function (string, length) {
+            if (string) {
+                if (string.length > length) {
+                    string = string.substring(0, length);
+                } else if (string.length < length) {
+                    var ini = (length - string.length) / 2;
+                    while (string.length < length - ini)
+                        string = ' ' + string;
+                    while (string.length < length)
+                        string = string + ' ';
+                }
+            } else {
+                string = ' '
+                while (string.length < length)
                     string = ' ' + string;
             }
             return string;
@@ -199,32 +228,32 @@ odoo.define('pos_customer_display', function(require) {
         AND when you create a new order line via add_product().
         So, when you add a product, we call prepare_text_customer_display() twice...
         but I haven't found any good solution to avoid this -- Alexis */
-        set_quantity: function(quantity){
+        set_quantity: function (quantity) {
             var res = OrderlineSuper.prototype.set_quantity.call(this, quantity);
             if (quantity != 'remove') {
                 var line = this;
-                if(this.selected){
+                if (this.selected) {
                     this.pos.prepare_text_customer_display('add_update_line', {'line': line});
                 }
             }
             return res;
         },
 
-        set_discount: function(discount){
+        set_discount: function (discount) {
             var res = OrderlineSuper.prototype.set_discount.call(this, discount);
             if (discount) {
                 var line = this;
-                if(this.selected){
+                if (this.selected) {
                     this.pos.prepare_text_customer_display('add_update_line', {'line': line});
                 }
             }
             return res;
         },
 
-        set_unit_price: function(price){
+        set_unit_price: function (price) {
             var res = OrderlineSuper.prototype.set_unit_price.call(this, price);
             var line = this;
-            if(this.selected){
+            if (this.selected) {
                 this.pos.prepare_text_customer_display('add_update_line', {'line': line});
             }
             return res;
@@ -235,33 +264,33 @@ odoo.define('pos_customer_display', function(require) {
     var OrderSuper = models.Order;
 
     models.Order = models.Order.extend({
-        add_product: function(product, options){
+        add_product: function (product, options) {
             var res = OrderSuper.prototype.add_product.call(this, product, options);
             if (product) {
                 var line = this.get_last_orderline();
-                this.pos.prepare_text_customer_display('add_update_line', {'line' : line});
+                this.pos.prepare_text_customer_display('add_update_line', {'line': line});
             }
             return res;
         },
 
-        remove_orderline: function(line){
+        remove_orderline: function (line) {
             if (line) {
-                this.pos.prepare_text_customer_display('remove_orderline', {'line' : line});
+                this.pos.prepare_text_customer_display('remove_orderline', {'line': line});
             }
             return OrderSuper.prototype.remove_orderline.call(this, line);
         },
 
-        remove_paymentline: function(line){
+        remove_paymentline: function (line) {
             if (line) {
-                this.pos.prepare_text_customer_display('remove_paymentline', {'line' : line});
+                this.pos.prepare_text_customer_display('remove_paymentline', {'line': line});
             }
             return OrderSuper.prototype.remove_paymentline.call(this, line);
         },
 
-        add_paymentline: function(cashregister){
+        add_paymentline: function (cashregister) {
             var res = OrderSuper.prototype.add_paymentline.call(this, cashregister);
             if (cashregister) {
-                this.pos.prepare_text_customer_display('add_paymentline', {'cashregister' : cashregister});
+                this.pos.prepare_text_customer_display('add_paymentline', {'cashregister': cashregister});
             }
             return res;
         },
@@ -269,7 +298,7 @@ odoo.define('pos_customer_display', function(require) {
     });
 
     screens.PaymentScreenWidget.include({
-        render_paymentlines: function(){
+        render_paymentlines: function () {
             var res = this._super();
             var currentOrder = this.pos.get_order();
             if (currentOrder) {
@@ -286,24 +315,28 @@ odoo.define('pos_customer_display', function(require) {
     });
 
     gui.Gui.include({
-        close: function(){
+        close: function () {
             this._super();
             this.pos.prepare_text_customer_display('closePOS', {});
         },
     });
 
     chrome.ProxyStatusWidget.include({
-        start: function(){
+        start: function () {
             this._super();
             this.pos.prepare_text_customer_display('openPOS', {});
         },
     });
 
-    screens.PaymentScreenWidget.include({
-        show: function(){
+    screens.PaymentScreenWidget.extend({
+        show: function () {
             this._super();
             this.pos.prepare_text_customer_display('add_paymentline', {});
         },
     });
+
+    return {
+        PosModel:models.PosModel,
+    }
 
 });
