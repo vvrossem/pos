@@ -73,9 +73,9 @@ class CustomerDisplayDriver(Thread):
                 self.status['messages'] = []
 
         if status == 'error' and message:
-            logger.error('Display Error: '+message)
+            logger.error('Display Error: ' + message)
         elif status == 'disconnected' and message:
-            logger.warning('Disconnected Display: '+message)
+            logger.warning('Disconnected Display: ' + message)
 
     def lockedstart(self):
         with self.lock:
@@ -102,23 +102,23 @@ class CustomerDisplayDriver(Thread):
             self.serial_write(unidecode(line).encode('ascii'))
 
     def setup_customer_display(self):
-        '''Set LCD cursor to off
+        """Set LCD cursor to off
         If your LCD has different setup instruction(s), you should
-        inherit this function'''
+        inherit this function"""
         # Bixolon spec : 35. "Set Cursor On/Off"
         self.cmd_serial_write(CURSOR_OFF)
         logger.debug('LCD cursor set to off')
 
     def clear_customer_display(self):
-        '''If your LCD has different clearing instruction, you should inherit
-        this function'''
+        """If your LCD has different clearing instruction, you should inherit
+        this function"""
         # Bixolon spec : 12. "Clear Display Screen and Clear String Mode"
         self.cmd_serial_write(CLEAR_DISPLAY)
         logger.debug('Customer display cleared')
 
     def cmd_serial_write(self, command):
-        '''If your LCD requires a prefix and/or suffix on all commands,
-        you should inherit this function'''
+        """If your LCD requires a prefix and/or suffix on all commands,
+        you should inherit this function"""
         assert isinstance(command, bytes), 'command must be a bytes string'
         self.serial_write(command)
 
@@ -127,7 +127,7 @@ class CustomerDisplayDriver(Thread):
         self.serial.write(text)
 
     def send_text_customer_display(self, text_to_display):
-        '''This function sends the data to the serial/usb port.
+        """This function sends the data to the serial/usb port.
         We open and close the serial connection on every message display.
         Why ?
         1. Because it is not a problem for the customer display
@@ -135,7 +135,7 @@ class CustomerDisplayDriver(Thread):
         3. Because it allows recovery on errors : you can unplug/replug the
         customer display and it will work again on the next message without
         problem
-        '''
+        """
         lines = simplejson.loads(text_to_display)
         assert isinstance(lines, list), 'lines_list should be a list'
         try:
@@ -163,7 +163,15 @@ class CustomerDisplayDriver(Thread):
                 if task == 'display':
                     self.send_text_customer_display(data)
                 elif task == 'status':
-                    pass
+                    serial = Serial(
+                        self.device_name, self.device_rate,
+                        timeout=self.device_timeout)
+                    if serial.isOpen():
+                        self.set_status(
+                            'connected',
+                            'Connected to %s' % self.device_name
+                        )
+                        self.serial = serial
             except Exception as e:
                 self.set_status('error', str(e))
 
