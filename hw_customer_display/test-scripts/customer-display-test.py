@@ -17,17 +17,17 @@ try:
 except (ImportError, IOError) as err:
     _logger.debug(err)
 
-DEVICE = '/dev/ttyUSB0'
+DEVICE = '/dev/bixolon'
 DEVICE_RATE = 9600
 DEVICE_COLS = 20
 
 CLEAR_DISPLAY = b'\x0C'
 MOVE_CURSOR_TO = b'\x1B\x6C'
-
+CURSOR_OFF = b'\x1F\x5F\x00'
 
 
 def display_text(ser, line1, line2):
-    print("set lines to the right length (%s)" % DEVICE_COLS)
+    print(("set lines to the right length (%s)" % DEVICE_COLS))
     for line in [line1, line2]:
         if len(line) < DEVICE_COLS:
             line += ' ' * (DEVICE_COLS - len(line))
@@ -59,14 +59,14 @@ def open_close_display(line1, line2):
     try:
         print("open serial port")
         ser = Serial(DEVICE, DEVICE_RATE, timeout=2)
-        print("serial port open =", ser.isOpen())
-        print("serial name =", ser.name)
+        print(("serial port open =", ser.isOpen()))
+        print(("serial name =", ser.name))
         print("try to set cursor to off")
-        ser.write(b'\x1F\x43\x00')
+        ser.write(CURSOR_OFF)
         print("cursor set to off")
         display_text(ser, line1, line2)
     except Exception as e:
-        print('EXCEPTION e={}'.format(e))
+        print(('EXCEPTION e={}'.format(e)))
         sys.exit(1)
     finally:
         if ser:
@@ -75,6 +75,6 @@ def open_close_display(line1, line2):
 
 
 if __name__ == '__main__':
-    line1 = u'Coop IT Easy'
-    line2 = u'Migration to 12.0'
+    line1 = 'Coop IT Easy'
+    line2 = 'Migration to 12.0'
     open_close_display(line1, line2)
