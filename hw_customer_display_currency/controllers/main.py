@@ -42,7 +42,7 @@ class CustomerDisplayCurrencyDriver(CustomerDisplayDriver):
 
     def draw_euro_symbol(self):
         self.serial_write(SELECT_USER_DEFINED_CHAR)
-        cmd = b'\x1B\x26\x01' + self.char_code + self.char_code + b'\x05\x14\x3E\x55\x41\x22'
+        cmd = b'\x1B\x26\x01' + self.currency_char_code + self.currency_char_code + b'\x05\x14\x3E\x55\x41\x22'
         self.serial_write(cmd)
         logger.debug('Draw euro symbol')
 
