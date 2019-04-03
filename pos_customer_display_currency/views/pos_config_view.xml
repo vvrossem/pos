@@ -7,8 +7,8 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='customer_display_line_length']/.." position="before">
                 <div class="row">
-                    <label for="customer_display_currency_char_code" class="col-lg-3 o_light_label"/>
-                    <field name="customer_display_currency_char_code"/>
+                    <label for="customer_display_currency_char" class="col-lg-3 o_light_label"/>
+                    <field name="customer_display_currency_char"/>
                 </div>
             </xpath>
         </field>
