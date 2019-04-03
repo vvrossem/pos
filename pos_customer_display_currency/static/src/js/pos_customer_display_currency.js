@@ -21,7 +21,7 @@ odoo.define('pos_customer_display_currency.pos_customer_display_currency', funct
                 return;
             var line_length = this.config.customer_display_line_length || 20;
             var currency_rounding = this.currency.decimals;
-            var currency_char_code = this.config.customer_display_currency_char_code;
+            var currency_char = this.config.customer_display_currency_char;
 
             if (type == 'add_update_line') {
                 var line = data['line'];
@@ -43,7 +43,7 @@ odoo.define('pos_customer_display_currency.pos_customer_display_currency', funct
                     unit_display = unit.name;
                 }
                 var l21 = qty + unit_display + ' x ' + price_unit;
-                var l22 = ' ' + line.get_display_price().toFixed(currency_rounding) + currency_char_code;
+                var l22 = ' ' + line.get_display_price().toFixed(currency_rounding) + currency_char;
                 var lines_to_send = new Array(
                     this.proxy.align_left(line.get_product().display_name, line_length),
                     this.proxy.align_left(l21, line_length - l22.length) + l22
@@ -61,7 +61,7 @@ odoo.define('pos_customer_display_currency.pos_customer_display_currency', funct
                 var total = this.get('selectedOrder').get_total_with_tax().toFixed(currency_rounding);
                 var lines_to_send = new Array(
                     this.proxy.align_left(_t("TOTAL: "), line_length),
-                    this.proxy.align_right(total + currency_char_code, line_length)
+                    this.proxy.align_right(total + currency_char, line_length)
                 );
 
             } else if (type == 'remove_paymentline') {
@@ -105,9 +105,10 @@ odoo.define('pos_customer_display_currency.pos_customer_display_currency', funct
         },
 
         prepare_currency_data_customer_display: function () {
+            // TODO(Vincent) currency_code = this.currency.name || this.company_currency.name ?
             var currency_data = {
                 'currency_code': this.currency.name,
-                'currency_char_code': this.config.customer_display_currency_char_code
+                'currency_char': this.config.customer_display_currency_char
             }
 
             this.proxy.send_currency_data_customer_display(currency_data);
@@ -117,7 +118,6 @@ odoo.define('pos_customer_display_currency.pos_customer_display_currency', funct
 
     devices.ProxyDevice = devices.ProxyDevice.extend({
         send_currency_data_customer_display: function (currency_data) {
-            console.log(currency_data);
             return this.message('send_currency_data_customer_display', {'currency_data': JSON.stringify(currency_data)});
         },
     });
@@ -125,7 +125,6 @@ odoo.define('pos_customer_display_currency.pos_customer_display_currency', funct
     // TODO(Vincent) is it the best place to fetch and set currency data?
     chrome.ProxyStatusWidget.include({
         start: function () {
-            console.log('start');
             this._super();
             this.pos.prepare_currency_data_customer_display();
         }

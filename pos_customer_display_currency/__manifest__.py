@@ -11,7 +11,7 @@
     'category': 'Point Of Sale',
 
     'summary': """
-        Adds Currency Management to POS Customer Display device""",
+        Add Currency Management to POS Customer Display device""",
 
     "author": "Coop IT Easy SCRLfs, "
               "Odoo Community Association (OCA)",
