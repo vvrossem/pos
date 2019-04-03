@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 
 CLEAR_DISPLAY = b'\x0C'
 MOVE_CURSOR_TO = b'\x1B\x6C'
-CURSOR_OFF = b'\x1F\x5F\x00'
+CURSOR_OFF = b'\x1F\x43\x00'
 
 try:
     from serial import Serial
