@@ -41,7 +41,7 @@ class CustomerDisplayCurrencyDriver(CustomerDisplayDriver):
     def send_currency_data_customer_display(self, currency_data):
         currency_data = simplejson.loads(currency_data)
         self.set_currency_code(currency_data['currency_code'])
-        self.set_currency_char_code(currency_data['currency_char_code'])
+        self.set_currency_char_code(currency_data['currency_char'])
 
     def draw_euro_symbol(self):
         cmd = DEFINE_USER_DEFINED_CHAR + self.currency_char_code + self.currency_char_code + EURO_SYMBOL_DRAWING
