@@ -14,6 +14,10 @@ from odoo import http
 logger = logging.getLogger(__name__)
 
 SELECT_USER_DEFINED_CHAR = b'\x1B\x25\x01'
+DEFINE_USER_DEFINED_CHAR = b'\x1B\x26\x01'
+EURO_SYMBOL_DRAWING = b'\x05\x14\x3E\x55\x41\x22'
+
+
 
 try:
     from serial import Serial
@@ -35,15 +39,14 @@ class CustomerDisplayCurrencyDriver(CustomerDisplayDriver):
         self.currency_char_code = currency_char_code.encode('ascii')
 
     def send_currency_data_customer_display(self, currency_data):
-        # TODO(Vincent) continue
         currency_data = simplejson.loads(currency_data)
         self.set_currency_code(currency_data['currency_code'])
         self.set_currency_char_code(currency_data['currency_char_code'])
 
     def draw_euro_symbol(self):
-        self.serial_write(SELECT_USER_DEFINED_CHAR)
-        cmd = b'\x1B\x26\x01' + self.currency_char_code + self.currency_char_code + b'\x05\x14\x3E\x55\x41\x22'
+        cmd = DEFINE_USER_DEFINED_CHAR + self.currency_char_code + self.currency_char_code + EURO_SYMBOL_DRAWING
         self.serial_write(cmd)
+        self.serial_write(SELECT_USER_DEFINED_CHAR)
         logger.debug('Draw euro symbol')
 
     def send_text_customer_display(self, text_to_display):
@@ -105,7 +108,7 @@ driver = CustomerDisplayCurrencyDriver()
 hw_proxy.drivers['customer_display'] = driver
 
 
-# TODO(Vincent) import CustomerDisplayProxy as well?
+# TODO(Vincent) import CustomerDisplayProxy instead of hw_proxy.Proxy
 class CustomerDisplayCurrencyProxy(hw_proxy.Proxy):
     @http.route(
         '/hw_proxy/send_text_customer_display', type='json', auth='none',
