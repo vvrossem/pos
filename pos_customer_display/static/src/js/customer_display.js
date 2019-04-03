@@ -335,8 +335,4 @@ odoo.define('pos_customer_display.pos_customer_display', function (require) {
         },
     });
 
-    return {
-        PosModel:models.PosModel,
-    }
-
 });
