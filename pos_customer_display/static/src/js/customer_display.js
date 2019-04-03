@@ -85,7 +85,7 @@ odoo.define('pos_customer_display.pos_customer_display', function (require) {
                 // only display unit when != Unit(s)
                 var unit = line.get_unit();
                 var unit_display = '';
-                if (unit && !unit.is_unit) {
+                if (unit && !unit.is_pos_groupable) {
                     unit_display = unit.name;
                 }
                 var l21 = qty + unit_display + ' x ' + price_unit;
