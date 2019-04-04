@@ -7,7 +7,6 @@ import logging
 import json as simplejson
 
 import odoo.addons.hw_proxy.controllers.main as hw_proxy
-# TODO(Vincent) import CustomerDisplayProxy as well?
 from odoo.addons.hw_customer_display.controllers.main import CustomerDisplayDriver
 from odoo import http
 
@@ -16,8 +15,6 @@ logger = logging.getLogger(__name__)
 SELECT_USER_DEFINED_CHAR = b'\x1B\x25\x01'
 DEFINE_USER_DEFINED_CHAR = b'\x1B\x26\x01'
 EURO_SYMBOL_DRAWING = b'\x05\x14\x3E\x55\x41\x22'
-
-
 
 try:
     from serial import Serial
@@ -108,7 +105,6 @@ driver = CustomerDisplayCurrencyDriver()
 hw_proxy.drivers['customer_display'] = driver
 
 
-# TODO(Vincent) import CustomerDisplayProxy instead of hw_proxy.Proxy
 class CustomerDisplayCurrencyProxy(hw_proxy.Proxy):
     @http.route(
         '/hw_proxy/send_text_customer_display', type='json', auth='none',
