@@ -128,7 +128,7 @@ odoo.define('pos_container.container', function (require) {
                 method: 'unlink',
                 args: [self.container.id],
             }).then(function(){
-                self.deleted_container();
+                self.deleted_container(self.container.id);
             },function(err,ev){
                 ev.preventDefault();
                 var error_body = _t('Your Internet connection is probably down.');
@@ -143,10 +143,11 @@ odoo.define('pos_container.container', function (require) {
                 }
             );
         },
-        deleted_container: function(){
+        deleted_container: function(id){
             var self = this;
-            this.$('.container-list .highlight').remove()
-            self.container = null;
+            this.pos.db.remove_containers([id]);
+            this.$('.container-list .highlight').remove();
+            this.container = null;
         },
         perform_search: function(query, associate_result){
             if(query){

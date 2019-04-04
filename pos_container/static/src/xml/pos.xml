@@ -152,7 +152,8 @@
                     <col width='25%' />
                 </colgroup>
                 <tr t-foreach="orderlines" t-as="orderline">
-                    <t t-if="orderline.get_tare_mode() == undefined">
+                    <t t-if="orderline.get_tare_mode() == undefined
+                            and orderline.product.barcode != 'CONTAINER'">
                         <td>
                             <t t-esc="orderline.get_product().display_name"/>
                             <t t-if="orderline.get_discount() > 0">

@@ -75,15 +75,14 @@ odoo.define('pos_container.models_and_db', function (require) {
             attr.pos = this.pos;
             attr.order = this;
             var product = this.pos.get_container_product();
-            var line = new models.Orderline({},
-                {pos: this.pos, order: this, product: product});
+            var line = new models.Orderline({}, {
+                pos: this.pos, order: this,
+                quantity: 0, product: product, });
 
             line.set_container(container);
             this.orderlines.add(line);
-            //self.pos_widget.reload_products(container.pos_categ_ids)
 
             this.select_orderline(this.get_last_orderline());
-            //this.pos.get_order().display_container(container);
         },
         has_tare_line: function(mode){
             var orderlines = this.orderlines.models
@@ -213,8 +212,18 @@ odoo.define('pos_container.models_and_db', function (require) {
             }
             return updated_count;
         },
+        remove_containers: function(ids){
+            for(var i = 0; i < ids.length; i++) {
+                var container = this.container_by_id[ids[i]];
+                if (container){
+                    var index_s = this.container_sorted.indexOf(container.id);
+                    this.container_sorted.splice(index_s, 1);
+                    delete this.container_by_id[container.id];
+                    delete this.container_by_barcode[container.barcode];
+                }
+            }
+        },
         get_container_write_date: function(){
-
             return this.container_write_date;
         },
         get_container_by_id: function(id){
