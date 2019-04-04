@@ -17,7 +17,6 @@ odoo.define('pos_customer_display_currency.pos_customer_display_currency', funct
 
     var round_pr = utils.round_precision;
 
-
     models.PosModel = models.PosModel.extend({
 
         prepare_text_customer_display: function (type, data) {
@@ -32,10 +31,9 @@ odoo.define('pos_customer_display_currency.pos_customer_display_currency', funct
             var line = {};
 
             if (type === 'add_update_line') {
+                // TODO(Vincent) change add/update line logic
                 console.log('add_update_line');
                 line = data['line'];
-                var price_unit = (line.get_unit_price() * (1.0 - (line.get_discount() / 100.0)))
-                                    .toFixed(currency_rounding);
 
                 var l21 = line.get_quantity_str_with_unit() + ' x ' + line.get_unit_price_with_unit(currency_char);
                 var l22 = ' ' + line.get_display_price().toFixed(currency_rounding) + currency_char;
@@ -44,20 +42,31 @@ odoo.define('pos_customer_display_currency.pos_customer_display_currency', funct
                     this.proxy.align_left(l21, line_length)
                     ];
 
+
             } else if (type === 'remove_orderline') {
+                // TODO(Vincent) check container logic
                 console.log('remove_orderline');
                 // first click on the backspace button set the amount to 0 => we can't precise the deleted qunatity and price
                 line = data['line'];
-                lines_to_send = [this.proxy.align_left(_t("Delete Item"), line_length),
-                    this.proxy.align_right(line.get_product().display_name, line_length)];
-
+                console.log(line);
+                var container = line.get_container();
+                var product = line.get_product();
+                if (container) {
+                     var lines_to_send = [this.proxy.align_left(("Delete Container"), line_length),
+                        this.proxy.align_right(container.name, line_length)];
+                } else if (product) {
+                    lines_to_send = [this.proxy.align_left(_t("Delete Item"), line_length),
+                    this.proxy.align_right(product.display_name, line_length)];
+                }
             } else if (type === 'add_paymentline') {
+                // TODO(Vincent) check customer_display_vracoop_extended getTotalTaxIncluded() function
                 console.log('add_paymentline');
                 var total = this.get('selectedOrder').get_total_with_tax().toFixed(currency_rounding) + currency_char;
                 lines_to_send = [this.proxy.align_left(_t("TOTAL: "), line_length),
                     this.proxy.align_right(total, line_length)];
 
             } else if (type === 'remove_paymentline') {
+                //TODO(Vincent) remove currency_char?
                 console.log('remove_paymentline');
                 line = data['line'];
                 var amount = line.get_amount().toFixed(currency_rounding) + currency_char;
@@ -65,22 +74,26 @@ odoo.define('pos_customer_display_currency.pos_customer_display_currency', funct
                     this.proxy.align_right(line.cashregister.journal_id[1], line_length - 1 - amount.length) + ' ' + amount];
 
             } else if (type === 'update_payment') {
+                //TODO(Vincent) remove currency_char?
                 console.log('update_payment');
                 var change = data['change'] + currency_char;
                 lines_to_send = [this.proxy.align_left(_t("Your Change:"), line_length),
                     this.proxy.align_right(change, line_length)];
 
             } else if (type === 'push_order') {
+                // OK
                 console.log('push_order');
                 lines_to_send = [this.proxy.align_center(this.config.customer_display_msg_next_l1, line_length),
                     this.proxy.align_center(this.config.customer_display_msg_next_l2, line_length)];
 
             } else if (type === 'openPOS') {
+                // OK
                 console.log('openPOS');
                 lines_to_send = [this.proxy.align_center(this.config.customer_display_msg_next_l1, line_length),
                     this.proxy.align_center(this.config.customer_display_msg_next_l2, line_length)];
 
             } else if (type === 'closePOS') {
+                // OK
                 console.log('closePOS');
                 lines_to_send = [this.proxy.align_center(this.config.customer_display_msg_closed_l1, line_length),
                     this.proxy.align_center(this.config.customer_display_msg_closed_l2, line_length)];
@@ -114,7 +127,6 @@ odoo.define('pos_customer_display_currency.pos_customer_display_currency', funct
     models.Orderline = models.Orderline.extend({
         get_quantity_str_with_unit: function(){
             var unit = this.get_unit();
-            console.log(unit);
             if(unit && !unit.is_pos_groupable){
                 return this.quantityStr + ' ' + unit.name;
             }else{
@@ -130,8 +142,9 @@ odoo.define('pos_customer_display_currency.pos_customer_display_currency', funct
                 return this.get_unit_price()  + currency_char;
             }
         },
-
     });
+
+
 
     // TODO(Vincent) is it the best place to fetch and set currency data?
     chrome.ProxyStatusWidget.include({
