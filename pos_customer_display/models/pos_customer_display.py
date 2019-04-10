@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # © 2014-2016 Aurélien DUMAINE
 # © 2015-2016 Akretion (Alexis de Lattre <alexis.delattre@akretion.com>)
+# © 2019 Coop IT Easy SCRLfs (Vincent Van Rossem <vvrossem@gmail.com>)
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 from odoo import models, fields, api, _
@@ -11,7 +12,8 @@ class PosConfig(models.Model):
     _inherit = 'pos.config'
 
     iface_customer_display = fields.Boolean(
-        string='Customer Display Device Management', help="Display data on the customer display device")
+        string='Customer Display Device Management',
+        help="Display data on the customer display device")
     customer_display_line_length = fields.Integer(
         string='Line Length', default=20,
         help="Length of the LEDs lines of the customer display")

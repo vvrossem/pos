@@ -2,9 +2,11 @@
     © 2014-2016 Aurélien DUMAINE
     © 2014-2016 Barroux Abbey (www.barroux.org)
     © 2014-2016 Akretion (www.akretion.com)
+    © 2019 Coop IT Easy SCRLfs
     @author: Aurélien DUMAINE
     @author: Alexis de Lattre <alexis.delattre@akretion.com>
     @author: Father Odilon (Barroux Abbey)
+    @author: Vincent Van Rossem <vvrossem@gmail.com>
     License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 */
 
@@ -42,7 +44,7 @@ odoo.define('pos_customer_display.pos_customer_display', function (require) {
                     self.config.iface_scan_via_proxy ||
                     self.config.iface_cashdrawer ||
                     self.config.iface_customer_facing_display ||
-                    self.config.iface_customer_display; // added field
+                    self.config.iface_customer_display;
 
                 if (self.config.company_id[0] !== self.user.company_id[0]) {
                     throw new Error(_t("Error: The Point of Sale User must belong to the same company as the Point of Sale. You are probably trying to load the point of sale as an administrator in a multi-company setup, with the administrator account set to the wrong company."));
@@ -69,7 +71,7 @@ odoo.define('pos_customer_display.pos_customer_display', function (require) {
             var line_length = this.config.customer_display_line_length || 20;
             var currency_rounding = this.currency.decimals;
 
-            if (type == 'add_update_line') {
+            if (type === 'add_update_line') {
                 var line = data['line'];
                 var price_unit = line.get_unit_price();
                 var discount = line.get_discount();
@@ -90,58 +92,42 @@ odoo.define('pos_customer_display.pos_customer_display', function (require) {
                 }
                 var l21 = qty + unit_display + ' x ' + price_unit;
                 var l22 = ' ' + line.get_display_price().toFixed(currency_rounding);
-                var lines_to_send = new Array(
-                    this.proxy.align_left(line.get_product().display_name, line_length),
-                    this.proxy.align_left(l21, line_length - l22.length) + l22
-                );
+                var lines_to_send = [this.proxy.align_left(line.get_product().display_name, line_length),
+                    this.proxy.align_left(l21, line_length - l22.length) + l22];
 
-            } else if (type == 'remove_orderline') {
+            } else if (type === 'remove_orderline') {
                 // first click on the backspace button set the amount to 0 => we can't precise the deleted qunatity and price
                 var line = data['line'];
-                var lines_to_send = new Array(
-                    this.proxy.align_left(_t("Delete Item"), line_length),
-                    this.proxy.align_right(line.get_product().display_name, line_length)
-                );
+                var lines_to_send = [this.proxy.align_left(_t("Delete Item"), line_length),
+                    this.proxy.align_right(line.get_product().display_name, line_length)];
 
-            } else if (type == 'add_paymentline') {
+            } else if (type === 'add_paymentline') {
                 var total = this.get('selectedOrder').get_total_with_tax().toFixed(currency_rounding);
-                var lines_to_send = new Array(
-                    this.proxy.align_left(_t("TOTAL: "), line_length),
-                    this.proxy.align_right(total, line_length)
-                );
+                var lines_to_send = [this.proxy.align_left(_t("TOTAL: "), line_length),
+                    this.proxy.align_right(total, line_length)];
 
-            } else if (type == 'remove_paymentline') {
+            } else if (type === 'remove_paymentline') {
                 var line = data['line'];
                 var amount = line.get_amount().toFixed(currency_rounding);
-                var lines_to_send = new Array(
-                    this.proxy.align_left(_t("Cancel Payment"), line_length),
-                    this.proxy.align_right(line.cashregister.journal_id[1], line_length - 1 - amount.length) + ' ' + amount
-                );
+                var lines_to_send = [this.proxy.align_left(_t("Cancel Payment"), line_length),
+                    this.proxy.align_right(line.cashregister.journal_id[1], line_length - 1 - amount.length) + ' ' + amount];
 
-            } else if (type == 'update_payment') {
+            } else if (type === 'update_payment') {
                 var change = data['change'];
-                var lines_to_send = new Array(
-                    this.proxy.align_left(_t("Your Change:"), line_length),
-                    this.proxy.align_right(change, line_length)
-                );
+                var lines_to_send = [this.proxy.align_left(_t("Your Change:"), line_length),
+                    this.proxy.align_right(change, line_length)];
 
-            } else if (type == 'push_order') {
-                var lines_to_send = new Array(
-                    this.proxy.align_center(this.config.customer_display_msg_next_l1, line_length),
-                    this.proxy.align_center(this.config.customer_display_msg_next_l2, line_length)
-                );
+            } else if (type === 'push_order') {
+                var lines_to_send = [this.proxy.align_center(this.config.customer_display_msg_next_l1, line_length),
+                    this.proxy.align_center(this.config.customer_display_msg_next_l2, line_length)];
 
-            } else if (type == 'openPOS') {
-                var lines_to_send = new Array(
-                    this.proxy.align_center(this.config.customer_display_msg_next_l1, line_length),
-                    this.proxy.align_center(this.config.customer_display_msg_next_l2, line_length)
-                );
+            } else if (type === 'openPOS') {
+                var lines_to_send = [this.proxy.align_center(this.config.customer_display_msg_next_l1, line_length),
+                    this.proxy.align_center(this.config.customer_display_msg_next_l2, line_length)];
 
             } else if (type = 'closePOS') {
-                var lines_to_send = new Array(
-                    this.proxy.align_center(this.config.customer_display_msg_closed_l1, line_length),
-                    this.proxy.align_center(this.config.customer_display_msg_closed_l2, line_length)
-                );
+                var lines_to_send = [this.proxy.align_center(this.config.customer_display_msg_closed_l1, line_length),
+                    this.proxy.align_center(this.config.customer_display_msg_closed_l2, line_length)];
             } else {
                 console.warn('Unknown message type');
                 return;
@@ -178,7 +164,7 @@ odoo.define('pos_customer_display.pos_customer_display', function (require) {
                         string = string + ' ';
                 }
             } else {
-                string = ' '
+                string = ' ';
                 while (string.length < length)
                     string = ' ' + string;
             }
@@ -194,7 +180,7 @@ odoo.define('pos_customer_display.pos_customer_display', function (require) {
                         string = ' ' + string;
                 }
             } else {
-                string = ' '
+                string = ' ';
                 while (string.length < length)
                     string = ' ' + string;
             }
@@ -213,7 +199,7 @@ odoo.define('pos_customer_display.pos_customer_display', function (require) {
                         string = string + ' ';
                 }
             } else {
-                string = ' '
+                string = ' ';
                 while (string.length < length)
                     string = ' ' + string;
             }
@@ -231,6 +217,7 @@ odoo.define('pos_customer_display.pos_customer_display', function (require) {
         set_quantity: function (quantity) {
             var res = OrderlineSuper.prototype.set_quantity.call(this, quantity);
             if (quantity != 'remove') {
+
                 var line = this;
                 if (this.selected) {
                     this.pos.prepare_text_customer_display('add_update_line', {'line': line});
@@ -264,13 +251,62 @@ odoo.define('pos_customer_display.pos_customer_display', function (require) {
     var OrderSuper = models.Order;
 
     models.Order = models.Order.extend({
+
+        /**
+         * Add or merge the product to the order lines and select it.
+         * @override add_product from models.js (module: point_of_sale)
+         */
         add_product: function (product, options) {
-            var res = OrderSuper.prototype.add_product.call(this, product, options);
-            if (product) {
-                var line = this.get_last_orderline();
-                this.pos.prepare_text_customer_display('add_update_line', {'line': line});
+            if(this._printed){
+                this.destroy();
+                return this.pos.get_order().add_product(product, options);
             }
-            return res;
+            this.assert_editable();
+            options = options || {};
+            var attr = JSON.parse(JSON.stringify(product));
+            attr.pos = this.pos;
+            attr.order = this;
+            var line = new models.Orderline({}, {pos: this.pos, order: this, product: product});
+
+            if(options.quantity !== undefined){
+                line.set_quantity(options.quantity);
+            }
+
+            if(options.price !== undefined){
+                line.set_unit_price(options.price);
+            }
+
+            //To substract from the unit price the included taxes mapped by the fiscal position
+            this.fix_tax_included_price(line);
+
+            if(options.discount !== undefined){
+                line.set_discount(options.discount);
+            }
+
+            if(options.extras !== undefined){
+                for (var prop in options.extras) {
+                    line[prop] = options.extras[prop];
+                }
+            }
+
+            var to_merge_orderline;
+            for (var i = 0; i < this.orderlines.length; i++) {
+                if(this.orderlines.at(i).can_be_merged_with(line) && options.merge !== false){
+                    to_merge_orderline = this.orderlines.at(i);
+                }
+            }
+            if (to_merge_orderline){
+                to_merge_orderline.merge(line);
+                line = to_merge_orderline
+            } else {
+                this.orderlines.add(line);
+            }
+            this.select_orderline(line); // instead of this.select_orderline(this.get_last_orderline());
+            this.pos.prepare_text_customer_display('add_update_line', {'line': line});
+
+            if(line.has_product_lot){
+                this.display_lot_popup();
+            }
         },
 
         remove_orderline: function (line) {

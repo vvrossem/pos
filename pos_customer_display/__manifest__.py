@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # © 2014-2016 Aurélien DUMAINE
 # © 2014-2016 Akretion (Alexis de Lattre <alexis.delattre@akretion.com>)
+# © 2019 Coop IT Easy SCRLfs (Vincent Van Rossem <vvrossem@gmail.com>)
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 {
