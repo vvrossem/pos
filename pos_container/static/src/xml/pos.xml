@@ -2,14 +2,14 @@
 <templates id="template" xml:space="preserve">
 
     <t t-name="ContainerButton">
-        <button class="control-button main">
+        <button class="control-button main o_container_button">
             <i class="fa fa-beer" role="img" aria-label="Container" title="Container"/>
             Container
         </button>
     </t>
 
     <t t-name="TareButton">
-        <button class="control-button second mode-button" data-mode="tare">
+        <button class="control-button second mode-button o_tare_button" data-mode="tare">
             Tare
         </button>
     </t>
@@ -213,7 +213,7 @@
                         <tr>
                             <td>
                                 <div style="margin-left:5%">
-                                    TW : <t t-esc="orderline.gross_weight"/>
+                                    Tare : <t t-esc="orderline.tare"/>
                                     <t t-esc="orderline.get_unit().name"/>
                                 </div>
                             </td>
@@ -263,7 +263,7 @@
                         <tr>
                             <td>
                                <div style="margin-left:5%">
-                                   TW : <t t-esc="orderline.gross_weight"/>
+                                   Tare : <t t-esc="orderline.tare"/>
                                    <t t-esc="orderline.get_unit().name"/>
                                </div>
                             </td>

@@ -11,6 +11,7 @@
             <link href="/pos_container/static/src/css/container.css" rel="stylesheet"/>
             <script type="text/javascript" src="/pos_container/static/src/js/models_and_db.js"/>
             <script type="text/javascript" src="/pos_container/static/src/js/container.js"/>
+            <script type="text/javascript" src="/pos_container/static/src/js/tests.js"/>
         </xpath>
     </template>
 </odoo>
