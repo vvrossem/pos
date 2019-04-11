@@ -144,7 +144,7 @@
     </t>
 
     <t t-extend="PosTicket">
-        <t t-jquery='.receipt-orderlines' t-operation='replace'>              
+        <t t-jquery='.receipt-orderlines' t-operation='inner'>              
             <table>
                 <colgroup>
                     <col width='50%' />
@@ -181,7 +181,7 @@
                     <td></td>
                     <td>
                         <center>------------------------</center>
-                        <center>Pesée automatique</center>
+                        <center>Automatic Weighing</center>
                         <center>------------------------</center>
                     </td>
                 </table>
@@ -231,7 +231,7 @@
                     <td></td>
                     <td>
                         <center>------------------------</center>
-                        <center>Saisie manuelle</center>
+                        <center>Manual Input</center>
                         <center>------------------------</center>
                     </td>
                 </table>
@@ -271,6 +271,143 @@
                     </t>
                 </tr>
             </table>
+        </t>
+    </t>
+
+    <t t-extend="XmlReceipt">
+        <t t-jquery='.orderlines' t-operation='inner'>              
+            <t t-foreach='receipt.orderlines' t-as='line'>
+                <t t-if="line.tare_mode == undefined">
+                    <t t-set='simple' t-value='line.discount === 0 and line.unit_name === "Unit(s)" and line.quantity === 1' />
+                    <t t-if='simple'>
+                        <line>
+                            <left><t t-esc='line.product_name_wrapped[0]' /></left>
+                            <right><value t-att-value-decimals='pos.currency.decimals'><t t-esc='line.price_display' /></value></right>
+                        </line>
+                        <t t-call="XmlReceiptWrappedProductNameLines"/>
+                    </t>
+                    <t t-if='!simple'>
+                        <line><left><t t-esc='line.product_name_wrapped[0]' /></left></line>
+                        <t t-call="XmlReceiptWrappedProductNameLines"/>
+                        <t t-if='line.discount !== 0'>
+                            <line indent='1'><left>Discount: <t t-esc='line.discount' />%</left></line>
+                        </t>
+                        <line indent='1'>
+                            <left>
+                                <value t-att-value-decimals='pos.dp["Product Unit of Measure"]' value-autoint='on'>
+                                    <t t-esc='line.quantity' />
+                                </value>
+                                <t t-if='line.unit_name !== "Unit(s)"'>
+                                    <t t-esc='line.unit_name' />
+                                </t>
+                                x
+                                <value t-att-value-decimals='pos.dp["Product Price"]'>
+                                    <t t-esc='line.price' />
+                                </value>
+                            </left>
+                            <right>
+                                <value t-att-value-decimals='pos.currency.decimals'><t t-esc='line.price_display' /></value>
+                            </right>
+                        </line>
+                    </t>
+                </t>
+            </t>
+            <div>------------------</div>
+            <t t-if="receipt.has_tare_mode.auto">
+                Automatic Weighing
+                <div>------------------</div>
+                <t t-foreach='receipt.orderlines' t-as='line'>
+                    <t t-if="line.tare_mode == 'AUTO'">
+                        <t t-set='simple' t-value='line.discount === 0 and line.unit_name === "Unit(s)" and line.quantity === 1' />
+                        <t t-if='simple'>
+                            <line>
+                                <left><t t-esc='line.product_name_wrapped[0]' /></left>
+                                <right><value t-att-value-decimals='pos.currency.decimals'><t t-esc='line.price_display' /></value></right>
+                            </line>
+                            <t t-call="XmlReceiptWrappedProductNameLines"/>
+                        </t>
+                        <t t-if='!simple'>
+                            <line><left><t t-esc='line.product_name_wrapped[0]' /></left></line>
+                            <t t-call="XmlReceiptWrappedProductNameLines"/>
+                            <t t-if='line.discount !== 0'>
+                                <line indent='1'><left>Discount: <t t-esc='line.discount' />%</left></line>
+                            </t>
+                            <line indent='1'>
+                                <left>
+                                    <value t-att-value-decimals='pos.dp["Product Unit of Measure"]' value-autoint='on'>
+                                        <t t-esc='line.quantity' />
+                                    </value>
+                                    <t t-if='line.unit_name !== "Unit(s)"'>
+                                        <t t-esc='line.unit_name' />
+                                    </t>
+                                    x
+                                    <value t-att-value-decimals='pos.dp["Product Price"]'>
+                                        <t t-esc='line.price' />
+                                    </value>
+                                </left>
+                                <right>
+                                    <value t-att-value-decimals='pos.currency.decimals'><t t-esc='line.price_display' /></value>
+                                </right>
+                            </line>
+                        </t>
+                    </t>
+                    <t t-if='line.container'>
+                        <line indent='1'>
+                            <left>
+                                Tare : <t t-esc='line.container.weight' /><t t-esc='line.unit_name' />
+                            </left>
+                        </line>
+                    </t>
+                </t>
+                <div>------------------</div>
+            </t>
+            <t t-if="receipt.has_tare_mode.manual">
+                Manual Input
+                <div>------------------</div>
+                <t t-foreach='receipt.orderlines' t-as='line'>
+                    <t t-if="line.tare_mode == 'MAN'">
+                        <t t-set='simple' t-value='line.discount === 0 and line.unit_name === "Unit(s)" and line.quantity === 1' />
+                        <t t-if='simple'>
+                            <line>
+                                <left><t t-esc='line.product_name_wrapped[0]' /></left>
+                                <right><value t-att-value-decimals='pos.currency.decimals'><t t-esc='line.price_display' /></value></right>
+                            </line>
+                            <t t-call="XmlReceiptWrappedProductNameLines"/>
+                        </t>
+                        <t t-if='!simple'>
+                            <line><left><t t-esc='line.product_name_wrapped[0]' /></left></line>
+                            <t t-call="XmlReceiptWrappedProductNameLines"/>
+                            <t t-if='line.discount !== 0'>
+                                <line indent='1'><left>Discount: <t t-esc='line.discount' />%</left></line>
+                            </t>
+                            <line indent='1'>
+                                <left>
+                                    <value t-att-value-decimals='pos.dp["Product Unit of Measure"]' value-autoint='on'>
+                                        <t t-esc='line.quantity' />
+                                    </value>
+                                    <t t-if='line.unit_name !== "Unit(s)"'>
+                                        <t t-esc='line.unit_name' />
+                                    </t>
+                                    x
+                                    <value t-att-value-decimals='pos.dp["Product Price"]'>
+                                        <t t-esc='line.price' />
+                                    </value>
+                                </left>
+                                <right>
+                                    <value t-att-value-decimals='pos.currency.decimals'><t t-esc='line.price_display' /></value>
+                                </right>
+                            </line>
+                        </t>
+                    </t>
+                    <t t-if='line.tare'>
+                        <line indent='1'>
+                            <left>
+                                Tare : <t t-esc='line.tare' /><t t-esc='line.unit_name' />
+                            </left>
+                        </line>
+                    </t>
+                </t>
+            </t>
         </t>
     </t>
 
