@@ -17,7 +17,7 @@ class Container(models.Model):
         size=13,
     )
     weight = fields.Float(
-        string='Weight (g)',
+        string='Weight (kg)',
     )
     owner_id = fields.Many2one(
         comodel_name='res.partner',
