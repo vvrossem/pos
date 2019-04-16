@@ -213,7 +213,7 @@
                         <tr>
                             <td>
                                 <div style="margin-left:5%">
-                                    Tare : <t t-esc="orderline.tare"/>
+                                    Tare : <t t-esc="orderline.get_container().weight"/>
                                     <t t-esc="orderline.get_unit().name"/>
                                 </div>
                             </td>

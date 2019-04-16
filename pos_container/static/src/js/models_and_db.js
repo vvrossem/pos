@@ -245,6 +245,29 @@ odoo.define('pos_container.models_and_db', function (require) {
             this.gross_weight = weight;
             this.trigger('change', this);
         },
+		export_as_JSON: function(){
+			var pack_lot_ids = [];
+			if (this.has_product_lot){
+				this.pack_lot_lines.each(_.bind( function(item) {
+					return pack_lot_ids.push([0, 0, item.export_as_JSON()]);
+				}, this));
+			}
+			return {
+				qty: this.get_quantity(),
+				price_unit: this.get_unit_price(),
+				price_subtotal: this.get_price_without_tax(),
+				price_subtotal_incl: this.get_price_with_tax(),
+				discount: this.get_discount(),
+				product_id: this.get_product().id,
+				tax_ids: [[6, false, _.map(this.get_applicable_taxes(), function(tax){ return tax.id; })]],
+				id: this.id,
+				pack_lot_ids: pack_lot_ids,
+				//custom starts here
+				tare: this.get_tare(),
+				container_id: this.get_container() ? this.get_container().id : null,
+				container_weight: this.get_container() ? this.get_container().weight : null,
+			};
+		},
         //used to create a json of the ticket, to be sent to the printer
         export_for_printing: function(){
             return {
@@ -394,8 +417,7 @@ odoo.define('pos_container.models_and_db', function (require) {
 
     models.load_models({
         model: 'pos.container',
-        fields: ['name','barcode', 'weight'],
-        // domain: [[]],
+		fields: ['name','barcode', 'weight'],
         loaded: function(self, containers){
             self.db.add_containers(containers);
         },
