@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        <record id="seq_picking_type_wpout" model="ir.sequence">
+            <field name="name">Picking wp</field>
+            <field name="prefix">wp</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        
+        <record id="picking_type_wpout" model="stock.picking.type">
+            <field name="name">wp Orders</field>
+            <field name="sequence_id" ref="seq_picking_type_wpout"/>
+            <field name="default_location_src_id" ref="stock.stock_location_stock"/>
+            <field name="default_location_dest_id" ref="stock.stock_location_customers"/>
+            <field name="warehouse_id" eval="False"/>
+            <field name="code">outgoing</field>
+        </record>
+    </data>
+
+    <data noupdate="1">
+        <!-- After closing the wp, open the dashboard menu -->
+        <record id="action_client_wp_menu" model="ir.actions.client">
+            <field name="name">Open wp Menu</field>
+            <field name="tag">reload</field>
+            <field name="params" eval="{'menu_id': ref('menu_point_root')}"/>
+        </record>
+
+        <record id="product_category_wp" model="product.category">
+            <field name="parent_id" ref="product.product_category_1"/>
+            <field name="name">wp</field>
+        </record>
+
+        <record id="product_product_tip" model="product.product">
+            <field name="name">Tips</field>
+            <field name="categ_id" ref="weighing_point.product_category_wp"/>
+            <field name="default_code">TIPS</field>
+            <field name="available_in_wp" eval="True"/>
+        </record>
+
+        <record model="wp.config" id="wp_config_main">
+            <field name="name">Shop</field>
+            <field name="picking_type_id" ref="picking_type_wpout"/>
+            <field name="barcode_nomenclature_id" ref="barcodes.default_barcode_nomenclature"/>
+        </record>
+
+        <record id="product_product_consumable" model="product.product">
+            <field name="name">Miscellaneous</field>
+            <field name="available_in_wp">True</field>
+            <field name="standard_price">13.0</field>
+            <field name="list_price">18.0</field>
+            <field name="type">consu</field>
+            <field name="categ_id" ref="weighing_point.product_category_wp"/>
+            <field name="uom_id" ref="uom.product_uom_unit"/>
+            <field name="uom_po_id" ref="uom.product_uom_unit"/>
+            <field name="default_code">MISC</field>
+            <field name="image" type="base64" file="weighing_point/static/img/product_product_49-image.jpg"/>
+        </record>
+
+        <record id="wp_sale_journal" model="account.journal">
+            <field name="name">wp Sale Journal</field>
+            <field name="code">wp</field>
+            <field name="type">sale</field>
+            <!-- avoid being selected as default journal -->
+            <field name="sequence">20</field>
+        </record>
+
+        <record id="uom.product_uom_categ_unit" model="uom.category">
+            <field name="is_wp_groupable">True</field>
+        </record>
+    </data>
+</odoo>
+

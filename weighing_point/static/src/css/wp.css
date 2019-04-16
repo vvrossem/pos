@@ -1,0 +1,2473 @@
+/* --- Fonts --- */
+
+@font-face{
+    font-family: 'Inconsolata';
+    src: url(../fonts/Inconsolata.otf);
+}
+
+/* --- Styling of OpenERP Elements --- */
+.ui-dialog, .modal-dialog {
+    background: white;
+    padding: 10px;
+    border-radius: 3px;
+    font-family: sans-serif;
+    box-shadow: 0px 10px 40px rgba(0,0,0,0.4);
+    position: absolute;
+    top: 30px;
+    height: 400px;
+    overflow: scroll;
+}
+.ui-dialog button, .modal-dialog button {
+    padding: 8px;
+    min-width: 48px;
+}
+.ui-dialog .ui-icon-closethick{
+    float: right;
+}
+div.modal.in {
+    position: absolute;
+    background: white;
+    padding: 20px;
+    box-shadow: 0px 10px 20px black;
+    border-radius: 3px;
+    max-width: 600px;
+    max-height: 400px;
+    margin-top: -200px;
+    margin-left: -300px;
+    top: 50%;
+    left: 50%;
+}
+
+/* --- Generic Restyling and Resets --- */
+
+html {
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+    font-family: sans-serif;
+}
+
+table {
+    border-spacing: 0px;
+    border-collapse: collapse;
+}
+td {
+    padding: 0px;
+}
+
+.oe_hidden{
+    display: none !important;
+}
+.oe_invisible{
+    visibility: hidden !important;
+}
+.clearfix:after {
+    content:" ";
+    display: block;
+    visibility: hidden;
+    line-height: 0;
+    height: 0;
+    clear: both;
+}
+
+
+.wp input::-webkit-outer-spin-button,
+.wp input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.wp button{
+    box-shadow: none;
+    outline: none;
+    border: none;
+    font-family: 'Lato';
+}
+.wp button:hover{
+    background: default;
+}
+.wp textarea {
+    font-family: "Lato";
+    font-size: 20px;
+    color: #444;
+    padding: 10px;
+    border-radius: 3px;
+    border: none;
+    box-shadow: 0px 0px 0px 1px rgb(220,220,220) inset;
+}
+.wp textarea:focus {
+    outline: none;
+    box-shadow: 0px 0px 0px 3px #6EC89B;
+}
+
+
+.wp .oe_hidden{
+    display: none !important;
+}
+
+.wp ul, .wp li  {
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+}
+
+.wp {
+    direction: ltr;
+    padding: 0;
+    margin: 0;
+    background-color: #f0eeee;
+    font-family: "Lato","Lucida Grande", Helvetica, Verdana, Arial;
+    color: #555555;
+    font-size: 12px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    -webkit-user-select: none;
+       -moz-user-select: none;
+            user-select: none;
+    text-shadow: none;
+    overflow: hidden;
+}
+
+/*  ********* The black loading screen ********* */
+
+.wp .loader{
+    background-color: #222;
+    position:absolute;
+    left:0px;
+    top:0px;
+    width:100%;
+    height:100%;
+    z-index: 999;
+    text-align: center;
+    font-family: Lato;
+    color: #555555;
+}
+
+.wp .loader-feedback{
+    width: 400px;
+    height: 160px;
+    margin: -60px -200px;
+    position: absolute;
+    left: 50%; top: 50%;
+    text-align: center;
+}
+.wp .loader-feedback h1{
+    font-weight: 300;
+}
+.wp .loader-feedback .progressbar{
+    background: rgb(73,73,73);
+    height: 1px;
+}
+.wp .loader-feedback .progressbar > .progress{
+    height: 100%;
+    background: white;
+    width: 0%;
+    box-shadow: 0px 0px 5px rgba(255,255,255,0.35);
+}
+.wp .loader-feedback .button{
+    display: inline-block;
+    margin: 25px auto;
+    line-height: 42px;
+    padding: 0px 16px;
+    font-size: 20px;
+    font-weight: 300;
+    border: solid 1px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.wp .loader-feedback .button:active{
+    color: #222;
+    background: #555555;
+}
+/*  ********* Generic Layout Constructs  ********* */
+
+.wp .window{
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    display: table;
+    border: none;
+    overflow: hidden;
+}
+.wp .window .subwindow{
+    display: table-row;
+    width: 100%;
+    height: 100%;
+}
+.wp .window .subwindow.collapsed{
+    height: 0px;
+}
+.wp .window .subwindow-container .collapsed{
+    height: 0px;
+}
+.wp .subwindow .subwindow-container{
+    display: table-cell;
+    position: relative;
+}
+/* firefox seems to ignore the relative positionning of the subwindow-container
+ * putting this inside subwindow-container fixes it.
+ */ 
+.wp .subwindow .subwindow-container-fix{
+    height: 100%;
+    position: relative;
+}
+
+.wp .clientlist-screen .window,
+.wp .clientlist-screen .full-content .subwindow{
+    display: block;
+}
+.wp .clientlist-screen .full-content .subwindow-container{
+    display: block;
+    height: 100%;
+}
+.wp .clientlist-screen .full-content .subwindow.collapsed,
+.wp .clientlist-screen .full-content .subwindow-container.collapsed{
+    height: auto;
+}
+
+/* ---- Scrollers ----- */
+
+.wp .scroller-container{
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+}
+.wp .scroller{
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+.wp .scroller.horizontal{
+    overflow-y: hidden;
+    overflow-x: auto;
+}
+.wp .scroller-content{
+    -webkit-transform: translate3d(0,0,0);
+}
+.wp .scroller-container ::-webkit-scrollbar{
+    width:  10px;
+    height: 10px;
+}
+.wp .scroller-container ::-webkit-scrollbar-track{
+    background: rgb(224,224,224);
+    border-left: solid 1px rgb(200,200,200);
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+}
+.wp .scroller-container ::-webkit-scrollbar-thumb{
+    background: rgb(168,168,168);
+    min-height: 30px;
+}
+
+/*  ********* Generic element styling  ********* */
+
+.wp a {
+    text-decoration: none;
+    color: #555555;
+}
+.wp button, .wp a.button {
+    display: inline-block;
+    cursor: pointer;
+    padding: 4px 10px;
+    font-size: 11px;
+    border: 1px solid #cacaca;
+    background: #e2e2e2;
+    border-radius: 3px;
+}
+.wp ul, .wp ol {
+    padding: 0;
+    margin: 0;
+}
+.wp li {
+    list-style-type: none;
+}
+.wp .wp-right-align {
+    text-align: right;
+}
+.wp .wp-center-align {
+    text-align: center;
+}
+.wp .wp-disc-font {
+    font-size: 12px;
+    font-style:italic;
+    color: #808080;
+}
+
+/*  ********* The black header bar ********* */
+
+
+.wp .wp-topheader {
+    position:absolute;
+    left:0;
+    top:0;
+    width: 100%;
+    height: 48px;
+    margin:0;
+    padding:0;
+    color: gray;
+    background: #393939;
+}
+
+/*  a) The left part of the top-bar */
+
+.wp .wp-branding{
+    position: absolute;
+    display: table-cell;
+    left:0;
+    top:0;
+    width:439px;
+    height:100%;
+    margin:0;
+    padding:0;
+    border-right: 1px solid #373737;
+    text-align:left;
+    line-height:100%;
+    vertical-align: middle;
+}
+.wp .wp-logo {
+    height: 35px;
+    margin-left: 7px;
+    margin-top: 2px;
+    vertical-align:middle;
+} 
+.wp .wp-branding .username{
+    float:right;
+    color:#DDD;
+    font-size:16px;
+    margin-right:32px;
+    line-height: 48px;
+    font-style:italic;
+    cursor: pointer;
+}
+
+/*  b) The right part of the top-bar */
+
+.wp .wp-rightheader {
+    position: absolute;
+    left:440px;
+    right:0;
+    top:0;
+    height:100%;
+    display: -webkit-flex;
+    display: flex;
+}
+.wp .wp-rightheader > * {
+    border-right: 1px solid #292929;
+}
+
+.wp .order-button{
+    color: #f0f0f0;
+    display: inline-block;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    height: 46px;
+    padding: 4px 8px;
+    margin: 3px;
+    margin-bottom: 0px;
+    margin-right: 2px;
+    padding-top: 0px;
+    background: #8b8b8b;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    vertical-align: top;
+    line-height: 42px;
+    text-align: center;
+    box-shadow: 0px -5px 10px -6px rgb(82,82,82) inset;
+    cursor: pointer;
+    min-width: 45px;
+}
+
+.wp .order-button:first-child {
+    margin-left: 0px;
+}
+
+.wp .order-button.selected{
+    font-weight: 900;
+    background: #EEEEEE;
+    color: rgb(75,75,75);
+    height: 45px;
+    border-bottom: solid 1px rgb(196, 196, 196);
+    box-shadow: none;
+    -webkit-flex-shrink: 0;
+    flex-shrink: 0;
+}
+
+.wp .order-button .order-sequence{
+    font-size: 16px;
+    font-weight: 800;
+    vertical-align: middle;
+}
+.wp .order-button.selected .order-sequence{
+    color: white;
+    background: black;
+    display: inline-block;
+    line-height: 24px;
+    min-width: 24px;
+    border-radius: 12px;
+    margin-right: 4px;
+    margin-left: -4px;
+}
+
+.wp .order-button.square{
+    margin-left:1px;
+    background: #5c5c5c;
+    color: rgb(160,160,160);
+    font-size: 18px;
+    line-height: 45px;
+}
+.wp .order-button:not(.square) > .fa {
+    font-size: 16px;
+    vertical-align: middle;
+    margin-right: 4px;
+}
+.wp .order-button .order-sequence{
+    font-size: 16px;
+    font-weight: 800;
+}
+
+.wp .order-selector {
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex: 1;
+    flex: 1;
+    max-width: -moz-available;
+    max-width: -webkit-fill-available;
+}
+.wp .orders {
+    display: -webkit-flex;
+    display: flex;
+    vertical-align: top;
+    margin-left: 0px;
+    overflow: hidden;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/*  c) The session buttons */
+
+.wp .wp-rightheader .header-button{
+    float: right;
+    height: 48px;
+    padding-left: 16px;
+    padding-right: 16px;
+    border-right: 1px solid #292929;
+    border-left: 1px solid #292929;
+    color: #DDD;
+    line-height: 48px;
+    text-align: center;
+    cursor: pointer;
+
+    -webkit-transition-property: background;
+    -webkit-transition-duration: 0.2s;
+    -webkit-transition-timing-function: ease-out;
+}
+.wp .wp-rightheader .header-button:last-child{
+    border-left:  1px solid #3a3a3a;
+}
+.wp .wp-rightheader .header-button:active{
+    background: rgba(0,0,0,0.2);
+    color:#EEE;
+}
+.wp .wp-rightheader .header-button.confirm {
+    background: #359766;
+    color: white;
+    font-weight: bold;
+}
+
+/*  c) The notifications indicator */
+
+.wp .oe_status{
+    float:right; 
+    color: rgba(255,255,255,0.4);
+    padding: 14px;
+    line-height: 20px;
+    font-size: 20px;
+    vertical-align:middle;
+    font-style: italic;
+    cursor:pointer;
+}
+.wp .oe_status.oe_inactive{
+    cursor: default;
+}
+.wp .oe_status .oe_icon{
+    display:inline-block;
+    cursor:pointer;
+    width:20px; height:16px;
+    color: white;
+}
+.wp .oe_status .oe_red,
+.wp .oe_icon.oe_red {
+    color: rgb(197, 52, 0);
+}
+.wp .oe_statu .oe_green,
+.wp .oe_icon.oe_green {
+    color: rgb(94, 185, 55);
+}
+.wp .oe_status .oe_orange,
+.wp .oe_icon.oe_orange {
+    color: rgb(239, 153, 65);
+}
+.wp .oe_link_icon{
+    cursor:pointer;
+}
+/*  ********* Contains everything below the  bar ********* */
+
+.wp .wp-content {
+    width: 100%;
+    position: absolute;
+    top: 48px;
+    bottom: 0;
+    background: #F0EEEE;
+}
+
+/*  ********* The leftpane contains the order, numpad and paypad ********* */
+
+.wp .leftpane {
+    -webkit-box-sizing: border-box;
+       -moz-box-sizing: border-box;
+        -ms-box-sizing: border-box;
+            box-sizing: border-box;
+    position:absolute;
+    left:0;
+    width:440px;
+    top:0px;
+    bottom:0;
+    border-right: solid 1px #CECBCB;
+    border-right: solid 3px #787878;
+    background: #e2e2e2;
+}
+
+.wp .leftpane .pads {
+    border-top: solid 3px rgb(110, 200, 155);
+}
+
+/*  ********* The control buttons ********* */
+
+.wp .control-buttons {
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-flow: row wrap;
+    flex-flow: row wrap;
+    padding: 8px 16px 0px 11px;
+    margin-bottom: -6px;
+}
+.wp .control-button {
+    -webkit-flex-grow: 1;
+    flex-grow: 1;
+    background: #e2e2e2;
+    border: solid 1px #bfbfbf;
+    display: inline-block;
+    line-height: 38px;
+    min-width: 80px;
+    text-align: center;
+    border-radius: 3px;
+    padding: 0px 10px;
+    font-size: 18px;
+    margin-left: 6px;
+    margin-bottom: 6px;
+    cursor: pointer;
+    overflow: hidden;
+    transition: all linear 150ms;
+}
+.wp .control-button:hover {
+    background: #efefef;
+}
+.wp .control-button:active {
+    background: black;
+    color: white;
+    border-color: black;
+}
+.wp .control-button .fa{
+    margin-right: 4px;
+}
+.wp .control-button .control-button-number {
+    color: rgb(226, 226, 226);
+    background: rgb(85, 85, 85);
+    display: inline-block;
+    height: 28px;
+    vertical-align: middle;
+    font-weight: bold;
+    line-height: 28px;
+    width: 28px;
+    border-radius: 50%;
+    text-align: center;
+    margin-left: -16px;
+    margin-right: 4px;
+}
+
+.wp .control-button.highlight,
+.wp .button.highlight {
+    background: #6EC89B !important;
+    border: solid 1px #64AF8A !important; 
+    color: white !important;
+}
+.wp .control-button.altlight,
+.wp .button.altlight {
+    background: #7F82AC !important;
+    border: solid 1px #756A99 !important;
+    color: white !important;
+}
+.wp .control-button.disabled,
+.wp .control-button.disabled:active{
+    background: #e2e2e2;
+    border: solid 1px #BEBEBE;
+    opacity: 0.5;
+    cursor: default;
+    color: inherit;
+}
+
+/*  ********* The actionpad (payment, set customer) ********* */
+
+.wp .actionpad {
+    display: inline-block;
+    float: left;
+    padding: 0;
+    margin: 16px;
+    margin-top: 8px;
+    margin-right: 0;
+    text-align: center;
+    vertical-align: top;
+    width: 186px;
+    border: none;
+    border-radius: 0;
+    border-top: 1px solid;
+    border-left: 1px solid;
+    border-color: #bfbfbf;
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+}
+.wp .actionpad .button {
+    position: relative;
+    display: block;
+    height: 54px;
+    width: 100%;
+    font-weight: bold;
+    vertical-align: middle;
+    color: #555555;
+    font-size: 14px;
+    border-radius: 0;
+    border: none;
+    border-right: 1px solid;
+    border-bottom: 1px solid;
+    border-color: #bfbfbf;
+    transition: all 150ms linear;
+}
+.wp .actionpad .button:hover {
+    background: #efefef;
+}
+.wp .actionpad .button:active {
+    background: black;
+    border-color: black;
+    color: white;
+}
+.wp .actionpad .button:first-child {
+    border-top-left-radius: 4px;
+}
+.wp .actionpad .button:last-child {
+    border-bottom-left-radius: 4px;
+}
+.wp .actionpad .button.pay {
+    height: 162px;
+}
+.wp .actionpad .button.pay .pay-circle {
+    display: block;
+    font-size: 32px;
+    line-height: 54px;
+    padding-top: 6px;
+    background: rgb(86, 86, 86);
+    color: white;
+    width: 60px;
+    margin: auto;
+    border-radius: 30px;
+    margin-bottom: 10px;
+}
+.wp .actionpad .button.pay .pay-circle .fa {
+    position: relative;
+    top: -1px;
+    left: 3px;
+}
+
+.wp .actionpad .button.set-customer{
+    padding-left: 40px;
+    padding-right: 40px;
+}
+.wp .actionpad .button.set-customer.decentered {
+    padding-left: 40px;
+    padding-right: 5px;
+}
+.wp .actionpad .button .fa-user {
+    position: absolute;
+    left: 13px;
+    top: 13px;
+    margin-right: 8px;
+    font-size: 18px;
+    background: rgba(255, 255, 255, 0.5);
+    line-height: 30px;
+    width: 30px;
+    border-radius: 100%;
+}
+
+/*  ********* The Numpad ********* */
+
+.wp .numpad {
+    display: inline-block;
+    float: right;
+    text-align: center;
+    width: 216px;
+    margin: 16px;
+    margin-top: 8px;
+    margin-left: 0px;
+    border: none;
+    border-radius: 0;
+    border-top: 1px solid;
+    border-color: #bfbfbf;
+    border-top-right-radius: 4px;
+}
+.wp .numpad button {
+    float: left;
+    height: 54px;
+    width: 54px;
+    font-weight: bold;
+    vertical-align: middle;
+    color: #555555;
+    border-radius: 0;
+    border: none;
+    border-right: 1px solid;
+    border-bottom: 1px solid;
+    border-color: #bfbfbf;
+    transition: all 150ms linear;
+}
+.wp .numpad button:hover {
+    background: #efefef;
+}
+.wp .numpad button:active {
+    background: black;
+    color: white;
+    border-color: transparent;
+}
+.wp .numpad button:nth-child(4) {
+    border-top-right-radius: 4px;
+}
+.wp .numpad button:last-child {
+    border-bottom-right-radius: 4px;
+}
+.wp .input-button {
+    font-size: 24px;
+}
+.wp .mode-button {
+    font-size: 14px;
+}
+.wp .mode-button.selected-mode {
+    color: white;
+    background: #6EC89B;
+    border-color: transparent;
+}
+.wp .mode-button.selected-mode:hover {
+    background: #6EC89B;
+    color: white;
+    border-color: transparent;
+}
+.wp .numpad .disabled-mode, .wp .numpad .disabled-mode:hover {
+    background: #c7c7c7;
+    color: #a5a1a1;
+    cursor: not-allowed;
+}
+
+/*  ********* The right pane contains the screens and headers ********* */
+
+.wp .rightpane {
+    position: absolute;
+    top: 0;
+    bottom:0;
+    left: 440px;
+    right: 0;
+    vertical-align: top;
+    -webkit-transform: translate3d(0,0,0);
+}
+
+.wp .rightpane-header {
+    padding: 0;
+    height: 48px;
+    border-bottom: 1px solid #c7c7c7;
+    background: #d3d3d3;
+    text-align: center;
+}
+
+/*  ********* The product list  ********* */
+
+.wp .product-list {
+    padding: 10px;
+    text-align: left;
+    -webkit-transform: translate3d(0,0,0);
+}
+
+.wp .product-list-scroller{
+    -webkit-box-sizing: border-box;
+       -moz-box-sizing: border-box;
+        -ms-box-sizing: border-box;
+            box-sizing: border-box;
+    width:100%;
+    height:100%;
+    overflow: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    -webkit-transform: translate3d(0,0,0);
+
+}
+.wp .product-list-container {
+    position:absolute;
+    top:0px;
+    bottom:0px;
+    left:0px;
+    right:0px;
+}
+
+/*  a) the product list navigation bar */
+
+.wp .breadcrumbs{
+    display: inline-block;
+    text-align: left;
+    float:left;
+}
+.wp .breadcrumb{
+    float: left;
+    display: inline-block;
+    line-height: 48px;
+    height: 48px;
+    min-width: 48px;
+}
+.wp .breadcrumb:last-child {
+    padding-right: 3px;
+    border-right: 1px solid #c5c5c5;
+}
+.wp .breadcrumb-button {
+    display: inline-block;
+    padding: 0 9px;
+    vertical-align: top;
+    color: #808080;
+    font-size: 14px;
+    cursor: pointer;
+}
+.wp .breadcrumb-button.breadcrumb-home {
+    line-height: 50px;
+    padding: 0;
+    width: 50px;
+    font-size: 25px;
+    text-align: center;
+}
+
+.wp .breadcrumb-arrow{
+    width: 28px;
+}
+.wp .breadcrumb-homeimg {
+    width: 27px;
+    margin: 12px 6px;
+}
+
+/*  b) the search box */
+
+.wp .searchbox {
+    position: absolute;
+    right: 2px;
+}
+.wp .searchbox input {
+    width: 100px;
+    border: 1px solid #cecbcb;
+    padding: 10px 20px;
+    padding-left: 38px;
+    margin: 6px;
+    background: url("../img/search.png") no-repeat 15px;
+    background-color: white;
+    border-radius: 20px;
+    font-family: "Lato","Lucida Grande", Helvetica, Verdana, Arial;
+    font-size: 13px;
+}
+.wp .searchbox input:focus {
+    outline: none;
+    box-shadow: 0px 0px 0px 2px rgb(153, 153, 255) inset;
+    color: rgb(153, 153, 255);
+}
+.wp .search-clear {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    top: 11px;
+    left: 11px;
+    cursor: pointer;
+}
+
+/*  c) the categories list */
+
+.wp .categories {
+    position: relative;
+    border-bottom: solid 3px rgb(110, 200, 155);
+}
+.wp .categories h4 {
+    display: inline-block;
+    margin: 9px 5px;
+}
+.wp .category-list-scroller{
+    -webkit-box-sizing: border-box;
+       -moz-box-sizing: border-box;
+        -ms-box-sizing: border-box;
+            box-sizing: border-box;
+    width:100%;
+    height:100%;
+    max-height:60vh;
+    overflow: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    -webkit-transform: translate3d(0,0,0);
+
+}
+.wp .category-list {
+    text-align: left;
+    padding: 10px;
+    background: rgb(229, 229, 229);
+    border-bottom: 1px solid #cecece;
+}
+.wp .category-list.simple {
+    padding: 0px;
+    background: #cecece;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-flow: row wrap;
+    flex-flow: row wrap;
+    border-bottom: none;
+}
+
+
+/*  d) the category button */
+
+.wp .category-button {
+    position: relative;
+    vertical-align: top;
+    display: inline-block;
+    font-size: 11px;
+    margin: 8px !important;
+    width: 120px;
+    height:120px;
+    background:#fff;
+    border: 1px solid #d7d7d7;
+    border-radius: 3px;
+    border-bottom-width: 3px;
+    cursor: pointer;
+}
+
+.wp .category-simple-button{
+    position: relative;
+    display: inline-block;
+    font-size: 14px;
+    margin-right: 1px;
+    margin-bottom: 1px;
+    padding: 5px 12px;
+    line-height: 32px;
+    flex-grow: 1;
+    -webkit-flex-grow: 1;
+    cursor: pointer;
+    background: #e2e2e2;
+}
+.wp .category-simple-button:active{
+    color: white;
+    background: black;
+
+    -webkit-transition-property: background, border;
+    -webkit-transition-duration: 0.2s;
+    -webkit-transition-timing-function: ease-out;
+}
+
+
+
+.wp .category-button .category-img {
+    position: relative;
+    width: 120px;
+    height: 100px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.wp .category-button .category-img img {
+    max-height: 100px;
+    max-width:  120px;
+    vertical-align: middle;
+}
+
+.wp .category-button .category-name {
+    position: absolute;
+    -webkit-box-sizing: border-box;
+       -moz-box-sizing: border-box;
+        -ms-box-sizing: border-box;
+            box-sizing: border-box;
+    bottom: 0;
+    top: auto;
+    line-height: 14px;
+    width: 100%;
+    /* for some reason the -90deg orientation doesn't match the -webkit-linear-gradient. It should be 180deg here.
+     * webkit also insists on rendering *both* gradients instead of only the native one. So it doesn't looks right. ugh. 
+    background:         linear-gradient(-90deg,rgba(255,255,255,0),rgba(255,255,255,1), rgba(255,255,255,1)); */
+    /*background:#FFF;*/
+    padding: 3px;
+    padding-top: 15px;
+    color: #7C7BAD;
+}
+
+/*  e) the product */
+
+.wp .product {
+    position:relative;
+    vertical-align: top;
+    display: inline-block;
+    line-height: 100px;
+    font-size: 11px;
+    margin: 8px !important;
+    width: 122px;
+    height:115px;
+    background:#fff;
+    border: 1px solid #e2e2e2;
+    border-radius: 3px;
+    border-bottom-width: 3px;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.wp .product .product-img {
+    position: relative;
+    width: 120px;
+    height: 100px;
+    background: white;
+    text-align: center;
+}
+
+.wp .product .product-img img {
+    max-height: 100px;
+    max-width:  120px;
+    vertical-align: middle;
+}
+
+.wp .product .price-tag {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    vertical-align: top;
+    color: white;
+    line-height: 13px;
+    background: #7f82ac;
+    padding: 2px 5px;
+    border-radius: 2px;
+}
+
+.wp .product .product-name {
+    position: absolute;
+    -webkit-box-sizing: border-box;
+       -moz-box-sizing: border-box;
+        -ms-box-sizing: border-box;
+            box-sizing: border-box;
+    bottom:0;
+    top:auto;
+    line-height: 14px;
+    width:100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    background: -webkit-linear-gradient(-90deg,rgba(255,255,255,0),rgba(255,255,255,1), rgba(255,255,255,1));
+    background:    -moz-linear-gradient(-90deg,rgba(255,255,255,0),rgba(255,255,255,1), rgba(255,255,255,1));
+    background:     -ms-linear-gradient(-90deg,rgba(255,255,255,0),rgba(255,255,255,1), rgba(255,255,255,1));
+    /* troublesome in latest webkit
+    background:         linear-gradient(-90deg,rgba(255,255,255,0),rgba(255,255,255,1), rgba(255,255,255,1));
+    */
+    /*background:#FFF;*/
+    padding: 3px;
+    padding-top:15px;
+}
+
+
+/*  ********* The Screens  ********* */
+
+.wp .screen {
+    position:absolute;
+    text-align: center;
+    top:0px;
+    bottom:0px;
+    width:100%;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+}
+.wp .screen header h2 {
+    margin-top: 0px;
+    padding-top: 7px;
+}
+.wp .screen p{
+    font-size: 18px;
+}
+.wp .dialog{
+    width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 50px;
+    text-align: center;
+}
+.wp .dialog p{
+    font-size: 25px;
+    margin-top: 10px;
+    color: #5a5a5a;
+}
+
+/* a) Generic Screen Layout Constructs */
+
+.screen .screen-content{
+    margin: 0px auto;
+    max-width: 1024px;
+    text-align: left;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+@media screen and (min-width: 1024px) {
+    .screen .screen-content{
+        border-left:  dashed 1px rgb(215,215,215);
+        border-right: dashed 1px rgb(215,215,215);
+    }
+}
+
+.screen .top-content{
+    position: absolute;
+    left: 0px; top: 0px; right: 0px;
+    height: 64px;
+    border-bottom: dashed 1px rgb(215,215,215);
+    text-align: center;
+}
+.screen .top-content .button {
+    position: absolute;
+    top: 0px;
+    line-height: 32px;
+    padding: 3px 13px;
+    font-size: 20px;
+    background: rgb(230, 230, 230);
+    margin: 12px;
+    border-radius: 3px;
+    border: solid 1px rgb(209, 209, 209);
+    cursor: pointer;
+    transition: all 150ms linear;
+}
+.screen .top-content .button:hover {
+    background: #efefef;
+}
+.screen .top-content .button:active {
+    background: black;
+    border-color: black;
+    color: white;
+}
+.screen .top-content .button.highlight {
+    background: rgb(110,200,155);
+    color: white;
+    border: solid 1px rgb(110,200,155);
+}
+.screen .top-content .button.highlight:hover {
+    background: rgb(120,210,165);
+}
+.screen .top-content .button.back {
+    left: 0px;
+    margin-left: 16px;
+}
+.screen .top-content .button.next{
+    right: 0px;
+    margin-right: 16px;
+}
+.screen .left-content{
+    position: absolute;
+    left:0px; top: 64px; bottom: 0px;
+    right:50%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    border-right: dashed 1px rgb(215,215,215);
+}
+.screen .left-content.pc40{
+    right: 66%;
+}
+.screen .right-content{
+    position: absolute;
+    right:0px; top: 64px; bottom: 0px;
+    left:50%;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+.screen .right-content.pc60{
+    left:34%;
+}
+.screen .centered-content{
+    position: absolute;
+    right:25%; top: 64px; bottom: 0px;
+    left:25%;
+    border-right: dashed 1px rgb(215,215,215);
+    border-left: dashed 1px rgb(215,215,215);
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+.screen .full-content{
+    position: absolute;
+    right: 0%; top: 65px; bottom: 0px;
+    left: 0%;
+}
+
+/* a) Layout for the Product Screen */
+
+.wp .screen .layout-table {
+    border:none;
+    width:100%;
+    height:100%;
+}
+
+.wp .screen .header-row {
+    border:none;
+    width:100%;
+    height:0px;
+}
+
+.wp .screen .header-cell{
+    border:none;
+    width:100%;
+    height:0px;
+}
+.wp .screen .content-row {
+    width:100%;
+    height:100%;
+}
+.wp .screen .content-cell{
+    width:100%;
+}
+.wp .screen .content-cell .content-container{
+    height:100%;
+    position:relative;
+}
+
+
+/* b) The payment screen */
+
+.wp .payment-numpad {
+    display: inline-block;
+    width: 50%;
+    box-sizing: border-box;
+    padding: 16px;
+    text-align: center;
+    float: left;
+}
+.wp .payment-numpad .numpad {
+    float: none;
+    border-radius: 4px;
+    border-top: 1px solid;
+    border-left: 1px solid;
+    border-color: #cacaca;
+    width: 296px;
+    overflow: hidden;
+    margin: 0;
+}
+.wp .payment-numpad .numpad button {
+    width: 74px;
+    height: 74px;
+}
+.wp .payment-numpad .numpad button:first-child {
+    border-top-left-radius: 4px;
+}
+.wp .payment-numpad .numpad button:nth-child(16) {
+    border-bottom-left-radius: 4px;
+}
+
+.wp .paymentlines-container {
+    padding: 16px;
+    padding-top: 0;
+    border-bottom: dashed 1px gainsboro;
+    min-height: 154px;
+}
+
+.wp .paymentlines {
+    width: 100%;
+}
+.wp .paymentlines .controls {
+    width: 40px;
+}
+.wp .paymentlines .label > * {
+    font-size: 16px;
+    padding: 8px;
+}
+.wp .paymentlines tbody{
+    background: white;
+    border-radius: 3px;
+}
+.wp .paymentline{
+    font-size: 22px;
+}
+.wp .paymentline.selected {
+    font-size: 22px;
+    background: #6EC89B;
+    color: white;
+}
+.wp .paymentline.selected .edit {
+    background: white;
+    color: #6EC89B;
+    outline: 3px blue;
+    box-shadow: 0px 0px 0px 3px #6EC89B;
+    position: relative;
+    border-radius: 3px;
+}
+.wp .paymentline > *{
+    padding: 8px 12px;
+}
+.wp .paymentline .col-due,
+.wp .paymentline .col-tendered,
+.wp .paymentline .col-change {
+    min-width: 90px;
+}
+.wp .paymentline.extra .col-due {
+    border-radius: 0 0 6px 6px;
+    border-top: solid 1px rgb(230, 230, 230);
+    font-weight: bold;
+}
+.wp .paymentline .col-change.highlight {
+    background: rgb(184, 152, 204);
+}
+.wp .paymentline .col-name {
+    font-size: 16px;
+}
+.wp .paymentline .delete-button{
+    cursor: pointer;
+    text-align: center;
+}
+.wp .payment-buttons {
+    display: inline-block;
+    width: 50%;
+    box-sizing: border-box;
+    padding: 16px;
+    padding-left: 0;
+    float: right;
+}
+.payment-screen .payment-buttons .button {
+    background: #e2e2e2;
+    line-height: 73px;
+    font-size: 16px;
+    padding: 0px 8px;
+    border: solid 1px rgb(200,200,200);
+    border-top-width: 0;
+    cursor: pointer;
+    text-align: center;
+    position: relative;
+    transition: background-color, border-color, color 150ms linear;
+}
+.payment-screen .payment-buttons .button:hover {
+    background-color: #efefef;
+}
+.payment-screen .payment-buttons .button:first-child {
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    border-top-width: 1px;
+}
+.payment-screen .payment-buttons .button:last-child {
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
+}
+.payment-screen .payment-buttons .button.highlight:not(:first-child) {
+    margin-top: -1px;
+    border-top: solid 1px;
+}
+.payment-screen .payment-buttons .button:active {
+    background: black;
+    border-color: black;
+    color: white;
+}
+.payment-screen .payment-buttons .button.highlight .fa {
+    border-color: rgba(0, 0, 0, 0.109804);
+    background: rgba(0, 0, 0, 0.0980392);
+}
+.payment-screen .payment-buttons .button .fa {
+    position: absolute;
+    left: 11px;
+    top: 50%;
+    width: 48px;
+    height: 48px;
+    line-height: 48px;
+    margin-top: -25px;
+    vertical-align: middle;
+    border-radius: 26px;
+    border: 1px solid rgba(0,0,0,0.2);
+    border-image-source: initial;
+    border-image-slice: initial;
+    border-image-width: initial;
+    border-image-outset: initial;
+    border-image-repeat: initial;
+    background: rgba(255,255,255,0.4);
+    font-size: 20px;
+    transition: all 150ms linear;
+}
+.payment-screen .paymentlines-empty .total {
+    text-align: center;
+    padding: 24px 0px 18px;
+    font-size: 64px;
+    color: #43996E;
+    text-shadow: 0px 2px white, 0px 2px 2px rgba(0, 0, 0, 0.27);
+}
+.payment-screen .paymentlines-empty .message {
+    text-align: center;
+}
+
+
+/* c) The receipt screen */
+
+.wp .receipt-screen .centered-content .button {
+    line-height: 40px;
+    padding: 3px 13px;
+    font-size: 20px;
+    text-align: center;
+    background: rgb(230, 230, 230);
+    margin: 16px;
+    margin-bottom: 0px;
+    border-radius: 3px;
+    border: solid 1px rgb(209, 209, 209);
+    cursor: pointer;
+}
+
+.wp .wp-receipt-container {
+    font-size: 0.75em;
+    text-align: center;
+    direction: ltr;
+}
+
+.wp .wp-sale-ticket {
+    text-align: left;
+    width: 300px;
+    background-color: white;
+    margin: 20px;
+    padding: 15px;
+    font-size: 14px;
+    padding-bottom:30px;
+    display: inline-block;
+    font-family: "Inconsolata";
+    border: solid 1px rgb(220,220,220);
+    border-radius: 3px;
+    overflow: hidden;
+}
+.wp .wp-sale-ticket pre{
+    font-family: "Inconsolata";
+}
+.wp .wp-sale-ticket .emph{
+    font-size: 20px;
+    margin:5px;
+}
+.wp .wp-sale-ticket table {
+    width: 100%;
+    border: 0;
+    table-layout: fixed;
+}
+.wp .wp-sale-ticket table td {
+    border: 0;
+    word-wrap: break-word;
+}
+
+@page {
+    margin: 0;
+}
+
+@media print {
+    * {
+        color: black !important;
+    }
+    body {
+        margin: 0;
+        color: white !important;
+    }
+    .oe_leftbar,
+    .oe_loading,
+    .wp .wp-topheader,
+    .wp .wp-leftpane,
+    .wp .keyboard_frame,
+    .wp .receipt-screen header,
+    .wp .receipt-screen .top-content,
+    .wp .receipt-screen .centered-content .button {
+        display: none !important;
+    }
+    .wp,
+    .wp .wp-content,
+    .wp .rightpane,
+    .wp .screen,
+    .wp .window,
+    .wp .window .subwindow,
+    .wp .subwindow .subwindow-container{
+        display: block;
+        position: static;
+        height: auto;
+    }
+    .wp{
+        background: white !important;
+    }
+    .wp .rightpane {
+        left: 0px !important;
+        background-color: white;
+    }
+    .wp .receipt-screen {
+        text-align: left;
+    }
+    .wp .receipt-screen .centered-content{
+        position: static;
+        border: none;
+    }
+    .wp .wp-receipt-container {
+        text-align: left;
+    }
+    .wp-actionbar {
+        display: none !important;
+    }
+    .debug-widget{
+        display: none !important;
+    }
+    .wp *{
+        text-shadow: none !important;
+        box-shadow: none !important;
+        background: transparent !important;
+    }
+    .wp .wp-sale-ticket{
+        margin: 0;
+        margin-left: auto !important;
+        margin-right: auto !important;
+        border: none !important;
+        font-size: 13px !important;
+        width: 266px !important;
+    }
+    .o_debug_manager {
+        display: none !important;
+    }
+    .o_chat_window {
+        display: none !important;
+    }
+}
+
+/* d) The Scale screen */
+
+.wp .scale-screen .product-price{
+    font-size: 25px;
+    margin: 16px;
+    text-align: center;
+    display: inline-block;
+    width: 40%;
+}
+.wp .scale-screen .computed-price{
+    font-size: 25px;
+    display: inline-block;
+    text-align: right;
+    margin: 16px;
+    margin-top: 0px;
+    padding: 16px;
+    background: white;
+    width: 40%;
+    border-radius: 3px;
+    font-family: Inconsolata;
+    font-weight: bold;
+    text-shadow: 0px 2px 0px rgb(210,210,210);
+    box-shadow: 0px 2px 0px rgb(225,225,225) inset;
+    float: right;
+}
+.wp .scale-screen .buy-product{
+    text-align: center;
+    font-size: 32px;
+    background: rgb(110,200,155);
+    color: white;
+    border-radius: 3px;
+    padding: 16px;
+    margin: 16px;
+    cursor: pointer;
+}
+
+.wp .scale-screen .weight{
+    text-align: right;
+    margin: 16px;
+    background: white;
+    padding: 20px;
+    padding-right: 30px;
+    font-size: 56px;
+    border-radius: 3px;
+    font-family: Inconsolata;
+    text-shadow: 0px 2px 0px rgb(210, 210, 210);
+    box-shadow: 0px 2px 0px rgb(225,225,225) inset;
+}
+
+
+/* e) The Client List Screen */
+
+.wp .clientlist-screen .client-list{
+    font-size: 16px;
+    width: 100%;
+    line-height: 40px;
+}
+.wp .clientlist-screen .client-list th,
+.wp .clientlist-screen .client-list td {
+    padding: 0px 8px;
+}
+.wp .clientlist-screen .client-list tr{
+    transition: all 150ms linear;
+    background: rgb(230,230,230);
+}
+.wp .clientlist-screen .client-list thead > tr,
+.wp .clientlist-screen .client-list tr:nth-child(even) {
+    background: rgb(247,247,247);
+}
+.wp .clientlist-screen .client-list tr.highlight{
+    transition: all 150ms linear;
+    background: rgb(110,200,155) !important;
+    color: white;
+}
+.wp .clientlist-screen .client-list tr.lowlight{
+    transition: all 150ms linear;
+    background: rgb(216, 238, 227);
+}
+.wp .clientlist-screen .client-list tr.lowlight:nth-child(even){
+    transition: all 150ms linear;
+    background: rgb(227, 246, 237);
+}
+.wp .clientlist-screen .client-details{
+    padding: 16px;
+    border-bottom: solid 5px rgb(110,200,155);
+}
+.wp .clientlist-screen .client-picture{
+    height: 64px;
+    width: 64px;
+    border-radius: 32px;
+    overflow: hidden;
+    text-align: center;
+    float: left;
+    margin-right: 16px;
+    background: white;
+    position: relative;
+}
+.wp .clientlist-screen .client-picture > img {
+    position: absolute;
+    top: -9999px;
+    bottom: -9999px;
+    right: -9999px;
+    left: -9999px;
+    max-height: 64px;
+    margin: auto;
+}
+.wp .clientlist-screen .client-picture > .fa {
+    line-height: 64px;
+    font-size: 32px;
+}
+.wp .clientlist-screen .client-picture .image-uploader {
+    position: absolute;
+    z-index: 1000;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+.wp .clientlist-screen .client-name {
+    font-size: 32px;
+    line-height: 64px;
+    margin-bottom:16px;
+}
+.wp .clientlist-screen .edit-buttons {
+    position: absolute;
+    right: 16px;
+    top: 10px;
+}
+.wp .clientlist-screen .edit-buttons .button{
+    display: inline-block;
+    margin-left: 16px;
+    color: rgb(128,128,128);
+    cursor: pointer;
+    font-size: 36px;
+}
+.wp .clientlist-screen .client-details-box{
+    position: relative;
+    font-size: 16px;
+}
+.wp .clientlist-screen .client-details-left{
+    width: 50%;
+    float: left;
+}
+.wp .clientlist-screen .client-details-right{
+    width: 50%;
+    float: right;
+}
+.wp .clientlist-screen .client-detail{
+    line-height: 24px;
+}
+.wp .clientlist-screen .client-detail > .label{
+    font-weight: bold;
+    display: inline-block;
+    width: 75px;
+    text-align: right;
+    margin-right: 8px;
+}
+.wp .clientlist-screen .client-details input,
+.wp .clientlist-screen .client-details select
+{
+    padding: 4px;
+    border-radius: 3px;
+    border: solid 1px #cecbcb;
+    margin-bottom: 4px;
+    background: white;
+    font-family: "Lato","Lucida Grande", Helvetica, Verdana, Arial;
+    color: #555555;
+    width: 340px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+.wp .clientlist-screen .client-details input.client-name {
+    font-size: 24px;
+    line-height: 24px;
+    margin: 18px 6px;
+    width: 340px;
+}
+.wp .clientlist-screen .client-detail > .empty{
+    opacity: 0.3;
+}
+.wp .clientlist-screen .searchbox{
+    right: auto;
+    margin-left: -90px;
+    margin-top:8px;
+    left: 50%;
+}
+.wp .clientlist-screen .searchbox input{
+    width: 120px;
+}
+.wp .clientlist-screen .button.new-customer {
+    left: 50%;
+    margin-left: 120px;
+}
+
+
+/*  ********* The OrderWidget  ********* */
+
+.wp .order-container{
+    position: absolute;
+    top: 0px;
+    width:100%;
+    height: 100%;
+    background: white;
+}
+
+.wp .order-scroller{
+    width:100%;
+    height:100%;
+    overflow: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.wp .scrollable-y{
+    overflow: hidden !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+}
+
+.wp .order{
+    background: white;
+    padding-bottom: 8px;
+    padding-top: 8px;
+    font-size: 16px;
+    text-align: left;
+    max-width: 500px;
+    -webkit-transform: translate3d(0,0,0);
+}
+
+.wp .order .order-empty {
+    text-align: center;
+    margin: 48px;
+    color: #DDD;
+}
+.wp .order .order-empty .fa {
+    font-size: 64px;
+}
+.wp .order .order-empty h1 {
+    font-size: 20px;
+}
+
+.wp .order .summary{
+    width:100%;
+    text-align:right;
+    font-weight: bold;
+    margin-top:20px;
+    margin-bottom:10px;
+}
+.wp .order .summary .line{
+    float: right;
+    margin-right:15px;
+    margin-left: 15px;
+    padding-top:5px;
+    border-top: solid 2px;
+    border-color:#777;
+}
+.wp .order .summary .total {
+    font-size: 22px;
+}
+.wp .order .summary .line .subentry{
+    font-size: 16px;
+    font-weight: normal;
+    text-align: center;
+}
+.wp .order .summary .line.empty{
+    text-align: right;
+    border-color:#BBB;
+    color:#999;
+}
+
+.wp .order .summary .fidpoints{
+    position: absolute;
+    left: 20px;
+    padding: 10px;
+    color: #6EC89B;
+    background: rgba(110, 200, 155, 0.17);
+    border-radius: 3px;
+}
+
+.submit-kitchen-button {
+    float: left;
+    background: rgb(61, 235, 82);
+    color: white;
+    padding: 12px 20px;
+    margin: 0px 15px;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+/*  ********* The OrderLineWidget  ********* */
+
+.wp .order .orderline{
+    width:100%;
+    margin:0px;
+    padding-top:3px;
+    padding-bottom:10px;
+    padding-left:15px;
+    padding-right:15px;
+    cursor: pointer;
+    -webkit-box-sizing: border-box;
+       -moz-box-sizing: border-box;
+        -ms-box-sizing: border-box;
+            box-sizing: border-box;
+    -webkit-transition: background 250ms ease-in-out;
+       -moz-transition: background 250ms ease-in-out;
+            transition: background 250ms ease-in-out;
+}
+.wp .order .orderline:active{
+    background: rgba(140,143,183,0.05);
+    -webkit-transition: background 50ms ease-in-out;
+       -moz-transition: background 50ms ease-in-out;
+            transition: background 50ms ease-in-out;
+}
+.wp .order .orderline.empty:active{
+    background: transparent;
+    cursor: default;
+}
+
+.wp .order .orderline.selected{
+    background: rgba(140,143,183,0.2);
+    -webkit-transition: background 250ms ease-in-out;
+       -moz-transition: background 250ms ease-in-out;
+            transition: background 250ms ease-in-out;
+    cursor: default;
+}
+.wp .order .orderline .product-name{
+    padding:0;
+    display:inline-block;
+    font-weight: bold;
+    width:80%;
+    overflow:hidden;
+    text-overflow: ellipsis;
+}
+.wp .order .orderline .price{
+    padding:0;
+    font-weight: bold;
+    float:right;
+}
+.wp .order .orderline .info-list{
+    color: #888;
+    margin-left:10px;
+}
+.wp .order .orderline .info-list em{
+    color: #777;
+    font-weight: bold;
+    font-style:normal;
+}
+
+/*  ********* SplitBill ********* */
+
+.splitbill-screen .order-info {
+    text-align: center;
+    margin-bottom:20px;
+    padding: 20px 0px;
+    font-size: 64px;
+    color: #43996E;
+    text-shadow: 0px 2px white, 0px 2px 2px rgba(0, 0, 0, 0.27);
+    border-bottom: dashed 1px rgb(215,215,215);
+}
+.wp .splitbill-screen .order {
+    background: white;
+    padding-bottom:15px;
+    padding-top:15px;
+    margin-left:16px;
+    margin-right:16px;
+    margin-top:16px;
+    margin-bottom:16px;
+    font-size:16px;
+    border-radius: 3px;
+    border: solid 1px rgb(220,220,220);
+    text-align: left;
+    max-width: 500px;
+    -webkit-transform: translate3d(0,0,0);
+}
+.splitbill-screen .order .orderline.selected{
+    background: rgb(110,200,155);
+    color: white;
+    -webkit-transition: background 250ms ease-in-out;
+       -moz-transition: background 250ms ease-in-out;
+            transition: background 250ms ease-in-out;
+    cursor: default;
+}
+.splitbill-screen .order .orderline.partially.selected{
+    background: rgb(136, 214, 176);
+}
+.splitbill-screen .order .orderline.selected .info-list {
+    color: white;
+}
+.splitbill-screen .order .orderline.selected .info-list em{
+    color: white;
+    font-size: 24px;
+    vertical-align: top;
+}
+.paymentmethods {
+    margin: 16px;
+}
+.paymentmethods .button {
+    background: #e2e2e2;
+    line-height: 74px;
+    font-size: 16px;
+    border: solid 1px rgb(202, 202, 202);
+    border-top-width: 0px;
+    cursor: pointer;
+    text-align: center;
+}
+.paymentmethods .button:first-child {
+    border-top-width: 1px;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+}
+.paymentmethods .button:last-child {
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
+}
+.paymentmethods .button:active {
+    background: black;
+    border-color: black;
+    color: white;
+}
+.paymentmethod .button.active {
+    background: #6EC89B;
+    color: white;
+    border-color: #6EC89B;
+}
+
+
+
+/*  ********* The ActionBarWidget  ********* */
+
+.wp .wp-actionbar{
+    height: 105px;
+    background: #f5f5f5;    /*#ebebeb;*/
+    border-top: solid 1px #cecece;
+    z-index:900;
+}
+
+.wp .wp-actionbar ul{
+    list-style:  none;
+}
+
+.wp .wp-actionbar-button-list{
+    height: 100%;
+    margin: 0px;
+    padding-left:3px;
+    padding-right:3px;
+    overflow:hidden;
+}
+
+.wp .wp-actionbar .button{
+    width: 90px;
+    height: 90px;
+    text-align:center;
+    margin:3px;
+    margin-top:6px;
+    float:left;
+
+    font-size:   14px;
+    font-weight: bold;
+
+    cursor: pointer;
+
+    border: 1px solid #cacaca;
+    border-radius: 3px;
+
+    background: #e2e2e2;
+}
+.wp .wp-actionbar .button .label{
+    margin-top: 37px;
+}
+.wp .wp-actionbar .button .icon{
+    margin-top: 10px;
+}
+.wp .wp-actionbar .button:active{
+    color: white;
+    background: #7f82ac;
+    border: 1px solid #7f82ac;
+
+    -webkit-transition-property: background, border;
+    -webkit-transition-duration: 0.2s;
+    -webkit-transition-timing-function: ease-out;
+}
+
+.wp .wp-actionbar .button.disabled{
+    opacity: 0.5;
+}
+.wp .wp-actionbar .button.disabled:active{
+    border: 1px solid #cacaca;
+    color: #555;
+    cursor: default;
+
+    background: #e2e2e2;
+}
+
+.wp .wp-actionbar .button.rightalign{
+    float:right;
+}
+/*  ********* The Debug Widget  ********* */
+
+.wp .debug-widget{
+    z-index:100000;
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    width: 200px;
+    font-size: 10px;
+    
+    background: rgba(0,0,0,0.82);
+    color: white;
+    padding-bottom: 10px;
+    cursor: move;
+    -webkit-transform: translate3d(0,0,0);
+}
+.wp .debug-widget .toggle{
+    position: absolute;
+    font-size: 16px;
+    cursor:pointer;
+    top:0px;
+    right:0px;
+    padding:10px;
+    padding-right:15px;
+}
+.wp .debug-widget .content{
+    overflow: hidden;
+}
+.wp .debug-widget h1{
+    background:black;
+    padding-top: 10px;
+    padding-left: 10px;
+    margin-top:0;
+    margin-bottom:0;
+}
+.wp .debug-widget .category{
+    background: black;
+    padding-left: 10px;
+    margin: 0px;
+    font-weight: bold;
+    padding-top:3px;
+    padding-bottom:3px;
+}
+.wp .debug-widget .button{
+    padding: 5px;
+    padding-left: 15px;
+    display: block;
+    cursor:pointer;
+}
+.wp .debug-widget .button:active{
+    background: rgba(96,21,177,0.45);
+}
+.wp .debug-widget input{
+    margin-left:10px;
+    margin-top:7px;
+    padding: 4px;
+    width: 180px;
+    border: none;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    border-radius: 3px;
+}
+.wp .debug-widget .status{
+    padding: 5px;
+    padding-left: 15px;
+    display: block;
+    cursor:default;
+}
+.wp .debug-widget .status.on{
+    background-color: #6cd11d;
+}
+.wp .debug-widget .event{
+    padding: 5px;
+    padding-left: 15px;
+    display: block;
+    cursor:default;
+    background-color: #1E1E1E;
+}
+
+/*  ********* The PopupWidgets  ********* */
+
+.wp .modal-dialog{
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height:100%;
+    background-color: rgba(0,0,0,0.5);
+    z-index:1000;
+}
+.wp .modal-dialog .popup{
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    margin: auto;
+    width:500px;
+    height:400px;
+    text-align:center;
+    font-size:20px;
+    font-weight:bold;
+    background-color: #F0EEEE;
+    border-radius: 3px;
+    box-shadow: 0px 10px 20px rgba(0,0,0,0.4);
+    z-index:1200;
+    font-family: 'Lato';
+    font-family: Lato;
+}
+
+.wp .modal-dialog .popup-textinput{
+    display: flex;
+    flex-direction: column;
+}
+
+.wp .modal-dialog .popup-textinput .title,
+.wp .modal-dialog .popup-textinput .footer{
+    flex: none;
+}
+
+.wp .modal-dialog .popup-textinput textarea{
+    resize: none;
+    flex: auto;
+    margin: 0 20px 80px;
+}
+.wp .modal-dialog .popup-confirm{
+    height: 250px;
+}
+.wp .popup-confirm .body {
+    overflow: auto;
+    height: 120px;
+}
+.wp .modal-dialog .popup-textinput{
+    display: flex;
+    flex-direction: column;
+}
+.wp .modal-dialog .popup-textinput .title,
+.wp .modal-dialog .popup-textinput .footer{
+    flex: none;
+}
+.wp .modal-dialog .popup-textinput textarea{
+    resize: none;
+    flex: auto;
+    margin: 0 20px 80px;
+}
+.wp .popup .title {
+    background: rgba(255,255,255,0.5);
+    margin: 0;
+    padding: 20px;
+    border-radius: 3px 3px 0px 0px;
+    border-bottom: solid 1px rgba(60,60,60,0.1);
+}
+.wp .popup .body {
+    font-weight: normal;
+    font-size: 18px;
+    margin: 16px;
+    margin-top: 20px;
+}
+.wp .popup .body.traceback {
+    height: 238px;
+    overflow: auto;
+    font-size: 14px;
+    white-space: pre-wrap;
+    text-align: left;
+    font-family: 'Inconsolata';
+    -webkit-user-select: text;
+       -moz-user-select: text;
+            user-select: text;
+}
+.wp .popup .footer{
+    position:absolute;
+    bottom:0;
+    left:0;
+    width:100%;
+    height:60px;
+    border-top: solid 1px rgba(60,60,60,0.1);
+}
+.wp .popup .button{
+    float:right;
+    width: 110px;
+    height: 40px;
+    line-height:40px;
+    text-align:center;
+    border-radius: 2px;
+    margin-top:10px;
+    margin-right:10px;
+
+    font-size:   14px;
+    font-weight: bold;
+
+    cursor: pointer;
+
+    border: solid 1px rgba(60,60,60,0.1);
+
+    background: rgba(0,0,0,0.05);
+}
+.wp .popup .button.icon {
+    width: 40px;
+    font-size: 20px;
+}
+.wp .popup .button:active{
+    color: white;
+    background: black;
+    border: 1px solid black;
+
+    -webkit-transition-property: background, border;
+    -webkit-transition-duration: 0.2s;
+    -webkit-transition-timing-function: ease-out;
+}
+
+
+.wp .popup .button.big-left{
+    position:absolute;
+    top: 120px;
+    left:40px;
+    width: 180px;
+    height: 180px;
+    line-height:180px;
+}
+
+.wp .popup .button.big-right{
+    position:absolute;
+    top: 120px;
+    right:40px;
+    width: 180px;
+    height: 180px;
+    line-height:180px;
+}
+.wp .popup input,
+.wp .popup-input {
+    text-align: left;
+    display: inline-block;
+    overflow: hidden;
+    background: white;
+    min-height: 44px;
+    font-family: "Lato";
+    font-size: 20px;
+    color: #444;
+    padding: 10px;
+    border-radius: 3px;
+    border: none;
+    box-shadow: 0px 0px 0px 1px rgb(220,220,220) inset;
+    box-sizing: border-box;
+    width: 80%;
+}
+.wp .popup .packlot-lines{
+    overflow: auto;
+    height: 250px;
+    margin: 10px;
+}
+.wp .popup .packlot-line-input {
+    margin: 3px;
+}
+
+.wp .popup-number .popup-input {
+    text-align: center;
+}
+.wp .popup input:focus,
+.wp .popup-input.active {
+    outline: none;
+    box-shadow: 0px 0px 0px 3px #6EC89B;
+}
+.wp .popup.popup-error {
+    background-color: #F3BBBB;
+    color: rgb(168, 89, 89);
+    box-shadow: 0px 10px 20px rgba(92,51,51,0.4);
+}
+.wp .popup.popup-error .title {
+    color: white;
+    background: rgba(255, 76, 76, 0.5);
+}
+.wp .popup.popup-selection .selection {
+    overflow-y: auto;
+    max-height: 273px;
+    font-size: 16px;
+    width: auto;
+    line-height: 50px;
+    margin-top: -1px;
+    border-top: solid 3px rgba(60,60,60,0.1);
+    
+}
+.wp .popup.popup-selection .selection-item {
+    width: auto;
+    background: rgb(230,230,230);
+    cursor: pointer;
+    text-align: left;
+    padding: 0px 16px;
+}
+.wp .popup.popup-selection .selection-item:nth-child(odd) {
+    background: rgb(247,247,247);
+}
+.wp .popup.popup-selection .selection-item.selected {
+    background: #6EC89B;
+}
+.wp .popup.popup-number {
+    width: 300px;
+    height: 450px;
+}
+.wp .footer.centered {
+    text-align: center;
+}
+.wp .footer.centered .button {
+    float: none;
+    display: inline-block;
+    margin-left: 3px;
+    margin-right: 3px;
+}
+.wp .popup-numpad {
+    margin: 12px auto;
+    text-align: center;
+    width: 254px;
+}
+.wp .popup-number .title,
+.wp .popup-textinput .title
+{
+    margin-bottom: 20px;
+}
+.wp .popup-numpad .input-button,
+.wp .popup-numpad .mode-button {
+    background: none;
+    height: 50px;
+    width: 50px;
+    padding: 0;
+    border-radius: 25px;
+    margin: 4px;
+    vertical-align: top;
+    color: #444;
+}
+.wp .popup-numpad .input-button:active,
+.wp .popup-numpad .mode-button:active {
+    background: #444;
+    color: white;
+    border-color: #444;
+}
+
+.wp .popup.popup-password {
+    width: 254px;
+}
+.wp .popup-password .mode-button.add,
+.wp .popup-password .input-button.dot {
+    display: none;
+}
+.wp .popup-password .popup-numpad {
+    width: 190px;
+    text-align: left;
+}
+.wp .popup-password .popup-input {
+    width: 70%;
+ }
+
+.wp .popup .body ul,
+.wp .popup ul.body {
+    text-align: left;
+    margin-left: 1em;
+}
+.wp .popup .body li {
+    text-indent: 1em;
+}
+.wp .popup .body li:before {
+    content: '—';
+    position: relative;
+    font-size: 0.6em;
+    left: -1em;
+    bottom: 0.2em;
+}
+
+
+/*  ********* The Webkit Scrollbar  ********* */
+
+.wp *::-webkit-scrollbar{
+    width:  4px;
+    height: 4px;
+}
+.wp *::-webkit-scrollbar-track{
+    background: rgb(224,224,224);
+    border-left: solid 1px rgb(200,200,200);
+}
+.wp *::-webkit-scrollbar-thumb{
+    background: rgb(168,168,168);
+    background: #393939;
+    min-height: 30px;
+}
+
+.wp.big-scrollbars *::-webkit-scrollbar{
+    width:  40px;
+    height: 40px;
+}
+.wp.big-scrollbars *::-webkit-scrollbar-track{
+    background: rgb(224,224,224);
+    border-left: none;
+}
+.wp.big-scrollbars *::-webkit-scrollbar-thumb{
+    background: rgb(168,168,168);
+    min-height: 40px;
+    border-radius: 3px;
+}
+.wp.big-scrollbars *::-webkit-scrollbar-button{
+    width:  40px;
+    height: 40px;
+    border-radius: 3px;
+    background: rgb(210,210,210);
+    background-size: cover;
+}
+.wp.big-scrollbars *::-webkit-scrollbar-button:decrement{
+    background-image: url('../img/scroll-up.png');
+}
+.wp.big-scrollbars *::-webkit-scrollbar-button:increment{
+    background-image: url('../img/scroll-down.png');
+}
+
+
+/*  ********* Unsupported Browser Page ********* */
+
+.wp .not-supported-browser{
+    position: absolute;
+    z-index: 100000;
+    top: 0; bottom: 0; left: 0; right: 0;
+    background: #2C2C2C;
+}
+.wp .not-supported-browser .message{
+    width:600px;
+    margin-top: 100px;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    color: #d3d3d3;
+    font-size: 14px;
+}
+.wp .not-supported-browser img{
+    border-collapse: separate;
+}
