@@ -15,6 +15,8 @@ logger = logging.getLogger(__name__)
 SELECT_USER_DEFINED_CHAR = b'\x1B\x25\x01'
 DEFINE_USER_DEFINED_CHAR = b'\x1B\x26\x01'
 EURO_SYMBOL_DRAWING = b'\x05\x14\x3E\x55\x41\x22'
+INIT_DISPLAY = b'\x1B\x40'
+
 
 try:
     from serial import Serial
@@ -28,6 +30,10 @@ class CustomerDisplayCurrencyDriver(CustomerDisplayDriver):
         super().__init__()
         self.currency_char_code = None
         self.currency_code = None
+
+    def init_customer_display(self):
+        self.serial.write(INIT_DISPLAY)
+        logger.debug('Init display')
 
     def set_currency_code(self, currency_code):
         self.currency_code = currency_code
@@ -66,8 +72,10 @@ class CustomerDisplayCurrencyDriver(CustomerDisplayDriver):
                 self.device_name, self.device_rate,
                 timeout=self.device_timeout)
             logger.debug('serial.is_open = %s' % self.serial.isOpen())
-            self.setup_customer_display()
-            self.clear_customer_display()
+
+            self.init_customer_display()
+            self.setup_customer_display()  # set cursor off
+
             if self.currency_code == 'EUR':
                 self.draw_euro_symbol()
             self.display_text(lines)
