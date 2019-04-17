@@ -53,7 +53,7 @@ odoo.define('pos_customer_display_currency.pos_customer_display_currency', funct
                     line = data['line'];
 
                     if (mode === 'quantity') {
-                        l21 = line.get_quantity_str_with_unit()
+                        l21 = line.get_quantity_str_with_uom()
                             + ' x '
                             + line.get_unit_price_with_uom_currency(currency_char, currency_rounding);
                         l22 = ' ' + line.get_display_price().toFixed(currency_rounding) + currency_char;
@@ -76,7 +76,7 @@ odoo.define('pos_customer_display_currency.pos_customer_display_currency', funct
 
                     } else if (mode === 'price') {
                         // first display "manual entry"
-                        l21 = line.get_quantity_str_with_unit()
+                        l21 = line.get_quantity_str_with_uom()
                             + ' x '
                             + line.get_unit_price_with_uom_currency(currency_char, currency_rounding);
                         lines_to_send = [
@@ -110,7 +110,7 @@ odoo.define('pos_customer_display_currency.pos_customer_display_currency', funct
 
                         // then display price information (only if orderline is a product)
                         if (product && !container){
-                            l21 = line.get_quantity_str_with_unit()
+                            l21 = line.get_quantity_str_with_uom()
                                 + ' x '
                                 + line.get_unit_price_with_uom_currency(currency_char, currency_rounding);
                             l22 = ' ' + line.get_display_price().toFixed(currency_rounding) + currency_char;
@@ -223,11 +223,12 @@ odoo.define('pos_customer_display_currency.pos_customer_display_currency', funct
 
     models.Orderline = models.Orderline.extend({
         /**
-         * Returns quantityStr with or without the name of the unit of measure
-         * @override get_quantity_str_with_unit from models.js (module point_of_sale)
+         * This function is for the Bixolon only
+         * Returns quantityStr with or without the name of the unit of measure (uom)
          */
-        get_quantity_str_with_unit: function(){
+        get_quantity_str_with_uom: function(){
             var unit = this.get_unit();
+
             if(unit && !unit.is_pos_groupable){ // is_pos_groupable: group products of a category in POS
                 return this.quantityStr + ' ' + unit.name;
             }else{
