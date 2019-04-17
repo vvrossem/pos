@@ -228,11 +228,10 @@ odoo.define('pos_customer_display_currency.pos_customer_display_currency', funct
          */
         get_quantity_str_with_uom: function(){
             var unit = this.get_unit();
-
-            if(unit && !unit.is_pos_groupable){ // is_pos_groupable: group products of a category in POS
+            if(unit && unit.measure_type === 'weight'){
                 return this.quantityStr + ' ' + unit.name;
             }else{
-                return round_pr(this.quantityStr, 0.1);
+                return this.quantity;
             }
         },
 
