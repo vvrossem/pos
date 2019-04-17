@@ -5,7 +5,7 @@ odoo.define('pos_order_mgmt_container.widgets', function (require) {
     "use strict";
 
     var screens = require('pos_order_mgmt.widgets');
-	//var pos = require('point_of_sale.models');
+	var pos = require('pos_container.models_and_db');
 
     screens.OrderListScreenWidget.include({
         _prepare_orderlines_from_order_data: function (order, order_data, orderLines) {
@@ -33,10 +33,12 @@ odoo.define('pos_order_mgmt_container.widgets', function (require) {
 					});
 					var oline = order.get_last_orderline();
 					if (line.tare){
-						oline.set_tare_mode('MAN');
 						oline.set_tare(line.tare);
 						// cancels set_tare quantity substraction
 						oline.set_quantity(line.qty);
+					}
+					if (line.tare || line.discount || line.price_unit != product.lst_price) {
+						oline.set_tare_mode('MAN');
 					}
 					if(!_.isUndefined(container)){
 						oline.set_container(container);

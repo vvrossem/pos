@@ -260,14 +260,16 @@
                                 <t t-esc="widget.format_currency(orderline.get_display_price())"/>
                             </td>
                         </tr>
-                        <tr>
-                            <td>
-                               <div style="margin-left:5%">
-                                   Tare : <t t-esc="orderline.tare"/>
-                                   <t t-esc="orderline.get_unit().name"/>
-                               </div>
-                            </td>
-                        </tr>
+						<t t-if="orderline.get_tare()">
+							<tr>
+								<td>
+								   <div style="margin-left:5%">
+									   Tare : <t t-esc="orderline.tare"/>
+									   <t t-esc="orderline.get_unit().name"/>
+								   </div>
+								</td>
+							</tr>
+						</t>
                     </t>
                 </tr>
             </table>

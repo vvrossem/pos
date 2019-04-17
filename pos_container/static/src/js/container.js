@@ -409,9 +409,11 @@ odoo.define('pos_container.container', function (require) {
             if (oline) {
                 var mode = this.numpad_state.get('mode');
                 if( mode === 'tare'){
-                    oline.set_tare_mode('MAN');
                     oline.set_tare(val);
                 }
+				if (['tare', 'discount', 'price'].indexOf(mode) != -1) {
+					oline.set_tare_mode('MAN');
+				}
             }
         },
     });
