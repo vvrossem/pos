@@ -357,7 +357,7 @@ odoo.define('pos_container.container', function (require) {
             });
 
             fields.barcode = this.gui.get_current_screen_param('barcode') || false;
-            fields.name = fields.name || 'Contenant';
+            fields.name = fields.name || _t('Container');
 
             rpc.query({
                 model: 'pos.container',
@@ -385,13 +385,8 @@ odoo.define('pos_container.container', function (require) {
                 var container = self.pos.db.get_container_by_id(container_id);
                 if (container) {
                     self.gui.show_screen(self.next_screen);
-                    self.order_container(container);
                 }
             });
-        },
-        order_container: function(container){
-            // fixme add_container takes a list ?
-            this.pos.get_order().add_container(container);
         },
 
     });
