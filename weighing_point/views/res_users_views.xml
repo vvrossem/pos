@@ -6,10 +6,10 @@
         <field name="inherit_id" ref="base.view_users_form" />
         <field name="arch" type="xml">
             <notebook position="inside">
-                <page string="Point of Sale">
+                <page string="weighing point">
                     <group>
                         <field name="barcode" />
-                        <field name="pos_security_pin" />
+                        <field name="wp_security_pin" />
                     </group>
                 </page>
             </notebook>

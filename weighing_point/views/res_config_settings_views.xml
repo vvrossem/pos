@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="res_config_settings_view_form" model="ir.ui.view">
-        <field name="name">res.config.settings.view.form.inherit.point_of_sale</field>
+        <field name="name">res.config.settings.view.form.inherit.weighing_point</field>
         <field name="model">res.config.settings</field>
         <field name="priority" eval="95"/>
         <field name="inherit_id" ref="base.res_config_settings_view_form" />
         <field name="arch" type="xml">
             <xpath expr="//div[hasclass('settings')]" position="inside">
-                <div class="app_settings_block" data-string="Point of sale" string="Point of Sale" data-key="point_of_sale" groups="point_of_sale.group_pos_manager">
+                <div class="app_settings_block" data-string="weighing point" string="weighing point" data-key="weighing_point" groups="weighing_point.group_wp_manager">
                     <h2>Taxes</h2>
                     <div class="row mt16 o_settings_container">
                         <div class="col-12 col-lg-6 o_setting_box" title="This tax is applied to any new product created in the catalog.">
@@ -31,22 +31,22 @@
                     <div class="row mt16 o_settings_container">
                         <div class="col-12 col-lg-6 o_setting_box" title="There are two ways to manage pricelists: 1) Multiple prices per product (e.g. quantity, shop-specific) : must be set in the Sales tab of the product detail form. 2) Price computed from formulas (discounts, margins, rounding) : must be set in the pricelist form.">
                             <div class="o_setting_left_pane">
-                                <field name="pos_sales_price"/>
+                                <field name="wp_sales_price"/>
                             </div>
                             <div class="o_setting_right_pane">
-                                <label for="pos_sales_price"/>
+                                <label for="wp_sales_price"/>
                                 <div class="text-muted">
                                     Set multiple prices per product, automated discounts, etc.
                                 </div>
-                                <div class="content-group" attrs="{'invisible': [('pos_sales_price' ,'=', False)]}">
+                                <div class="content-group" attrs="{'invisible': [('wp_sales_price' ,'=', False)]}">
                                     <div class="mt16">
                                         <field name="group_product_pricelist" invisible="1"/>
                                         <field name="group_sale_pricelist" invisible="1"/>
                                         <field name="group_pricelist_item" invisible="1"/>
-                                        <field name="pos_pricelist_setting" widget="radio" class="o_light_label"/>
+                                        <field name="wp_pricelist_setting" widget="radio" class="o_light_label"/>
                                     </div>
                                     <button name="%(product.product_pricelist_action2)d" icon="fa-arrow-right" type="action" string="Pricelists"
-                                      attrs="{'invisible': [('pos_pricelist_setting', '=', False)]}" class="btn-link"/>
+                                      attrs="{'invisible': [('wp_pricelist_setting', '=', False)]}" class="btn-link"/>
                                 </div>
                             </div>
                         </div>
@@ -74,15 +74,15 @@
                     <div class="row mt16 o_settings_container">
                         <div class="col-12 col-lg-6 o_setting_box" title="The transactions are processed by Vantiv. Set your Vantiv credentials on the related payment journal.">
                             <div class="o_setting_left_pane">
-                                <field name="module_pos_mercury"/>
+                                <field name="module_wp_mercury"/>
                             </div>
                             <div class="o_setting_right_pane">
-                                <label for="module_pos_mercury" string="Credit Card Reader"/>
+                                <label for="module_wp_mercury" string="Credit Card Reader"/>
                                 <div class="text-muted">
                                     Accept payments with a credit card reader
                                 </div>
-                                <div class="content-group" attrs="{'invisible': [('module_pos_mercury', '=', False)]}">
-                                    <div class="mt16" id="btn_use_pos_mercury">
+                                <div class="content-group" attrs="{'invisible': [('module_wp_mercury', '=', False)]}">
+                                    <div class="mt16" id="btn_use_wp_mercury">
                                         <button string="Save" type="object" name="execute" class="oe_highlight"/>
                                     </div>
                                 </div>
@@ -94,19 +94,19 @@
         </field>
     </record>
 
-    <record id="action_pos_configuration" model="ir.actions.act_window">
+    <record id="action_wp_configuration" model="ir.actions.act_window">
         <field name="name">Settings</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">res.config.settings</field>
         <field name="view_mode">form</field>
         <field name="target">inline</field>
-        <field name="context">{'module' : 'point_of_sale'}</field>
+        <field name="context">{'module' : 'weighing_point'}</field>
     </record>
 
-    <menuitem id="menu_pos_global_settings"
+    <menuitem id="menu_wp_global_settings"
         name="Settings"
         parent="menu_point_config_product"
         sequence="0"
-        action="action_pos_configuration"
+        action="action_wp_configuration"
         groups="base.group_system"/>
 </odoo>

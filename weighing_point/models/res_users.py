@@ -7,10 +7,7 @@ from odoo.exceptions import UserError
 class ResUsers(models.Model):
     _inherit = 'res.users'
 
-    wp_security_pin = fields.Char(
-        string='Security PIN',
-        size=32,
-        help='A Security PIN used to protect sensible functionality in the Weighing Point')
+    wp_security_pin = fields.Char(string='Security PIN', size=32, help='A Security PIN used to protect sensible functionality in the weighing point')
 
     @api.constrains('wp_security_pin')
     def _check_pin(self):

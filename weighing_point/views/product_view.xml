@@ -34,7 +34,7 @@
                 Create a new product variant
             </p><p>
                 You must define a product for everything you sell through
-                the Weighing Point interface.
+                the weighing point interface.
             </p>
         </field>
     </record>
@@ -53,7 +53,7 @@
         <field name="inherit_id" ref="stock.view_template_property_form"/>
         <field name="arch" type="xml">
             <xpath expr="//group[@name='pricelists']" position="before">
-                <group name="wp" string="Weighing Point">
+                <group name="wp" string="weighing point">
                     <group>
                         <field name="available_in_wp"/>
                         <field name="wp_categ_id" attrs="{'invisible': [('available_in_wp', '=', False)]}" string="Category"/>

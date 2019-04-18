@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- TODO(Vincent) SAME -->
 <odoo>
     <data noupdate="0">
         <record id="seq_picking_type_wpout" model="ir.sequence">
@@ -17,7 +18,6 @@
             <field name="code">outgoing</field>
         </record>
     </data>
-
     <data noupdate="1">
         <!-- After closing the wp, open the dashboard menu -->
         <record id="action_client_wp_menu" model="ir.actions.client">
@@ -59,7 +59,7 @@
 
         <record id="wp_sale_journal" model="account.journal">
             <field name="name">wp Sale Journal</field>
-            <field name="code">wp</field>
+            <field name="code">wpS</field>
             <field name="type">sale</field>
             <!-- avoid being selected as default journal -->
             <field name="sequence">20</field>

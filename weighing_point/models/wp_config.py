@@ -8,9 +8,45 @@ from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError
 
 
+class AccountCashboxLine(models.Model):
+    _inherit = 'account.cashbox.line'
+
+    default_wp_id = fields.Many2one('wp.config', string='This cashbox line is used by default when opening or closing a balance for this weighing point')
+
+    @api.multi
+    def name_get(self):
+        result = []
+        for cashbox_line in self:
+            result.append((cashbox_line.id, "%s * %s"%(cashbox_line.coin_value, cashbox_line.number)))
+        return result
+
+class AccountBankStmtCashWizard(models.Model):
+    _inherit = 'account.bank.statement.cashbox'
+
+    @api.model
+    def default_get(self, fields):
+        vals = super(AccountBankStmtCashWizard, self).default_get(fields)
+        config_id = self.env.context.get('default_wp_id')
+        if config_id:
+            lines = self.env['account.cashbox.line'].search([('default_wp_id', '=', config_id)])
+            if self.env.context.get('balance', False) == 'start':
+                vals['cashbox_lines_ids'] = [[0, 0, {'coin_value': line.coin_value, 'number': line.number, 'subtotal': line.subtotal}] for line in lines]
+            else:
+                vals['cashbox_lines_ids'] = [[0, 0, {'coin_value': line.coin_value, 'number': 0, 'subtotal': 0.0}] for line in lines]
+        return vals
+
 class WpConfig(models.Model):
     _name = 'wp.config'
-    _description = 'Weighing Point Configuration'
+    _description = 'weighing point Configuration'
+
+    def _default_sale_journal(self):
+        journal = self.env.ref('weighing_point.wp_sale_journal', raise_if_not_found=False)
+        if journal and journal.sudo().company_id == self.env.user.company_id:
+            return journal
+        return self._default_invoice_journal()
+
+    def _default_invoice_journal(self):
+        return self.env['account.journal'].search([('type', '=', 'sale'), ('company_id', '=', self.env.user.company_id.id)], limit=1)
 
     def _default_pricelist(self):
         return self.env['product.pricelist'].search([('currency_id', '=', self.env.user.company_id.currency_id.id)], limit=1)
@@ -24,169 +60,121 @@ class WpConfig(models.Model):
     def _get_group_wp_user(self):
         return self.env.ref('weighing_point.group_wp_user')
 
-    name = fields.Char(
-        string='Weighing Point Name',
-        index=True,
-        required=True,
-        help="An internal identification of the weighing point.")
+    def _compute_default_customer_html(self):
+        return self.env['ir.qweb'].render('weighing_point.customer_facing_display_html')
 
+    name = fields.Char(string='weighing point Name', index=True, required=True, help="An internal identification of the weighing point.")
+    is_installed_account_accountant = fields.Boolean(string="Is the Full Accounting Installed",
+        compute="_compute_is_installed_account_accountant")
+    journal_ids = fields.Many2many(
+        'account.journal', 'wp_config_journal_rel',
+        'wp_config_id', 'journal_id', string='Available Payment Methods',
+        domain="[('journal_user', '=', True ), ('type', 'in', ['bank', 'cash'])]",)
+    picking_type_id = fields.Many2one('stock.picking.type', string='Operation Type')
+    use_existing_lots = fields.Boolean(related='picking_type_id.use_existing_lots', readonly=False)
     stock_location_id = fields.Many2one(
-        'stock.location',
-        string='Stock Location',
-        domain=[('usage', '=', 'internal')],
-        required=True,
-        default=_get_default_location)
-
-    #TODO(Vincent) how to handle?
-    currency_id = fields.Many2one(
-        'res.currency',
-        compute='_compute_currency',
-        string="Currency")
-
-    iface_electronic_scale = fields.Boolean(
-        string='Electronic Scale',
-        help="Enables Electronic Scale integration.")
-
-    iface_vkeyboard = fields.Boolean(
-        string='Virtual KeyBoard',
-        help=u"Don’t turn this option on if you weighing point is on smartphones or tablets."
-             u"Such devices already benefit from a native keyboard.")
-
-    iface_print_via_proxy = fields.Boolean(
-        string='Print via Proxy',
-        help="Bypass browser printing and prints via the hardware proxy.")
-
-    iface_scan_via_proxy = fields.Boolean(
-        string='Scan via Proxy',
-        help="Enable barcode scanning with a remotely connected barcode scanner.")
-
-    iface_big_scrollbars = fields.Boolean(
-        'Large Scrollbars',
-        help='For imprecise industrial touchscreens.')
-
-    iface_tax_included = fields.Selection(
-        [('subtotal', 'Tax-Excluded Price'), ('total', 'Tax-Included Price')],
-        string="Tax Display",
-        default='subtotal', required=True)
-
-    iface_start_categ_id = fields.Many2one(
-        'wp.category',
-        string='Initial Category',
-        help='The weighing point will display this product category by default.'
-             'If no category is specified, all available products will be shown.')
-
-    iface_display_categ_images = fields.Boolean(
-        string='Display Category Pictures',
+        'stock.location', string='Stock Location',
+        domain=[('usage', '=', 'internal')], required=True, default=_get_default_location)
+    journal_id = fields.Many2one(
+        'account.journal', string='Sales Journal',
+        domain=[('type', '=', 'sale')],
+        help="Accounting journal used to post sales entries.",
+        default=_default_sale_journal)
+    invoice_journal_id = fields.Many2one(
+        'account.journal', string='Invoice Journal',
+        domain=[('type', '=', 'sale')],
+        help="Accounting journal used to create invoices.",
+        default=_default_invoice_journal)
+    currency_id = fields.Many2one('res.currency', compute='_compute_currency', string="Currency")
+    iface_cashdrawer = fields.Boolean(string='Cashdrawer', help="Automatically open the cashdrawer.")
+    iface_payment_terminal = fields.Boolean(string='Payment Terminal', help="Enables Payment Terminal integration.")
+    iface_electronic_scale = fields.Boolean(string='Electronic Scale', help="Enables Electronic Scale integration.")
+    iface_vkeyboard = fields.Boolean(string='Virtual KeyBoard', help=u"Don’t turn this option on if you take orders on smartphones or tablets. \n Such devices already benefit from a native keyboard.")
+    iface_customer_facing_display = fields.Boolean(string='Customer Facing Display', help="Show checkout to customers with a remotely-connected screen.")
+    iface_print_via_proxy = fields.Boolean(string='Print via Proxy', help="Bypass browser printing and prints via the hardware proxy.")
+    iface_scan_via_proxy = fields.Boolean(string='Scan via Proxy', help="Enable barcode scanning with a remotely connected barcode scanner.")
+    iface_big_scrollbars = fields.Boolean('Large Scrollbars', help='For imprecise industrial touchscreens.')
+    iface_print_auto = fields.Boolean(string='Automatic Receipt Printing', default=False,
+        help='The receipt will automatically be printed at the end of each order.')
+    iface_print_skip_screen = fields.Boolean(string='Skip Preview Screen', default=True,
+        help='The receipt screen will be skipped if the receipt can be printed automatically.')
+    iface_precompute_cash = fields.Boolean(string='Prefill Cash Payment',
+        help='The payment input will behave similarily to bank payment input, and will be prefilled with the exact due amount.')
+    iface_tax_included = fields.Selection([('subtotal', 'Tax-Excluded Price'), ('total', 'Tax-Included Price')], string="Tax Display", default='subtotal', required=True)
+    iface_start_categ_id = fields.Many2one('wp.category', string='Initial Category',
+        help='The weighing point will display this product category by default. If no category is specified, all available products will be shown.')
+    iface_display_categ_images = fields.Boolean(string='Display Category Pictures',
         help="The product categories will be displayed with pictures.")
-
-    restrict_price_control = fields.Boolean(
-        string='Restrict Price Modifications to Managers',
-        help="Only users with Manager access rights for WP app can modify the product prices on the weighing point.")
-
-    receipt_header = fields.Text(
-        string='Receipt Header',
-        help="A short text that will be inserted as a header in the printed receipt.")
-
-    receipt_footer = fields.Text(
-        string='Receipt Footer',
-        help="A short text that will be inserted as a footer in the printed receipt.")
-
-    proxy_ip = fields.Char(
-        string='IP Address',
-        size=45,
-        help='The hostname or ip address of the hardware proxy. Will be autodetected if left empty.')
-
+    restrict_price_control = fields.Boolean(string='Restrict Price Modifications to Managers',
+        help="Only users with Manager access rights for wp app can modify the product prices on orders.")
+    cash_control = fields.Boolean(string='Cash Control', help="Check the amount of the cashbox at opening and closing.")
+    receipt_header = fields.Text(string='Receipt Header', help="A short text that will be inserted as a header in the printed receipt.")
+    receipt_footer = fields.Text(string='Receipt Footer', help="A short text that will be inserted as a footer in the printed receipt.")
+    proxy_ip = fields.Char(string='IP Address', size=45,
+        help='The hostname or ip address of the hardware proxy, Will be autodetected if left empty.')
     active = fields.Boolean(default=True)
-
-    uuid = fields.Char(
-        readonly=True,
-        default=lambda self: str(uuid4()),
-        help='A globally unique identifier for this wp configuration, '
-             'used to prevent conflicts in client-generated data.')
-
-    session_ids = fields.One2many(
-        'wp.session',
-        'config_id',
-        string='Sessions')
-
-    current_session_id = fields.Many2one(
-        'wp.session',
-        compute='_compute_current_session',
-        string="Current Session")
-
+    uuid = fields.Char(readonly=True, default=lambda self: str(uuid4()),
+        help='A globally unique identifier for this wp configuration, used to prevent conflicts in client-generated data.')
+    sequence_id = fields.Many2one('ir.sequence', string='Order IDs Sequence', readonly=True,
+        help="This sequence is automatically created by Odoo but you can change it "
+        "to customize the reference numbers of your orders.", copy=False)
+    sequence_line_id = fields.Many2one('ir.sequence', string='Order Line IDs Sequence', readonly=True,
+        help="This sequence is automatically created by Odoo but you can change it "
+        "to customize the reference numbers of your orders lines.", copy=False)
+    session_ids = fields.One2many('wp.session', 'config_id', string='Sessions')
+    current_session_id = fields.Many2one('wp.session', compute='_compute_current_session', string="Current Session")
     current_session_state = fields.Char(compute='_compute_current_session')
-
+    last_session_closing_cash = fields.Float(compute='_compute_last_session')
     last_session_closing_date = fields.Date(compute='_compute_last_session')
-
     wp_session_username = fields.Char(compute='_compute_current_session_user')
-
     wp_session_state = fields.Char(compute='_compute_current_session_user')
-
     wp_session_duration = fields.Char(compute='_compute_current_session_user')
-
-    pricelist_id = fields.Many2one(
-        'product.pricelist',
-        string='Default Pricelist',
-        required=True,
-        default=_default_pricelist,
+    group_by = fields.Boolean(string='Group Journal Items', default=True,
+        help="Check this if you want to group the Journal Items by Product while closing a Session.")
+    pricelist_id = fields.Many2one('product.pricelist', string='Default Pricelist', required=True, default=_default_pricelist,
         help="The pricelist used if no customer is selected or if the customer has no Sale Pricelist configured.")
-
-    available_pricelist_ids = fields.Many2many(
-        'product.pricelist',
-        string='Available Pricelists',
-        default=_default_pricelist,
-        help="Make several pricelists available in the Weighing Point. "
-             "You can also apply a pricelist to specific customers from their contact form (in Sales tab). "
-             "To be valid, this pricelist must be listed here as an available pricelist. "
-             "Otherwise the default pricelist will apply.")
-
-    company_id = fields.Many2one(
-        'res.company',
-        string='Company',
-        required=True,
-        default=lambda self: self.env.user.company_id)
-
-    barcode_nomenclature_id = fields.Many2one(
-        'barcode.nomenclature',
-        string='Barcode Nomenclature',
-        help='Defines what kind of barcodes are available '
-             'and how they are assigned to products, customers and cashiers.')
-
-    group_wp_manager_id = fields.Many2one(
-        'res.groups',
-        string='Weighing Point Manager Group',
-        default=_get_group_wp_manager,
-        help='This field is there to pass the id of the wp manager group to the Weighing Point client.')
-
-    group_wp_user_id = fields.Many2one(
-        'res.groups',
-        string='Weighing Point User Group',
-        default=_get_group_wp_user,
-        help='This field is there to pass the id of the wp user group to the Weighing Point client.')
-
-    iface_tipproduct = fields.Boolean(string="Product tips") #TODO(Vincent) needed?
-
-    tip_product_id = fields.Many2one(
-        'product.product',
-        string='Tip Product',
+    available_pricelist_ids = fields.Many2many('product.pricelist', string='Available Pricelists', default=_default_pricelist,
+        help="Make several pricelists available in the weighing point. You can also apply a pricelist to specific customers from their contact form (in Sales tab). To be valid, this pricelist must be listed here as an available pricelist. Otherwise the default pricelist will apply.")
+    company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.user.company_id)
+    barcode_nomenclature_id = fields.Many2one('barcode.nomenclature', string='Barcode Nomenclature',
+        help='Defines what kind of barcodes are available and how they are assigned to products, customers and cashiers.')
+    group_wp_manager_id = fields.Many2one('res.groups', string='weighing point Manager Group', default=_get_group_wp_manager,
+        help='This field is there to pass the id of the wp manager group to the weighing point client.')
+    group_wp_user_id = fields.Many2one('res.groups', string='weighing point User Group', default=_get_group_wp_user,
+        help='This field is there to pass the id of the wp user group to the weighing point client.')
+    iface_tipproduct = fields.Boolean(string="Product tips")
+    tip_product_id = fields.Many2one('product.product', string='Tip Product',
         help="This product is used as reference on customer receipts.")
-
+    fiscal_position_ids = fields.Many2many('account.fiscal.position', string='Fiscal Positions', help='This is useful for restaurants with onsite and take-away services that imply specific tax rates.')
+    default_fiscal_position_id = fields.Many2one('account.fiscal.position', string='Default Fiscal Position')
+    default_cashbox_lines_ids = fields.One2many('account.cashbox.line', 'default_wp_id', string='Default Balance')
+    customer_facing_display_html = fields.Html(string='Customer facing display content', translate=True, default=_compute_default_customer_html)
+    use_pricelist = fields.Boolean("Use a pricelist.")
     tax_regime = fields.Boolean("Tax Regime")
-
     tax_regime_selection = fields.Boolean("Tax Regime Selection value")
-
     barcode_scanner = fields.Boolean("Barcode Scanner")
-
     start_category = fields.Boolean("Set Start Category")
-
-    is_iotbox = fields.Boolean("IoTBox")
-
+    module_account = fields.Boolean(string='Invoicing', help='Enables invoice generation from the weighing point.')
+    module_wp_restaurant = fields.Boolean("Is a Bar/Restaurant")
+    module_wp_discount = fields.Boolean("Global Discounts")
+    module_wp_loyalty = fields.Boolean("Loyalty Program")
+    module_wp_mercury = fields.Boolean(string="Integrated Card Payments")
+    module_wp_reprint = fields.Boolean(string="Reprint Receipt")
+    is_iotbox = fields.Boolean("iotBox")
     is_header_or_footer = fields.Boolean("Header & Footer")
 
-    @api.depends()
+    def _compute_is_installed_account_accountant(self):
+        account_accountant = self.env['ir.module.module'].sudo().search([('name', '=', 'account_accountant'), ('state', '=', 'installed')])
+        for wp_config in self:
+            wp_config.is_installed_account_accountant = account_accountant and account_accountant.id
+
+    @api.depends('journal_id.currency_id', 'journal_id.company_id.currency_id')
     def _compute_currency(self):
         for wp_config in self:
-            wp_config.currency_id = self.env.user.company_id.currency_id.id
+            if wp_config.journal_id:
+                wp_config.currency_id = wp_config.journal_id.currency_id.id or wp_config.journal_id.company_id.currency_id.id
+            else:
+                wp_config.currency_id = self.env.user.company_id.currency_id.id
 
     @api.depends('session_ids')
     def _compute_current_session(self):
@@ -231,24 +219,54 @@ class WpConfig(models.Model):
     @api.constrains('company_id', 'stock_location_id')
     def _check_company_location(self):
         if self.stock_location_id.company_id and self.stock_location_id.company_id.id != self.company_id.id:
-            raise ValidationError(_("The stock location and the Weighing Point must belong to the same company."))
+            raise ValidationError(_("The stock location and the weighing point must belong to the same company."))
 
-    @api.constrains('pricelist_id', 'available_pricelist_ids')
+    @api.constrains('company_id', 'journal_id')
+    def _check_company_journal(self):
+        if self.journal_id and self.journal_id.company_id.id != self.company_id.id:
+            raise ValidationError(_("The sales journal and the weighing point must belong to the same company."))
+
+    @api.constrains('company_id', 'invoice_journal_id')
+    def _check_company_invoice_journal(self):
+        if self.invoice_journal_id and self.invoice_journal_id.company_id.id != self.company_id.id:
+            raise ValidationError(_("The invoice journal and the weighing point must belong to the same company."))
+
+    @api.constrains('company_id', 'journal_ids')
+    def _check_company_payment(self):
+        if self.env['account.journal'].search_count([('id', 'in', self.journal_ids.ids), ('company_id', '!=', self.company_id.id)]):
+            raise ValidationError(_("The method payments and the weighing point must belong to the same company."))
+
+    @api.constrains('pricelist_id', 'available_pricelist_ids', 'journal_id', 'invoice_journal_id', 'journal_ids')
     def _check_currencies(self):
         if self.pricelist_id not in self.available_pricelist_ids:
             raise ValidationError(_("The default pricelist must be included in the available pricelists."))
         if any(self.available_pricelist_ids.mapped(lambda pricelist: pricelist.currency_id != self.currency_id)):
-            raise ValidationError(_("All available pricelists must be in the same currency as the company"))
+            raise ValidationError(_("All available pricelists must be in the same currency as the company or"
+                                    " as the Sales Journal set on this weighing point if you use"
+                                    " the Accounting application."))
+        if self.invoice_journal_id.currency_id and self.invoice_journal_id.currency_id != self.currency_id:
+            raise ValidationError(_("The invoice journal must be in the same currency as the Sales Journal or the company currency if that is not set."))
+        if any(self.journal_ids.mapped(lambda journal: journal.currency_id and journal.currency_id != self.currency_id)):
+            raise ValidationError(_("All payment methods must be in the same currency as the Sales Journal or the company currency if that is not set."))
 
     @api.constrains('company_id', 'available_pricelist_ids')
     def _check_companies(self):
         if any(self.available_pricelist_ids.mapped(lambda pl: pl.company_id.id not in (False, self.company_id.id))):
-            raise ValidationError(_("The selected pricelists must belong to no company or the company of the Weighing Point."))
+            raise ValidationError(_("The selected pricelists must belong to no company or the company of the weighing point."))
 
     @api.onchange('iface_print_via_proxy')
     def _onchange_iface_print_via_proxy(self):
         self.iface_print_auto = self.iface_print_via_proxy
 
+    @api.onchange('module_account')
+    def _onchange_module_account(self):
+        if self.module_account:
+            self.invoice_journal_id = self.env.ref('weighing_point.wp_sale_journal')
+
+    @api.onchange('picking_type_id')
+    def _onchange_picking_type_id(self):
+        if self.picking_type_id.default_location_src_id.usage == 'internal' and self.picking_type_id.default_location_dest_id.usage == 'customer':
+            self.stock_location_id = self.picking_type_id.default_location_src_id.id
 
     @api.onchange('use_pricelist')
     def _onchange_use_pricelist(self):
@@ -284,7 +302,9 @@ class WpConfig(models.Model):
             self.proxy_ip = False
             self.iface_scan_via_proxy = False
             self.iface_electronic_scale = False
+            self.iface_cashdrawer = False
             self.iface_print_via_proxy = False
+            self.iface_customer_facing_display = False
 
     @api.onchange('tax_regime')
     def _onchange_tax_regime(self):
@@ -319,8 +339,10 @@ class WpConfig(models.Model):
         return result
 
     @api.model
-    #TODO(Vincent) understand
     def create(self, values):
+        if values.get('is_iotbox') and values.get('iface_customer_facing_display'):
+            if values.get('customer_facing_display_html') and not values['customer_facing_display_html'].strip():
+                values['customer_facing_display_html'] = self._compute_default_customer_html()
         IrSequence = self.env['ir.sequence'].sudo()
         val = {
             'name': _('wp Order %s') % values['name'],
@@ -329,7 +351,6 @@ class WpConfig(models.Model):
             'code': "wp.order",
             'company_id': values.get('company_id', False),
         }
-
         # force sequence_id field to new wp.order sequence
         values['sequence_id'] = IrSequence.create(val).id
 
@@ -338,11 +359,9 @@ class WpConfig(models.Model):
         wp_config = super(WpConfig, self).create(values)
         wp_config.sudo()._check_modules_to_install()
         wp_config.sudo()._check_groups_implied()
-        # If you plan to add something after this, use a new environment.
-        # The one above is no longer valid after the modules install.
+        # If you plan to add something after this, use a new environment. The one above is no longer valid after the modules install.
         return wp_config
 
-    #TODO(Vincent) understand
     @api.multi
     def write(self, vals):
         result = super(WpConfig, self).write(vals)
@@ -362,6 +381,13 @@ class WpConfig(models.Model):
             wp_config.sequence_id.unlink()
             wp_config.sequence_line_id.unlink()
         return super(WpConfig, self).unlink()
+
+    def _set_fiscal_position(self):
+        for config in self:
+            if config.tax_regime and config.default_fiscal_position_id.id not in config.fiscal_position_ids.ids:
+                config.fiscal_position_ids = [(4, config.default_fiscal_position_id.id)]
+            elif not config.tax_regime_selection and not config.tax_regime and config.fiscal_position_ids.ids:
+                config.fiscal_position_ids = [(5, 0, 0)]
 
     def _check_modules_to_install(self):
         module_installed = False
