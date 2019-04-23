@@ -757,12 +757,9 @@ odoo.define('weighing_point.chrome', function (require) {
 //
 // It is mainly composed of :
 // - a header, containing the list of orders
-    // TODO(Vincent) this below is wrong: productscreen contains
-    // left/right pane
-// - a leftpane, containing the list of bought 
-//   products (orderlines) 
+// - a leftpane, containing the scale widget
 // - a rightpane, containing the screens 
-//   (see wp_screens.js)
+//   (see screens.js)
 // - popups
 // - an onscreen keyboard
 // - .gui which controls the switching between 
@@ -833,6 +830,7 @@ odoo.define('weighing_point.chrome', function (require) {
 
             this.renderElement();
 
+            //TODO(Vincent) add a home-logo/button
             this.$('.wp-logo').click(function () {
                 self.click_logo();
             });
@@ -1074,10 +1072,6 @@ odoo.define('weighing_point.chrome', function (require) {
                 'name': 'scale_widget',
                 'widget': ScaleWidget,
                 'replace': '.placeholder-ScaleWidget'
-            }, {
-                'name':'back_button',
-                'widget': BackButtonWidget,
-                'replace': '.placeholder-BackButtonWidget'
             },
         ],
 

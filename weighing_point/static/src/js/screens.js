@@ -382,20 +382,20 @@ odoo.define('weighing_point.screens', function (require) {
         weighing_screen:'weighing',
         scanning_screen:'scanning',
 
-        show: function () {
+        start: function () {
             this._super();
             var self = this;
 
             this.$('.products-screen').click(function () {
-                self.gui.show_screen(self.products_screen);
+                self.gui.show_screen(self.products_screen, {'previous-screen':'startup'});
             });
 
             this.$('.weighing-screen').click(function () {
-                self.gui.show_screen(self.weighing_screen);
+                self.gui.show_screen(self.weighing_screen, {'previous-screen':'startup'});
             });
 
             this.$('.scanning-screen').click(function () {
-                self.gui.show_screen(self.scanning_screen);
+                self.gui.show_screen(self.scanning_screen, {'previous-screen':'startup'});
             });
         },
 
@@ -417,11 +417,21 @@ odoo.define('weighing_point.screens', function (require) {
         previous_screen:'',
         next_screen:'',
 
-        show: function () {
+        start:function(){
             this._super();
             var self = this;
-            // TODO(Vincent) develop logic
+            // TODO(Vincent) continue logic
+
+            // TODO(Vincent) move this to a unique widget
+            $(".button.previous-screen").click(function () {
+                var currentScreen = self.gui.get_current_screen();
+                var previousScreen = self.gui.get_current_screen_param('previous-screen');
+                if (previousScreen && previousScreen !== currentScreen){
+                    self.gui.show_screen(previousScreen);
+                }
+            });
         },
+
 
     });
     gui.define_screen({name: 'scanning', widget: ScanningScreenWidget});
@@ -444,6 +454,8 @@ odoo.define('weighing_point.screens', function (require) {
         show: function () {
             this._super();
             var self = this;
+            console.log(this.gui.get_current_screen());
+
             // TODO(Vincent) develop logic
         },
 
@@ -1034,6 +1046,8 @@ odoo.define('weighing_point.screens', function (require) {
 
         show: function (reset) {
             this._super();
+            console.log(this.gui.get_current_screen());
+
             if (reset) {
                 this.product_categories_widget.reset_category();
                 //this.numpad.state.reset();
