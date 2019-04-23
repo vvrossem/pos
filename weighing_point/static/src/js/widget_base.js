@@ -7,7 +7,7 @@ var Widget = require('web.Widget');
 
 var round_di = utils.round_decimals;
 
-// This is a base class for all Widgets in the wp. It exposes relevant data to the 
+// This is a base class for all Widgets in the weighing point. It exposes relevant data to the
 // templates : 
 // - widget.currency : { symbol: '$' | '€' | ..., position: 'before' | 'after }
 // - widget.format_currency(amount) : this method returns a formatted string based on the

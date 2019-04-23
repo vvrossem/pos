@@ -16,16 +16,40 @@
 
             <div class="wp-content">
 
-                <div class='window'>
-                    <div class='subwindow'>
-                        <div class='subwindow-container'>
-                            <div class='subwindow-container-fix screens'>
-                                <!-- here go the screens -->
+                <div class="leftpane">
+                    <div class='window'>
+                        <div class='subwindow'>
+                            <div class='subwindow-container'>
+                                <div class='subwindow-container-fix'>
+                                    <!-- here goes the scale widget -->
+                                    <div class="placeholder-ScaleWidget"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class='subwindow collapsed'>
+                            <div class='subwindow-container'>
+                                <div class='subwindow-container-fix pads'>
+                                    <div class="control-buttons oe_hidden"></div>
+                                    <div class="placeholder-ActionpadWidget"></div>
+                                    <div class="placeholder-NumpadWidget"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
+                <div class="rightpane">
+                    <div class='window'>
+                        <div class='subwindow'>
+                            <div class='subwindow-container'>
+                                <div class='subwindow-container-fix screens'>
+                                    <!-- here go the screens -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div class="placeholder-OnscreenKeyboardWidget"></div>
             </div>
 
@@ -244,47 +268,21 @@
 
     <t t-name="ProductScreenWidget">
         <div class="product-screen screen">
-            <div class="leftpane">
-                <div class='window'>
-                    <div class='subwindow'>
-                        <div class='subwindow-container'>
-                            <div class='subwindow-container-fix'>
-                                <div class="placeholder-OrderWidget"></div>
-                            </div>
+            <table class="layout-table">
+                <tr class="header-row">
+                    <td class="header-cell">
+                        <span class="placeholder-ProductCategoriesWidget" />
+                    </td>
+                </tr>
+                <tr class="content-row">
+                    <td class="content-cell">
+                        <div class="content-container">
+                            <span class="placeholder-ProductListWidget" />
                         </div>
-                    </div>
+                    </td>
+                </tr>
 
-                    <div class='subwindow collapsed'>
-                        <div class='subwindow-container'>
-                            <div class='subwindow-container-fix pads'>
-                                <div class="control-buttons oe_hidden"></div>
-                                <div class="placeholder-ActionpadWidget"></div>
-                                <div class="placeholder-NumpadWidget"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-            <div class="rightpane">
-                <table class="layout-table">
-
-                    <tr class="header-row">
-                        <td class="header-cell">
-                            <span class="placeholder-ProductCategoriesWidget" />
-                        </td>
-                    </tr>
-
-                    <tr class="content-row">
-                        <td class="content-cell">
-                            <div class="content-container">
-                                <span class="placeholder-ProductListWidget" />
-                            </div>
-                        </td>
-                    </tr>
-
-                </table>
-            </div>
+            </table>
         </div>
     </t>
 
@@ -312,6 +310,51 @@
                         Order
                         <i class='fa fa-angle-double-right'></i>
                     </div>
+                </div>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="ScaleWidget">
+        <div class="scale-screen screen">
+            <div class="screen-content">
+                <div class="top-content">
+                    <h1 class='product-name'><t t-esc="widget.get_product_name()" /></h1>
+                </div>
+                <div class="centered-content">
+                    <div class='weight js-weight'>
+                        <t t-esc="widget.get_product_weight_string()" />
+                    </div>
+                    <div class='product-price'>
+                        <t t-esc="widget.format_currency(widget.get_product_price()) + '/' + widget.get_product_uom()" />
+                    </div>
+                    <div class='computed-price'>
+                        123.14 €
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="StartupScreenWidget">
+        <div class="screen">
+            <div class="screen-content">
+                <div class="top-content">
+                    <h1>STARTUPSCREEN</h1>
+                </div>
+
+
+                <div class="centered-content">
+                    <div class="button products-screen">
+                        TO PRODUCTS SCREEN
+                    </div>
+                    <div class="button weighing-screen">
+                        TO WEIGHING SCREEN
+                    </div>
+                    <div class="button scanning-screen">
+                        TO SCANNING SCREEN
+                    </div>
+
                 </div>
             </div>
         </div>

@@ -27,11 +27,13 @@ var Gui = core.Class.extend({
         this.current_screen = null; 
 
         this.chrome.ready.then(function(){
+            console.log('this.chrome.ready');
             self.close_other_tabs();
             var order = self.wp.get_order();
             if (order) {
                 self.show_saved_screen(order);
             } else {
+                console.log('show_screen:' + self.startup_screen);
                 self.show_screen(self.startup_screen);
             }
             self.wp.bind('change:selectedOrder', function(){
