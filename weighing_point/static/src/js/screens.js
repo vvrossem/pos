@@ -253,7 +253,7 @@ odoo.define('weighing_point.screens', function (require) {
 // The scale screen displays the weight of
 // a product on the electronic scale.
     //TODO(Vincent) what to do with this?
-    // transform it into a 'selected product' screen?
+    // transform it into a 'selected product/container' screen?
     var ScaleScreenWidget = ScreenWidget.extend({
         template: 'ScaleScreenWidget',
 
@@ -368,23 +368,23 @@ odoo.define('weighing_point.screens', function (require) {
     \*======================================*/
 
     /**
-     * The startup screen proposes the following actions to the user:
-     * - weigh filled bags
-     * - weigh empty containers
-     * - scan filled containers
+     * The startup screen redirects
+     * to the following actions and screens:
+     * - weigh filled bags (products screen)
+     * - weigh empty containers (weighing screen)
+     * - scan filled containers (scanning screen)
      */
 
     var StartupScreenWidget = ScreenWidget.extend({
         template: 'StartupScreenWidget',
 
         products_screen:'products',
-        scanning_screen:'scanning',
         weighing_screen:'weighing',
+        scanning_screen:'scanning',
 
         show: function () {
             this._super();
             var self = this;
-
 
             this.$('.products-screen').click(function () {
                 self.gui.show_screen(self.products_screen);
@@ -403,6 +403,54 @@ odoo.define('weighing_point.screens', function (require) {
     gui.define_screen({name: 'startup', widget: StartupScreenWidget});
 
     /*--------------------------------------*\
+     |         THE SCANNING SCREEN          |
+    \*======================================*/
+
+    /**
+     * The scanning screen
+     * ...
+     */
+
+    var ScanningScreenWidget = ScreenWidget.extend({
+        template: 'ScanningScreenWidget',
+
+        previous_screen:'',
+        next_screen:'',
+
+        show: function () {
+            this._super();
+            var self = this;
+            // TODO(Vincent) develop logic
+        },
+
+    });
+    gui.define_screen({name: 'scanning', widget: ScanningScreenWidget});
+
+    /*--------------------------------------*\
+     |         THE WEIGHING SCREEN          |
+    \*======================================*/
+
+    /**
+     * The weighing screen
+     * ...
+     */
+
+    var WeighingScreenWidget = ScreenWidget.extend({
+        template: 'WeighingScreenWidget',
+
+        previous_screen:'',
+        next_screen:'',
+
+        show: function () {
+            this._super();
+            var self = this;
+            // TODO(Vincent) develop logic
+        },
+
+    });
+    gui.define_screen({name: 'weighing', widget: WeighingScreenWidget});
+
+    /*--------------------------------------*\
      |         THE PRODUCT SCREEN           |
     \*======================================*/
 
@@ -415,98 +463,7 @@ odoo.define('weighing_point.screens', function (require) {
 // the code follows.
 
 
-    /* ------------ The Numpad ------------ */
 
-// The numpad that edits the order lines.
-
-    var NumpadWidget = WpBaseWidget.extend({
-        template: 'NumpadWidget',
-        init: function (parent) {
-            this._super(parent);
-            this.state = new models.NumpadState();
-        },
-        start: function () {
-            this.applyAccessRights();
-            this.state.bind('change:mode', this.changedMode, this);
-            this.wp.bind('change:cashier', this.applyAccessRights, this);
-            this.changedMode();
-            this.$el.find('.numpad-backspace').click(_.bind(this.clickDeleteLastChar, this));
-            this.$el.find('.numpad-minus').click(_.bind(this.clickSwitchSign, this));
-            this.$el.find('.number-char').click(_.bind(this.clickAppendNewChar, this));
-            this.$el.find('.mode-button').click(_.bind(this.clickChangeMode, this));
-        },
-        applyAccessRights: function () {
-            var cashier = this.wp.get('cashier') || this.wp.get_cashier();
-            var has_price_control_rights = !this.wp.config.restrict_price_control || cashier.role == 'manager';
-            this.$el.find('.mode-button[data-mode="price"]')
-                .toggleClass('disabled-mode', !has_price_control_rights)
-                .prop('disabled', !has_price_control_rights);
-            if (!has_price_control_rights && this.state.get('mode') == 'price') {
-                this.state.changeMode('quantity');
-            }
-        },
-        clickDeleteLastChar: function () {
-            return this.state.deleteLastChar();
-        },
-        clickSwitchSign: function () {
-            return this.state.switchSign();
-        },
-        clickAppendNewChar: function (event) {
-            var newChar;
-            newChar = event.currentTarget.innerText || event.currentTarget.textContent;
-            return this.state.appendNewChar(newChar);
-        },
-        clickChangeMode: function (event) {
-            var newMode = event.currentTarget.attributes['data-mode'].nodeValue;
-            return this.state.changeMode(newMode);
-        },
-        changedMode: function () {
-            var mode = this.state.get('mode');
-            $('.selected-mode').removeClass('selected-mode');
-            $(_.str.sprintf('.mode-button[data-mode="%s"]', mode), this.$el).addClass('selected-mode');
-        },
-    });
-
-    /* ---------- The Action Pad ---------- */
-
-// The action pad contains the payment button and the 
-// customer selection button
-
-    var ActionpadWidget = WpBaseWidget.extend({
-        template: 'ActionpadWidget',
-        init: function (parent, options) {
-            var self = this;
-            this._super(parent, options);
-
-            this.wp.bind('change:selectedClient', function () {
-                self.renderElement();
-            });
-        },
-        renderElement: function () {
-            var self = this;
-            this._super();
-            this.$('.pay').click(function () {
-                var order = self.wp.get_order();
-                var has_valid_product_lot = _.every(order.orderlines.models, function (line) {
-                    return line.has_valid_product_lot();
-                });
-                if (!has_valid_product_lot) {
-                    self.gui.show_popup('confirm', {
-                        'title': _t('Empty Serial/Lot Number'),
-                        'body': _t('One or more product(s) required serial/lot number.'),
-                        confirm: function () {
-                            self.gui.show_screen('payment');
-                        },
-                    });
-                } else {
-                    self.gui.show_screen('payment');
-                }
-            });
-            this.$('.set-customer').click(function () {
-                self.gui.show_screen('clientlist');
-            });
-        }
-    });
 
     /* --------- The Order Widget --------- */
 
@@ -1031,16 +988,9 @@ odoo.define('weighing_point.screens', function (require) {
 
             var self = this;
 
-            // TODO(Vincent) move this somewhere else
-            this.actionpad = new ActionpadWidget(this, {});
-            this.actionpad.replace(this.$('.placeholder-ActionpadWidget'));
-
-            this.numpad = new NumpadWidget(this, {});
-            this.numpad.replace(this.$('.placeholder-NumpadWidget'));
-
-            this.order_widget = new OrderWidget(this, {
-                numpad_state: this.numpad.state,
-            });
+            //this.order_widget = new OrderWidget(this, {
+            //    numpad_state: this.numpad.state,
+            //});
             //this.order_widget.replace(this.$('.placeholder-OrderWidget'));
 
             this.product_list_widget = new ProductListWidget(this, {
@@ -1086,7 +1036,7 @@ odoo.define('weighing_point.screens', function (require) {
             this._super();
             if (reset) {
                 this.product_categories_widget.reset_category();
-                this.numpad.state.reset();
+                //this.numpad.state.reset();
             }
             if (this.wp.config.iface_vkeyboard && this.chrome.widget.keyboard) {
                 this.chrome.widget.keyboard.connect($(this.el.querySelector('.searchbox input')));
@@ -2330,12 +2280,13 @@ odoo.define('weighing_point.screens', function (require) {
         define_action_button: define_action_button,
         ScreenWidget: ScreenWidget,
         PaymentScreenWidget: PaymentScreenWidget,
+        ScanningScreenWidget:ScanningScreenWidget,
         OrderWidget: OrderWidget,
-        NumpadWidget: NumpadWidget,
+        //NumpadWidget: NumpadWidget,
         ProductScreenWidget: ProductScreenWidget,
         ProductListWidget: ProductListWidget,
         ClientListScreenWidget: ClientListScreenWidget,
-        ActionpadWidget: ActionpadWidget,
+        //ActionpadWidget: ActionpadWidget,
         DomCache: DomCache,
         ProductCategoriesWidget: ProductCategoriesWidget,
         ScaleScreenWidget: ScaleScreenWidget,

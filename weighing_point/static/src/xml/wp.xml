@@ -321,7 +321,7 @@
                 <div class="top-content">
                     <h1 class='product-name'><t t-esc="widget.get_product_name()" /></h1>
                 </div>
-                <div class="centered-content">
+                <div class="full-content">
                     <div class='weight js-weight'>
                         <t t-esc="widget.get_product_weight_string()" />
                     </div>
@@ -344,7 +344,7 @@
                 </div>
 
 
-                <div class="centered-content">
+                <div class="full-content">
                     <div class="button products-screen">
                         TO PRODUCTS SCREEN
                     </div>
@@ -356,6 +356,30 @@
                     </div>
 
                 </div>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="ScanningScreenWidget">
+        <div class="screen">
+            <div class="screen-content">
+                <div class="top-content">
+                    <h1>SCANNING SCREEN</h1>
+                </div>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="WeighingScreenWidget">
+        <div class="screen">
+            <div class="screen-content">
+                <div class="top-content">
+                    <h1>WEIGHING SCREEN</h1>
+                </div>
+                <div class="full-content">
+                    <div>Weigh the empty container</div>
+                </div>
+
             </div>
         </div>
     </t>

@@ -33,7 +33,6 @@ var Gui = core.Class.extend({
             if (order) {
                 self.show_saved_screen(order);
             } else {
-                console.log('show_screen:' + self.startup_screen);
                 self.show_screen(self.startup_screen);
             }
             self.wp.bind('change:selectedOrder', function(){
