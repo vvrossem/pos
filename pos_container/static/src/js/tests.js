@@ -10,43 +10,43 @@ odoo.define('pos_container.tour.tare', function (require) {
         }
     }
 
-	function scan(barcode) {
-		return {
-			content: "Scanning barcode " + barcode,
-			trigger: "input.ean",
-			run: "text " + barcode
-		}
-	}
+    function scan(barcode) {
+        return {
+            content: "Scanning barcode " + barcode,
+            trigger: "input.ean",
+            run: "text " + barcode
+        }
+    }
 
-	function confirm_scan() {
-		return {
-			content: "Confirm barcode",
-			trigger: ".button.barcode",
-		}
-	}
+    function confirm_scan() {
+        return {
+            content: "Confirm barcode",
+            trigger: ".button.barcode",
+        }
+    }
 
-	function set_weight(weight) {
-		return {
-			content: "Setting weight " + weight,
-			trigger: "input.weight",
-			run: "text " + weight
-		}
-	}
+    function set_weight(weight) {
+        return {
+            content: "Setting weight " + weight,
+            trigger: "input.weight",
+            run: "text " + weight
+        }
+    }
 
-	function confirm_weight() {
-		return {
-			content: "Confirm weight",
-			trigger: ".button.set_weight",
-		}
-	}
+    function confirm_weight() {
+        return {
+            content: "Confirm weight",
+            trigger: ".button.set_weight",
+        }
+    }
 
-	function check_selected_orderline(message, check) {
-		return {
-			content: message,
-			trigger: ".orderline.selected " + check,
-			run: function () {}, // it's a check
-		}
-	}
+    function check_selected_orderline(message, check) {
+        return {
+            content: message,
+            trigger: ".orderline.selected " + check,
+            run: function () {}, // it's a check
+        }
+    }
 
 
     var steps = [{
@@ -54,46 +54,46 @@ odoo.define('pos_container.tour.tare', function (require) {
         trigger: '.o_main_content:has(.loader:hidden)',
         run: function () {},
     },
-	scan('0499999999998'),
-	confirm_scan(),
-	set_weight(0.1),
-	confirm_weight(),
+    scan('0499999999998'),
+    confirm_scan(),
+    set_weight(0.1),
+    confirm_weight(),
     {
         content: "Click on save",
         trigger: ".add-container",
     },
-	// Test a second time with a custom name
-	scan('0499999999981'),
-	confirm_scan(),
-	set_weight(0.2),
-	confirm_weight(),
-	{
-		content: "Set a custom name",
-		trigger:"input.container-name",
-		run:"text TOTO",
-	}, {
+    // Test a second time with a custom name
+    scan('0499999999981'),
+    confirm_scan(),
+    set_weight(0.2),
+    confirm_weight(),
+    {
+        content: "Set a custom name",
+        trigger:"input.container-name",
+        run:"text TOTO",
+    }, {
         content: "Click on save",
         trigger: ".add-container",
     },
-	// Scan du premier contenant 
-	scan('0499999999998'),
-	confirm_scan(),
-	check_selected_orderline("Check: empty container in the orderline", ".product-name:contains('Container without product')"),
-	check_selected_orderline("Check: the name is 'Container'", ".info:contains('Container')"),
+    // Scan du premier contenant 
+    scan('0499999999998'),
+    confirm_scan(),
+    check_selected_orderline("Check: empty container in the orderline", ".product-name:contains('Container without product')"),
+    check_selected_orderline("Check: the name is 'Container'", ".info:contains('Container')"),
     {
         content: "select product",
         trigger: ".product:contains('Whiteboard Pen')", //UoM = kg
     },
-	set_weight(0.3),
-	confirm_weight(),
-	{
+    set_weight(0.3),
+    confirm_weight(),
+    {
         content: "validate weight",
         trigger: ".buy-product",
     },
-	check_selected_orderline("Check: the name is 'Container'", ".info:contains('Container')"),
-	check_selected_orderline("Check: orderline in AUTO tare mode", ".pos-right-align:contains('AUTO')"),
-	check_selected_orderline("Check: orderline's product is the Pen", ".product-name:contains('Whiteboard Pen')"),
-	check_selected_orderline("Check: the quantity is the tared weight", ".info:contains('0.200')"),
+    check_selected_orderline("Check: the name is 'Container'", ".info:contains('Container')"),
+    check_selected_orderline("Check: orderline in AUTO tare mode", ".pos-right-align:contains('AUTO')"),
+    check_selected_orderline("Check: orderline's product is the Pen", ".product-name:contains('Whiteboard Pen')"),
+    check_selected_orderline("Check: the quantity is the tared weight", ".info:contains('0.200')"),
     {
         content: "click container button",
         trigger: ".control-button.o_container_button",
@@ -136,9 +136,9 @@ odoo.define('pos_container.tour.tare', function (require) {
         content: "select another product",
         trigger: ".product:contains('Desk Organizer')", //UoM = kg
     },
-	set_weight(0.5),
-	confirm_weight(),
-	{
+    set_weight(0.5),
+    confirm_weight(),
+    {
         content: "confirm purchase",
         trigger: ".buy-product",
     }, {
@@ -148,9 +148,9 @@ odoo.define('pos_container.tour.tare', function (require) {
     click_numpad(0),
     click_numpad('.'),
     click_numpad(2),
-	check_selected_orderline("Check: orderline in MAN tare mode", ".pos-right-align:contains('MAN')"),
-	check_selected_orderline("Check: orderline's product is the Organizer", ".product-name:contains('Desk Organizer')"),
-	check_selected_orderline("Check: the quantity is the tared weight", ".info:contains('0.300')"),
+    check_selected_orderline("Check: orderline in MAN tare mode", ".pos-right-align:contains('MAN')"),
+    check_selected_orderline("Check: orderline's product is the Organizer", ".product-name:contains('Desk Organizer')"),
+    check_selected_orderline("Check: the quantity is the tared weight", ".info:contains('0.300')"),
     {
         content: "click orderline auto",
         trigger: ".orderline .pos-right-align:contains('AUTO')",
@@ -161,9 +161,9 @@ odoo.define('pos_container.tour.tare', function (require) {
     click_numpad(0),
     click_numpad('.'),
     click_numpad(2),
-	check_selected_orderline("Check: orderline in MAN tare mode", ".pos-right-align:contains('MAN')"),
-	check_selected_orderline("Check: orderline's product is the Pen", ".product-name:contains('Whiteboard Pen')"),
-	check_selected_orderline("Check: the quantity is the tared weight", ".info:contains('0.100')"),
+    check_selected_orderline("Check: orderline in MAN tare mode", ".pos-right-align:contains('MAN')"),
+    check_selected_orderline("Check: orderline's product is the Pen", ".product-name:contains('Whiteboard Pen')"),
+    check_selected_orderline("Check: the quantity is the tared weight", ".info:contains('0.100')"),
     {
         content: "Add a unit product",
         trigger: ".product:contains('Large Cabinet')",
@@ -173,7 +173,7 @@ odoo.define('pos_container.tour.tare', function (require) {
     },
     click_numpad(1),
     click_numpad(0),
-	check_selected_orderline("Check: orderline in MAN tare mode", ".pos-right-align:contains('MAN')"),
+    check_selected_orderline("Check: orderline in MAN tare mode", ".pos-right-align:contains('MAN')"),
     {
         content: "Add a unit product",
         trigger: ".product:contains('Large Cabinet')",
@@ -184,21 +184,21 @@ odoo.define('pos_container.tour.tare', function (require) {
     click_numpad(2),
     click_numpad(0),
     click_numpad(0),
-	check_selected_orderline("Check: orderline in MAN tare mode", ".pos-right-align:contains('MAN')"),
-	// Ajouter une ligne en AUTO
-	scan('0499999999998'),
-	confirm_scan(),
+    check_selected_orderline("Check: orderline in MAN tare mode", ".pos-right-align:contains('MAN')"),
+    // Ajouter une ligne en AUTO
+    scan('0499999999998'),
+    confirm_scan(),
     {
         content: "select product",
         trigger: ".product:contains('Whiteboard Pen')", //UoM = kg
     },
-	set_weight(0.3),
-	confirm_weight(),
-	{
+    set_weight(0.3),
+    confirm_weight(),
+    {
         content: "validate weight",
         trigger: ".buy-product",
     },
-	{
+    {
         content: "pay",
         trigger: ".button.pay",
     },
@@ -206,7 +206,7 @@ odoo.define('pos_container.tour.tare', function (require) {
     click_numpad(0),
     click_numpad(0),
     click_numpad(0),
-	{
+    {
         content: "validate",
         trigger: ".button.next",
     }];

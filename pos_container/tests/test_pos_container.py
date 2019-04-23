@@ -2,7 +2,7 @@ import odoo.tests
 
 
 @odoo.tests.tagged('pos_install', '-at-install')
-class testUi(odoo.tests.HttpCase):
+class TestUi(odoo.tests.HttpCase):
 
     def test_01_pos_container_tour(self):
         self.phantom_js(
