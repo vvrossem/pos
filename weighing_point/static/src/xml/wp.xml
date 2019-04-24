@@ -33,10 +33,8 @@
                                     <!--<div class="control-buttons oe_hidden"></div>
                                     <div class="placeholder-ActionpadWidget"></div>
                                     <div class="placeholder-NumpadWidget"></div>-->
-                                    <span class='button previous-screen'>
-                                        <i class='fa fa-angle-double-left'></i>
-                                        Back
-                                    </span>
+                                    <div class="placeholder-BackButtonWidget"></div>
+
                                 </div>
                             </div>
                         </div>
@@ -285,12 +283,12 @@
                         </div>
                     </td>
                 </tr>
-
             </table>
         </div>
     </t>
 
-    <t t-name="ScaleScreenWidget">
+
+    <!--<t t-name="ScaleScreenWidget">
         <div class="scale-screen screen">
             <div class="screen-content">
                 <div class="top-content">
@@ -305,7 +303,7 @@
                         <t t-esc="widget.get_product_weight_string()" />
                     </div>
                     <div class='product-price'>
-                        <t t-esc="widget.format_currency(widget.get_product_price()) + '/' + widget.get_product_uom()" />
+                        <t t-esc="widget.format_currency(widget.get_product_price())" />
                     </div>
                     <div class='computed-price'>
                         123.14 €
@@ -317,14 +315,33 @@
                 </div>
             </div>
         </div>
+    </t>-->
+
+    <t t-name="SelectedProductWidget">
+        <div class='product-container'>
+            <div class="product-scroller touch-scrollable">
+                <div class="selected-product">
+                </div>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="SelectedProductScreenWidget">
+        <div class="selected-product-screen screen">
+            <div class="screen-content">
+                <div class="top-content">
+                    <h1 class='product-name'>Selected product:</h1>
+                </div>
+                <div class="full-content">
+                    <span class="placeholder-SelectedProductWidget" />
+                </div>
+            </div>
+        </div>
     </t>
 
     <t t-name="ScaleWidget">
         <div class="scale-screen screen">
             <div class="screen-content">
-                <div class="top-content">
-                    <h1 class='product-name'><t t-esc="widget.get_product_name()" /></h1>
-                </div>
                 <div class="full-content">
                     <div class='weight js-weight'>
                         <t t-esc="widget.get_product_weight_string()" />
@@ -333,7 +350,7 @@
                         <t t-esc="widget.format_currency(widget.get_product_price()) + '/' + widget.get_product_uom()" />
                     </div>
                     <div class='computed-price'>
-                        123.14 €
+
                     </div>
                 </div>
             </div>
@@ -341,13 +358,11 @@
     </t>
 
     <t t-name="StartupScreenWidget">
-        <div class="screen">
+        <div class="startup-screen screen">
             <div class="screen-content">
                 <div class="top-content">
                     <h1>STARTUPSCREEN</h1>
                 </div>
-
-
                 <div class="full-content">
                     <div class="button products-screen">
                         TO PRODUCTS SCREEN
@@ -358,14 +373,13 @@
                     <div class="button scanning-screen">
                         TO SCANNING SCREEN
                     </div>
-
                 </div>
             </div>
         </div>
     </t>
 
     <t t-name="ScanningScreenWidget">
-        <div class="screen">
+        <div class="scanning-screen screen">
             <div class="screen-content">
                 <div class="top-content">
                     <h1>SCANNING SCREEN</h1>
@@ -375,7 +389,7 @@
     </t>
 
     <t t-name="WeighingScreenWidget">
-        <div class="screen">
+        <div class="weighing-screen screen">
             <div class="screen-content">
                 <div class="top-content">
                     <h1>WEIGHING SCREEN</h1>
@@ -385,6 +399,15 @@
                 </div>
 
             </div>
+        </div>
+    </t>
+
+    <t t-name="BackButtonWidget">
+        <div class="control-button">
+            <span class='button back'>
+                <i class='fa fa-angle-double-left'></i>
+                Back
+            </span>
         </div>
     </t>
 
@@ -1313,6 +1336,27 @@
     </t>
 
     <t t-name="Product">
+        <article class='product' t-att-data-product-id="product.id" tabindex="0" t-attf-aria-labelledby="article_product_#{product.id}">
+            <div class="product-img">
+                <img t-att-src='image_url' alt="Product image"/>
+                <t t-if="!product.to_weight">
+                    <span class="price-tag">
+                        <t t-esc="widget.format_currency(product.get_price(pricelist, 1),'Product Price')"/>
+                    </span>
+                </t>
+                <t t-if="product.to_weight">
+                    <span class="price-tag">
+                        <t t-esc="widget.format_currency(product.get_price(pricelist, 1),'Product Price')+'/'+widget.wp.units_by_id[product.uom_id[0]].name"/>
+                    </span>
+                </t>
+            </div>
+            <div class="product-name" t-attf-id="article_product_#{product.id}">
+                <t t-esc="product.display_name"/>
+            </div>
+        </article>
+    </t>
+
+    <t t-name="SelectedProduct">
         <article class='product' t-att-data-product-id="product.id" tabindex="0" t-attf-aria-labelledby="article_product_#{product.id}">
             <div class="product-img">
                 <img t-att-src='image_url' alt="Product image"/>

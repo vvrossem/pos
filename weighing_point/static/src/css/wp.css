@@ -526,7 +526,7 @@ td {
     bottom: 0;
     background: #F0EEEE;
 }
-
+/*TODO(Vincent) change this*/
 /*  ********* The leftpane contains the order, numpad and paypad ********* */
 
 .wp .leftpane {
@@ -1180,6 +1180,7 @@ td {
     right: 0px;
     margin-right: 16px;
 }
+
 .screen .left-content{
     position: absolute;
     left:0px; top: 64px; bottom: 0px;
@@ -1210,11 +1211,46 @@ td {
     overflow-x: hidden;
     overflow-y: auto;
 }
+
 .screen .full-content{
     position: absolute;
     right: 0%; top: 65px; bottom: 0px;
     left: 0%;
 }
+
+.screen .full-content .button {
+    position: relative;
+    display: inline-block;
+    top: 0px;
+    line-height: 32px;
+    padding: 3px 13px;
+    font-size: 20px;
+    background: rgb(230, 230, 230);
+    margin: 12px;
+    border-radius: 3px;
+    border: solid 1px rgb(209, 209, 209);
+    cursor: pointer;
+    transition: all 150ms linear;
+}
+
+.screen .full-content .button:hover {
+    background: #efefef;
+}
+.screen .full-content .button:active {
+    background: black;
+    border-color: black;
+    color: white;
+}
+.screen .full-content .button.highlight {
+    background: rgb(110,200,155);
+    color: white;
+    border: solid 1px rgb(110,200,155);
+}
+.screen .full-content .button.highlight:hover {
+    background: rgb(120,210,165);
+}
+
+
 
 /* a) Layout for the Product Screen */
 

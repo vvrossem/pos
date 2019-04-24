@@ -10,11 +10,15 @@ odoo.define('weighing_point.chrome', function (require) {
     var ajax = require('web.ajax');
     var CrashManager = require('web.CrashManager');
     var BarcodeEvents = require('barcodes.BarcodeEvents').BarcodeEvents;
+    var utils = require('web.utils');
+
 
 
     var _t = core._t;
     var _lt = core._lt;
     var QWeb = core.qweb;
+
+    var round_pr = utils.round_precision;
 
 
 
@@ -28,8 +32,9 @@ odoo.define('weighing_point.chrome', function (require) {
     var ScaleWidget = WpBaseWidget.extend({
         template: 'ScaleWidget',
 
+        //TODO(Vincent) how to reset weight data?
+
         init: function (parent, options) {
-            console.log('[ScaleWidget]init');
             this._super(parent, options);
         },
 
@@ -50,7 +55,6 @@ odoo.define('weighing_point.chrome', function (require) {
 
         },
         get_product: function () {
-            // TODO(Vincent) this won't work anymore
             return this.gui.get_current_screen_param('product');
         },
         _get_active_pricelist: function () {
@@ -60,7 +64,6 @@ odoo.define('weighing_point.chrome', function (require) {
             if (current_order) {
                 current_pricelist = current_order.pricelist;
             }
-
             return current_pricelist;
         },
         // TODO(Vincent) add print_label: function() {...}
@@ -74,25 +77,26 @@ odoo.define('weighing_point.chrome', function (require) {
         get_product_price: function () {
             var product = this.get_product();
             var pricelist = this._get_active_pricelist();
+
             return (product ? product.get_price(pricelist, this.weight) : 0) || 0;
         },
         get_product_uom: function () {
             var product = this.get_product();
-
             if (product) {
                 return this.wp.units_by_id[product.uom_id[0]].name;
             } else {
-                return '';
+                return 'kg';
             }
         },
         set_weight: function (weight) {
             this.weight = weight;
             this.$('.weight').text(this.get_product_weight_string());
             this.$('.computed-price').text(this.get_computed_price_string());
+            this.$('.product-price').text(this.format_currency(this.get_product_price()) + '/' + this.get_product_uom());
         },
         get_product_weight_string: function () {
             var product = this.get_product();
-            var defaultstr = (this.weight || 0).toFixed(3) + ' Kg';
+            var defaultstr = (this.weight || 0).toFixed(3) + ' kg';
             if (!product || !this.wp) {
                 return defaultstr;
             }
@@ -119,103 +123,11 @@ odoo.define('weighing_point.chrome', function (require) {
         },
     });
 
-    /* ------------ The Numpad ------------ */
-
-// The numpad that edits the order lines.
-
-    var BackButtonWidget = WpBaseWidget.extend({
-        template: 'BackButtonWidget',
-        init: function (parent) {
-            this._super(parent);
-            this.state = new models.NumpadState();
-        },
-        start: function () {
-            this.applyAccessRights();
-            this.state.bind('change:mode', this.changedMode, this);
-            this.wp.bind('change:cashier', this.applyAccessRights, this);
-            this.changedMode();
-            this.$el.find('.numpad-backspace').click(_.bind(this.clickDeleteLastChar, this));
-            this.$el.find('.numpad-minus').click(_.bind(this.clickSwitchSign, this));
-            this.$el.find('.number-char').click(_.bind(this.clickAppendNewChar, this));
-            this.$el.find('.mode-button').click(_.bind(this.clickChangeMode, this));
-        },
-        applyAccessRights: function () {
-            var cashier = this.wp.get('cashier') || this.wp.get_cashier();
-            var has_price_control_rights = !this.wp.config.restrict_price_control || cashier.role == 'manager';
-            this.$el.find('.mode-button[data-mode="price"]')
-                .toggleClass('disabled-mode', !has_price_control_rights)
-                .prop('disabled', !has_price_control_rights);
-            if (!has_price_control_rights && this.state.get('mode') == 'price') {
-                this.state.changeMode('quantity');
-            }
-        },
-        clickDeleteLastChar: function () {
-            return this.state.deleteLastChar();
-        },
-        clickSwitchSign: function () {
-            return this.state.switchSign();
-        },
-        clickAppendNewChar: function (event) {
-            var newChar;
-            newChar = event.currentTarget.innerText || event.currentTarget.textContent;
-            return this.state.appendNewChar(newChar);
-        },
-        clickChangeMode: function (event) {
-            var newMode = event.currentTarget.attributes['data-mode'].nodeValue;
-            return this.state.changeMode(newMode);
-        },
-        changedMode: function () {
-            var mode = this.state.get('mode');
-            $('.selected-mode').removeClass('selected-mode');
-            $(_.str.sprintf('.mode-button[data-mode="%s"]', mode), this.$el).addClass('selected-mode');
-        },
-    });
-
-    /* ---------- The Action Pad ---------- */
-
-// The action pad contains the payment button and the
-// customer selection button
-
-    var ActionpadWidget = WpBaseWidget.extend({
-        template: 'ActionpadWidget',
-        init: function (parent, options) {
-            var self = this;
-            this._super(parent, options);
-
-            this.wp.bind('change:selectedClient', function () {
-                self.renderElement();
-            });
-        },
-        renderElement: function () {
-            var self = this;
-            this._super();
-            this.$('.pay').click(function () {
-                var order = self.wp.get_order();
-                var has_valid_product_lot = _.every(order.orderlines.models, function (line) {
-                    return line.has_valid_product_lot();
-                });
-                if (!has_valid_product_lot) {
-                    self.gui.show_popup('confirm', {
-                        'title': _t('Empty Serial/Lot Number'),
-                        'body': _t('One or more product(s) required serial/lot number.'),
-                        confirm: function () {
-                            self.gui.show_screen('payment');
-                        },
-                    });
-                } else {
-                    self.gui.show_screen('payment');
-                }
-            });
-            this.$('.set-customer').click(function () {
-                self.gui.show_screen('clientlist');
-            });
-        }
-    });
 
     /* -------- The Order Selector -------- */
 
-// Allows the cashier to create / delete and
-// switch between orders.
+    // Allows the cashier to create / delete and
+    // switch between orders.
 
     var OrderSelectorWidget = WpBaseWidget.extend({
         template: 'OrderSelectorWidget',
@@ -276,8 +188,8 @@ odoo.define('weighing_point.chrome', function (require) {
 
     /* ------- The User Name Widget ------- */
 
-// Displays the current cashier's name and allows
-// to switch between cashiers.
+    // Displays the current cashier's name and allows
+    // to switch between cashiers.
 
     var UsernameWidget = WpBaseWidget.extend({
         template: 'UsernameWidget',
@@ -316,9 +228,9 @@ odoo.define('weighing_point.chrome', function (require) {
 
     /* -------- The Header Button --------- */
 
-// Used to quickly add buttons with simple
-// labels and actions to the weighing point
-// header.
+    // Used to quickly add buttons with simple
+    // labels and actions to the weighing point
+    // header.
 
     var HeaderButtonWidget = WpBaseWidget.extend({
         template: 'HeaderButtonWidget',
@@ -347,11 +259,11 @@ odoo.define('weighing_point.chrome', function (require) {
 
     /* --------- The Debug Widget --------- */
 
-// The debug widget lets the user control 
-// and monitor the hardware and software status
-// without the use of the proxy, or to access
-// the raw locally stored db values, useful
-// for debugging
+    // The debug widget lets the user control
+    // and monitor the hardware and software status
+    // without the use of the proxy, or to access
+    // the raw locally stored db values, useful
+    // for debugging
 
     var DebugWidget = WpBaseWidget.extend({
         template: "DebugWidget",
@@ -526,8 +438,8 @@ odoo.define('weighing_point.chrome', function (require) {
 
     /* --------- The Status Widget -------- */
 
-// Base class for widgets that want to display
-// status in the weighing point header.
+    // Base class for widgets that want to display
+    // status in the weighing point header.
 
     var StatusWidget = WpBaseWidget.extend({
         status: ['connected', 'connecting', 'disconnected', 'warning', 'error'],
@@ -548,8 +460,8 @@ odoo.define('weighing_point.chrome', function (require) {
 
     /* ------- Synch. Notifications ------- */
 
-// Displays if there are orders that could
-// not be submitted, and how many. 
+    // Displays if there are orders that could
+    // not be submitted, and how many.
 
     var SynchNotificationWidget = StatusWidget.extend({
         template: 'SynchNotificationWidget',
@@ -566,8 +478,8 @@ odoo.define('weighing_point.chrome', function (require) {
 
     /* --------- The Proxy Status --------- */
 
-// Displays the status of the hardware proxy
-// (connected, disconnected, errors ... )
+    // Displays the status of the hardware proxy
+    // (connected, disconnected, errors ... )
 
     var ProxyStatusWidget = StatusWidget.extend({
         template: 'ProxyStatusWidget',
@@ -621,11 +533,10 @@ odoo.define('weighing_point.chrome', function (require) {
         },
     });
 
-
     /* --------- The Sale Details --------- */
 
-// Generates a report to print the sales of the
-// day on a ticket
+    // Generates a report to print the sales of the
+    // day on a ticket
 
     var SaleDetailsButton = WpBaseWidget.extend({
         template: 'SaleDetailsButton',
@@ -638,8 +549,9 @@ odoo.define('weighing_point.chrome', function (require) {
     });
 
     /* User interface for distant control over the Client display on the IoT Box */
-// The boolean iotbox_supports_display (in devices.js) will allow interaction to the IoT Box on true, prevents it otherwise
-// We don't want the incompatible IoT Box to be flooded with 404 errors on arrival of our many requests as it triggers losses of connections altogether
+    // The boolean iotbox_supports_display (in devices.js) will allow interaction to the IoT Box on true, prevents it otherwise
+    // We don't want the incompatible IoT Box to be flooded with 404 errors on arrival of our many requests as it triggers losses of connections altogether
+
     var ClientScreenWidget = WpBaseWidget.extend({
         template: 'ClientScreenWidget',
 
@@ -744,26 +656,52 @@ odoo.define('weighing_point.chrome', function (require) {
         },
     });
 
+    /* ------------ The Back Button ------------ */
+
+    // The back button allows the user to go back to the previous screen.
+    var BackButtonWidget = WpBaseWidget.extend({
+        template: 'BackButtonWidget',
+
+        //TODO(Vincent) reset search category
+
+        //TODO(Vincent) reset weight data
+
+        //TODO(Vincent) implement a stack for deeper history level
+        start: function () {
+            this._super();
+            var self = this;
+            this.$el.click(function () {
+                var currentScreen = self.gui.get_current_screen();
+                console.log('current screen=' + currentScreen);
+                var previousScreen = self.gui.get_current_screen_param('previous-screen');
+                console.log('previous screen=' + previousScreen);
+                if (previousScreen && previousScreen !== currentScreen) {
+                    self.gui.show_screen(previousScreen,{},true);
+                }
+            });
+        },
+    });
+
 
     /*--------------------------------------*\
      |             THE CHROME               |
     \*======================================*/
 
-// The Chrome is the main widget that contains 
-// all other widgets in the PointOfSale.
-//
-// It is the first object instanciated and the
-// starting point of the weighing point code.
-//
-// It is mainly composed of :
-// - a header, containing the list of orders
-// - a leftpane, containing the scale widget
-// - a rightpane, containing the screens 
-//   (see screens.js)
-// - popups
-// - an onscreen keyboard
-// - .gui which controls the switching between 
-//   screens and the showing/closing of popups
+    // The Chrome is the main widget that contains
+    // all other widgets in the Weighing Point.
+    //
+    // It is the first object instanciated and the
+    // starting point of the weighing point code.
+    //
+    // It is mainly composed of :
+    // - a header, containing the header widgets
+    // - a leftpane, containing the scale widget
+    // - a rightpane, containing the screens
+    //   (see screens.js)
+    // - popups
+    // - an onscreen keyboard
+    // - .gui which controls the switching between
+    //   screens and the showing/closing of popups
 
     var Chrome = WpBaseWidget.extend(AbstractAction.prototype, {
         template: 'Chrome',
@@ -1072,7 +1010,11 @@ odoo.define('weighing_point.chrome', function (require) {
                 'name': 'scale_widget',
                 'widget': ScaleWidget,
                 'replace': '.placeholder-ScaleWidget'
-            },
+            }, {
+                'name': 'back_button',
+                'widget': BackButtonWidget,
+                'replace': '.placeholder-BackButtonWidget'
+            }
         ],
 
         // This method instantiates all the screens, widgets, etc.
@@ -1098,8 +1040,8 @@ odoo.define('weighing_point.chrome', function (require) {
                     this.widget[def.name] = w;
                 }
             }
-
             console.log('end widgets');
+
             console.log('start screens');
             this.screens = {};
             for (i = 0; i < this.gui.screen_classes.length; i++) {
@@ -1138,9 +1080,8 @@ odoo.define('weighing_point.chrome', function (require) {
 
     return {
         Chrome: Chrome,
-        ScaleWidget:ScaleWidget,
-        BackButtonWidget:BackButtonWidget,
-        ActionpadWidget:ActionpadWidget,
+        ScaleWidget: ScaleWidget,
+        BackButtonWidget: BackButtonWidget,
         DebugWidget: DebugWidget,
         HeaderButtonWidget: HeaderButtonWidget,
         OrderSelectorWidget: OrderSelectorWidget,
