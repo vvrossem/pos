@@ -141,17 +141,6 @@
                                         <label string="Receipt Printer" for="iface_print_via_proxy" class="col-lg-3 o_light_label"/>
                                         <field name="iface_print_via_proxy"/>
                                     </div>
-                                    <div class="row">
-                                        <label string="Customer Display" for="iface_customer_facing_display" class="col-lg-3 o_light_label"/>
-                                        <field name="iface_customer_facing_display"/>
-                                    </div>
-                                    <field name="customer_facing_display_html" invisible="1"/>
-                                    <div class="text-muted" attrs="{'invisible' : ['|', ('iface_customer_facing_display', '=', False), '&amp;', ('id', '!=', False), ('customer_facing_display_html', '!=', '')]}">Save this configuration to see and edit the customer display</div>
-                                    <div class="row mt16 o_settings_container" attrs="{'invisible' : ['|', '|',('iface_customer_facing_display', '=', False), ('id', '=', False), ('customer_facing_display_html', '=', '')]}">
-                                        <div class="col-12 col-lg-6 o_setting_box">
-                                        <field name="customer_facing_display_html" widget="html_frame" nolabel="1" options="{'editor_url': '/weighing_point/field/customer_facing_display_template'}"/>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
                         </div>

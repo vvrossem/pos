@@ -36,11 +36,13 @@ odoo.define('weighing_point.chrome', function (require) {
 
         init: function (parent, options) {
             this._super(parent, options);
+            this.tare = 0;
         },
 
         // TODO(Vincent) show doesn't work -> start
         start: function () {
             this._super();
+            console.log(this);
             var self = this;
             var queue = this.wp.proxy_queue;
 
@@ -66,7 +68,6 @@ odoo.define('weighing_point.chrome', function (require) {
             }
             return current_pricelist;
         },
-        // TODO(Vincent) add print_label: function() {...}
         order_product: function () {
             this.wp.get_order().add_product(this.get_product(), {quantity: this.weight});
         },
@@ -76,6 +77,7 @@ odoo.define('weighing_point.chrome', function (require) {
         },
         get_product_price: function () {
             var product = this.get_product();
+            console.log(product);
             var pricelist = this._get_active_pricelist();
 
             return (product ? product.get_price(pricelist, this.weight) : 0) || 0;
@@ -89,10 +91,18 @@ odoo.define('weighing_point.chrome', function (require) {
             }
         },
         set_weight: function (weight) {
+            var product = this.get_product();
+            if (product && product.container_weight){
+                console.log(product.container_weight);
+                weight -= product.container_weight;
+            }
             this.weight = weight;
+            console.log(this.weight);
             this.$('.weight').text(this.get_product_weight_string());
             this.$('.computed-price').text(this.get_computed_price_string());
             this.$('.product-price').text(this.format_currency(this.get_product_price()) + '/' + this.get_product_uom());
+            this.$('.product-tare').text(this.get_container_weight_string());
+
         },
         get_product_weight_string: function () {
             var product = this.get_product();
@@ -109,6 +119,27 @@ odoo.define('weighing_point.chrome', function (require) {
             var weightstr = weight.toFixed(Math.ceil(Math.log(1.0 / unit.rounding) / Math.log(10)));
             weightstr += ' ' + unit.name;
             return weightstr;
+        },
+        get_container_weight_string: function(){
+            console.log('[ScaleWidget] get_container_weight_string');
+            var product = this.get_product();
+            if (product && product.container_weight){
+                var defaultstr = (product.container_weight || 0).toFixed(3) + ' Kg';
+                if (!product || !this.wp) {
+                    return defaultstr;
+                }
+                var unit_id = product.uom_id;
+                if (!unit_id) {
+                    return defaultstr;
+                }
+                var unit = this.wp.units_by_id[unit_id[0]];
+                var weight = round_pr(product.container_weight || 0, unit.rounding);
+                var weightstr = weight.toFixed(Math.ceil(Math.log(1.0 / unit.rounding) / Math.log(10)));
+                weightstr += ' ' + unit.name;
+                return weightstr;
+            }
+            return '';
+
         },
         get_computed_price_string: function () {
             return this.format_currency(this.get_product_price() * this.weight);
@@ -548,113 +579,7 @@ odoo.define('weighing_point.chrome', function (require) {
         },
     });
 
-    /* User interface for distant control over the Client display on the IoT Box */
-    // The boolean iotbox_supports_display (in devices.js) will allow interaction to the IoT Box on true, prevents it otherwise
-    // We don't want the incompatible IoT Box to be flooded with 404 errors on arrival of our many requests as it triggers losses of connections altogether
 
-    var ClientScreenWidget = WpBaseWidget.extend({
-        template: 'ClientScreenWidget',
-
-        change_status_display: function (status) {
-            var msg = ''
-            if (status === 'success') {
-                this.$('.js_warning').addClass('oe_hidden');
-                this.$('.js_disconnected').addClass('oe_hidden');
-                this.$('.js_connected').removeClass('oe_hidden');
-            } else if (status === 'warning') {
-                this.$('.js_disconnected').addClass('oe_hidden');
-                this.$('.js_connected').addClass('oe_hidden');
-                this.$('.js_warning').removeClass('oe_hidden');
-                msg = _t('Connected, Not Owned');
-            } else {
-                this.$('.js_warning').addClass('oe_hidden');
-                this.$('.js_connected').addClass('oe_hidden');
-                this.$('.js_disconnected').removeClass('oe_hidden');
-                msg = _t('Disconnected')
-                if (status === 'not_found') {
-                    msg = _t('Client Screen Unsupported. Please upgrade the IoT Box')
-                }
-            }
-
-            this.$('.oe_customer_display_text').text(msg);
-        },
-
-        status_loop: function () {
-            var self = this;
-
-            function loop() {
-                if (self.wp.proxy.iotbox_supports_display) {
-                    var deffered = self.wp.proxy.test_ownership_of_client_screen();
-                    if (deffered) {
-                        deffered.then(
-                            function (data) {
-                                if (typeof data === 'string') {
-                                    data = JSON.parse(data);
-                                }
-                                if (data.status === 'OWNER') {
-                                    self.change_status_display('success');
-                                } else {
-                                    self.change_status_display('warning');
-                                }
-                            },
-
-                            function (err) {
-                                if (typeof err == "undefined") {
-                                    self.change_status_display('failure');
-                                } else {
-                                    self.change_status_display('not_found');
-                                    self.wp.proxy.iotbox_supports_display = false;
-                                }
-                            })
-
-                            .always(function () {
-                                setTimeout(loop, 3000);
-                            });
-                    }
-                }
-            }
-
-            loop();
-        },
-
-        start: function () {
-            if (this.wp.config.iface_customer_facing_display) {
-                this.show();
-                var self = this;
-                this.$el.click(function () {
-                    self.wp.render_html_for_customer_facing_display().then(function (rendered_html) {
-                        self.wp.proxy.take_ownership_over_client_screen(rendered_html).then(
-                            function (data) {
-                                if (typeof data === 'string') {
-                                    data = JSON.parse(data);
-                                }
-                                if (data.status === 'success') {
-                                    self.change_status_display('success');
-                                } else {
-                                    self.change_status_display('warning');
-                                }
-                                if (!self.wp.proxy.wpbox_supports_display) {
-                                    self.wp.proxy.iotbox_supports_display = true;
-                                    self.status_loop();
-                                }
-                            },
-
-                            function (err) {
-                                if (typeof err == "undefined") {
-                                    self.change_status_display('failure');
-                                } else {
-                                    self.change_status_display('not_found');
-                                }
-                            });
-                    });
-
-                });
-                this.status_loop();
-            } else {
-                this.hide();
-            }
-        },
-    });
 
     /* ------------ The Back Button ------------ */
 
@@ -662,21 +587,24 @@ odoo.define('weighing_point.chrome', function (require) {
     var BackButtonWidget = WpBaseWidget.extend({
         template: 'BackButtonWidget',
 
-        //TODO(Vincent) reset search category
+        init: function(parent, options){
+            this._super(parent, options);
+            this.history_stack = [];
+        },
 
-        //TODO(Vincent) reset weight data
+        //TODO(Vincent) reset search category
 
         //TODO(Vincent) implement a stack for deeper history level
         start: function () {
             this._super();
             var self = this;
             this.$el.click(function () {
+                var previousScreen = self.history_stack.pop();
                 var currentScreen = self.gui.get_current_screen();
                 console.log('current screen=' + currentScreen);
-                var previousScreen = self.gui.get_current_screen_param('previous-screen');
                 console.log('previous screen=' + previousScreen);
                 if (previousScreen && previousScreen !== currentScreen) {
-                    self.gui.show_screen(previousScreen,{},true);
+                    self.gui.show_screen(previousScreen, {});
                 }
             });
         },
@@ -962,13 +890,6 @@ odoo.define('weighing_point.chrome', function (require) {
                     return this.wp.config.use_proxy;
                 },
             }, {
-                'name': 'screen_status',
-                'widget': ClientScreenWidget,
-                'append': '.wp-rightheader',
-                'condition': function () {
-                    return this.wp.config.use_proxy;
-                },
-            }, {
                 'name': 'notification',
                 'widget': SynchNotificationWidget,
                 'append': '.wp-rightheader',
@@ -1087,7 +1008,6 @@ odoo.define('weighing_point.chrome', function (require) {
         OrderSelectorWidget: OrderSelectorWidget,
         ProxyStatusWidget: ProxyStatusWidget,
         SaleDetailsButton: SaleDetailsButton,
-        ClientScreenWidget: ClientScreenWidget,
         StatusWidget: StatusWidget,
         SynchNotificationWidget: SynchNotificationWidget,
         UsernameWidget: UsernameWidget,

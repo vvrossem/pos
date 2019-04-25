@@ -60,9 +60,6 @@ class WpConfig(models.Model):
     def _get_group_wp_user(self):
         return self.env.ref('weighing_point.group_wp_user')
 
-    def _compute_default_customer_html(self):
-        return self.env['ir.qweb'].render('weighing_point.customer_facing_display_html')
-
     name = fields.Char(string='weighing point Name', index=True, required=True, help="An internal identification of the weighing point.")
     is_installed_account_accountant = fields.Boolean(string="Is the Full Accounting Installed",
         compute="_compute_is_installed_account_accountant")
@@ -90,7 +87,6 @@ class WpConfig(models.Model):
     iface_payment_terminal = fields.Boolean(string='Payment Terminal', help="Enables Payment Terminal integration.")
     iface_electronic_scale = fields.Boolean(string='Electronic Scale', help="Enables Electronic Scale integration.")
     iface_vkeyboard = fields.Boolean(string='Virtual KeyBoard', help=u"Don’t turn this option on if you take orders on smartphones or tablets. \n Such devices already benefit from a native keyboard.")
-    iface_customer_facing_display = fields.Boolean(string='Customer Facing Display', help="Show checkout to customers with a remotely-connected screen.")
     iface_print_via_proxy = fields.Boolean(string='Print via Proxy', help="Bypass browser printing and prints via the hardware proxy.")
     iface_scan_via_proxy = fields.Boolean(string='Scan via Proxy', help="Enable barcode scanning with a remotely connected barcode scanner.")
     iface_big_scrollbars = fields.Boolean('Large Scrollbars', help='For imprecise industrial touchscreens.')
@@ -148,7 +144,6 @@ class WpConfig(models.Model):
     fiscal_position_ids = fields.Many2many('account.fiscal.position', string='Fiscal Positions', help='This is useful for restaurants with onsite and take-away services that imply specific tax rates.')
     default_fiscal_position_id = fields.Many2one('account.fiscal.position', string='Default Fiscal Position')
     default_cashbox_lines_ids = fields.One2many('account.cashbox.line', 'default_wp_id', string='Default Balance')
-    customer_facing_display_html = fields.Html(string='Customer facing display content', translate=True, default=_compute_default_customer_html)
     use_pricelist = fields.Boolean("Use a pricelist.")
     tax_regime = fields.Boolean("Tax Regime")
     tax_regime_selection = fields.Boolean("Tax Regime Selection value")
@@ -304,7 +299,6 @@ class WpConfig(models.Model):
             self.iface_electronic_scale = False
             self.iface_cashdrawer = False
             self.iface_print_via_proxy = False
-            self.iface_customer_facing_display = False
 
     @api.onchange('tax_regime')
     def _onchange_tax_regime(self):
@@ -340,9 +334,6 @@ class WpConfig(models.Model):
 
     @api.model
     def create(self, values):
-        if values.get('is_iotbox') and values.get('iface_customer_facing_display'):
-            if values.get('customer_facing_display_html') and not values['customer_facing_display_html'].strip():
-                values['customer_facing_display_html'] = self._compute_default_customer_html()
         IrSequence = self.env['ir.sequence'].sudo()
         val = {
             'name': _('wp Order %s') % values['name'],
@@ -365,10 +356,6 @@ class WpConfig(models.Model):
     @api.multi
     def write(self, vals):
         result = super(WpConfig, self).write(vals)
-
-        config_display = self.filtered(lambda c: c.is_iotbox and c.iface_customer_facing_display and not (c.customer_facing_display_html or '').strip())
-        if config_display:
-            super(WpConfig, config_display).write({'customer_facing_display_html': self._compute_default_customer_html()})
 
         self.sudo()._set_fiscal_position()
         self.sudo()._check_modules_to_install()

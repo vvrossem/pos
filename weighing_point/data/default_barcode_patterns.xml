@@ -36,4 +36,14 @@
             <field name="encoding">ean13</field>
             <field name="pattern">23.....{NNNDD}</field>
         </record>
+
+        <!-- Container Barcode Rule -->
+        <record id="barcode_rule_container" model="barcode.rule">
+            <field name="name">Container Barcodes</field>
+            <field name="barcode_nomenclature_id" ref="barcodes.default_barcode_nomenclature"/>
+            <field name="sequence">14</field>
+            <field name="type">container</field>
+            <field name="encoding">ean13</field>
+            <field name="pattern">24.....{NNDDD}</field>
+        </record>
 </odoo>

@@ -468,14 +468,6 @@ var ProxyDevice  = core.Class.extend(mixins.PropertiesMixin,{
             });
     },
 
-    update_customer_facing_display: function(html) {
-        if (this.iotbox_supports_display) {
-            return this.message('customer_facing_display',
-                { html: html },
-                { timeout: 5000 });
-        }
-    },
-
     take_ownership_over_client_screen: function(html) {
         return this.message("take_control", { html: html });
     },

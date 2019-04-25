@@ -60,23 +60,6 @@
 </html>
 </template>
 
-<!-- This is a duplicate of Qweb template JS side CustomerFacingDisplayHead. We could have told models.js to do an extra rpc call for this-->
-<template id="extra_head">
-    <link href="/weighing_point/static/src/css/customer_facing_display.css" rel="stylesheet"/>
-    <script type="text/javascript">
-        $(document).ready(function(){
-            $(window).on('resize', function () {
-                $('.wp-customer_facing_display').toggleClass('wp-js_no_ADV', $('.wp-adv').hasClass('wp-hidden'));
-            }).trigger('resize');
-        });
-    </script>
-</template>
-
-<template id="wp_editor_fieldtexthtml_assets" inherit_id="web.assets_backend">
-    <xpath expr="." position="inside">
-        <script type="text/javascript" src="/weighing_point/static/src/js/field_text_html.js"/>
-    </xpath>
-</template>
 
 <template id="wp_editor_assets" inherit_id="web_editor.assets_editor">
     <xpath expr="//script[last()]" position="after">
@@ -84,41 +67,4 @@
     </xpath>
 </template>
 
-
-<template id="customer_facing_display_snippets">
-    <!-- web_editor needs a ul (normally contains the header, body, extra buttons)-->
-    <ul/>
-    <div id="o_scroll" class="d-none"/>
-
-    <div id="snippet_options" class="d-none">
-        <t t-call="web_editor.snippet_options"/>
-
-        <div data-js='wp_no_remove' data-selector=".wp-company_logo, .wp-adv, .wp-customer_facing_display"/>
-        <div data-js='wp_no_parent' data-selector=".wp-company_logo, .wp-adv"/>
-        <div data-js='wp_company_logo' data-selector=".wp-company_logo"/>
-
-        <div data-js='wp_palette' data-selector=".wp-customer_facing_display">
-            <a href="#" class="wp-palette_01 dropdown-item" data-select-class="wp-palette_01"></a>
-            <a href="#" class="wp-palette_02 dropdown-item" data-select-class="wp-palette_02"></a>
-            <a href="#" class="wp-palette_03 dropdown-item" data-select-class="wp-palette_03"></a>
-            <a href="#" class="wp-palette_04 dropdown-item" data-select-class="wp-palette_04"></a>
-            <a href="#" class="wp-palette_05 dropdown-item" data-select-class="wp-palette_05"></a>
-            <a href="#" class="wp-palette_06 dropdown-item" data-select-class="wp-palette_06"></a>
-            <a href="#" class="wp-palette_07 dropdown-item" data-select-class="wp-palette_07"></a>
-            <a href="#" class="wp-palette_08 dropdown-item" data-select-class="wp-palette_08"></a>
-            <a href="#" class="wp-palette_09 dropdown-item" data-select-class="wp-palette_09"></a>
-            <a href="#" class="wp-palette_10 dropdown-item" data-select-class="wp-palette_10"></a>
-            <a href="#" class="wp-palette_11 dropdown-item" data-select-class="wp-palette_11"></a>
-            <a href="#" class="wp-palette_12 dropdown-item" data-select-class="wp-palette_12"></a>
-            <a href="#" class="wp-palette_13 dropdown-item" data-select-class="wp-palette_13"></a>
-        </div>
-
-        <div data-js='wp_background' data-selector=".wp-company_logo, .wp-adv">
-            <a href="#" class="dropdown-item" data-choose-image="true" data-no-preview="true"><b>Set Custom Image...</b></a>
-            <a href="#" class="dropdown-item d-none wp-use_default_logo" data-background="">Default company logo</a>
-            <div class="dropdown-divider"/>
-            <a href="#" class="dropdown-item" data-toggle-class="wp-hidden"><i class="fa fa-eye-slash"/>Hide</a>
-        </div>
-    </div>
-</template>
 </odoo>

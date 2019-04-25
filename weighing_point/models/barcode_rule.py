@@ -13,5 +13,6 @@ class BarcodeRule(models.Model):
             ('price', 'Priced Product'),
             ('discount', 'Discounted Product'),
             ('client', 'Client'),
-            ('cashier', 'Cashier')
+            ('cashier', 'Cashier'),
+            ('container', 'Weighted Container'),
         ])

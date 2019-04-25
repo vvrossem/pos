@@ -1180,7 +1180,6 @@ td {
     right: 0px;
     margin-right: 16px;
 }
-
 .screen .left-content{
     position: absolute;
     left:0px; top: 64px; bottom: 0px;
@@ -1210,6 +1209,37 @@ td {
     border-left: dashed 1px rgb(215,215,215);
     overflow-x: hidden;
     overflow-y: auto;
+}
+.screen .centered-content .button {
+    position: relative;
+    display: inline-block;
+    top: 0px;
+    line-height: 32px;
+    padding: 3px 13px;
+    font-size: 20px;
+    background: rgb(230, 230, 230);
+    margin: 12px;
+    border-radius: 3px;
+    border: solid 1px rgb(209, 209, 209);
+    cursor: pointer;
+    transition: all 150ms linear;
+}
+
+.screen .centered-content .button:hover {
+    background: #efefef;
+}
+.screen .centered-content .button:active {
+    background: black;
+    border-color: black;
+    color: white;
+}
+.screen .centered-content .button.highlight {
+    background: rgb(110,200,155);
+    color: white;
+    border: solid 1px rgb(110,200,155);
+}
+.screen .centered-content .button.highlight:hover {
+    background: rgb(120,210,165);
 }
 
 .screen .full-content{
