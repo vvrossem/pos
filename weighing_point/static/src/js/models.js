@@ -929,10 +929,12 @@ exports.WpModel = Backbone.Model.extend({
             });
     },
 
-    //TODO(Vincent) in case we decide later to implement get_container_by_barcode
-    scan_filled_container: function(parsed_code){
+    // TODO(Vincent)for future improvements
+    // in case we decide later to implement get_container_by_barcode
+    scan_container: function(parsed_code){
         console.log('[models] scan_filled_container');
-        return true;
+        console.log(parsed_code);
+        return parsed_code.type === 'container';
     },
 
     scan_product: function(parsed_code){

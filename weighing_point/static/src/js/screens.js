@@ -57,24 +57,6 @@ odoo.define('weighing_point.screens', function (require) {
 
         barcode_product_screen: 'products',     //if defined, this screen will be loaded when a product is scanned
 
-
-        //TODO(Vincent) improve logic when a filled container is scanned
-        // what happens when a filled container is scanned:
-        // redirection to the products screen with the container_weight in params
-        barcode_filled_container_action: function(barcode) {
-            console.log('[screens] barcode_filled_container_action');
-            console.log(barcode);
-            var self = this;
-            if (self.wp.scan_filled_container(barcode)){ // check if container exists in db
-                self.chrome.widget.back_button.history_stack.push(self.gui.get_current_screen());
-                self.gui.show_screen('products', { barcode: barcode }); // or container_weight:barcode.value ?
-            } else {
-                // for future improvements: add container to db
-                this.barcode_error_action(barcode);
-            }
-        },
-
-
         // what happens when a product is scanned :
         // it will add the product to the order and go to barcode_product_screen.
         barcode_product_action: function (code) {
@@ -165,7 +147,6 @@ odoo.define('weighing_point.screens', function (require) {
                 'client': _.bind(self.barcode_client_action, self),
                 'discount': _.bind(self.barcode_discount_action, self),
                 'error': _.bind(self.barcode_error_action, self),
-                'container': _.bind(self.barcode_filled_container_action, self),
             });
         },
 
@@ -266,137 +247,18 @@ odoo.define('weighing_point.screens', function (require) {
     });
 
     /*--------------------------------------*\
-     |          THE SCALE SCREEN            |
-    \*======================================*/
-
-    // The scale screen displays the weight of
-    // a product on the electronic scale.
-    //TODO(Vincent) what to do with this?
-    // transform it into a 'selected product/container' screen?
-    /*var ScaleScreenWidget = ScreenWidget.extend({
-        template: 'ScaleScreenWidget',
-
-        next_screen: 'products',
-        previous_screen: 'products',
-
-        show: function () {
-            this._super();
-            var self = this;
-            var queue = this.wp.proxy_queue;
-
-            this.set_weight(0);
-            this.renderElement();
-
-            this.hotkey_handler = function (event) {
-                if (event.which === 13) {
-                    self.order_product();
-                    self.gui.show_screen(self.next_screen);
-                } else if (event.which === 27) {
-                    self.gui.show_screen(self.previous_screen);
-                }
-            };
-
-            $('body').on('keypress', this.hotkey_handler);
-
-            this.$('.back').click(function () {
-                self.gui.show_screen(self.previous_screen);
-            });
-
-            this.$('.next,.buy-product').click(function () {
-                self.gui.show_screen(self.next_screen);
-                // add product *after* switching screen to scroll properly
-                self.order_product();
-            });
-
-            queue.schedule(function () {
-                return self.wp.proxy.scale_read().then(function (weight) {
-                    self.set_weight(weight.weight);
-                });
-            }, {duration: 500, repeat: true});
-
-        },
-        get_product: function () {
-            return this.gui.get_current_screen_param('product');
-        },
-        _get_active_pricelist: function () {
-            var current_order = this.wp.get_order();
-            var current_pricelist = this.wp.default_pricelist;
-
-            if (current_order) {
-                current_pricelist = current_order.pricelist;
-            }
-
-            return current_pricelist;
-        },
-        order_product: function () {
-            this.wp.get_order().add_product(this.get_product(), {quantity: this.weight});
-        },
-        get_product_name: function () {
-            var product = this.get_product();
-            return (product ? product.display_name : undefined) || 'Unnamed Product';
-        },
-        get_product_price: function () {
-            var product = this.get_product();
-            var pricelist = this._get_active_pricelist();
-            return (product ? product.get_price(pricelist, this.weight) : 0) || 0;
-        },
-        get_product_uom: function () {
-            var product = this.get_product();
-
-            if (product) {
-                return this.wp.units_by_id[product.uom_id[0]].name;
-            } else {
-                return '';
-            }
-        },
-        set_weight: function (weight) {
-            this.weight = weight;
-            this.$('.weight').text(this.get_product_weight_string());
-            this.$('.computed-price').text(this.get_computed_price_string());
-        },
-        get_product_weight_string: function () {
-            var product = this.get_product();
-            var defaultstr = (this.weight || 0).toFixed(3) + ' Kg';
-            if (!product || !this.wp) {
-                return defaultstr;
-            }
-            var unit_id = product.uom_id;
-            if (!unit_id) {
-                return defaultstr;
-            }
-            var unit = this.wp.units_by_id[unit_id[0]];
-            var weight = round_pr(this.weight || 0, unit.rounding);
-            var weightstr = weight.toFixed(Math.ceil(Math.log(1.0 / unit.rounding) / Math.log(10)));
-            weightstr += ' ' + unit.name;
-            return weightstr;
-        },
-        get_computed_price_string: function () {
-            return this.format_currency(this.get_product_price() * this.weight);
-        },
-        close: function () {
-            this._super();
-            $('body').off('keypress', this.hotkey_handler);
-
-            this.wp.proxy_queue.clear();
-        },
-    });
-    gui.define_screen({name: 'scale', widget: ScaleScreenWidget});*/
-
-    /*--------------------------------------*\
      |         THE PRODUCT SCREEN           |
     \*======================================*/
 
-// The product screen contains the list of products,
-// The category selector and the order display.
-// It is the default screen for orders and the
-// startup screen for shops.
-//
-// There product screens uses many sub-widgets,
-// the code follows.
+    // The product screen contains the list of products,
+    // and the category selector.
+    //
+    // The product screen uses many sub-widgets,
+    // the code follows.
 
     /* --------- The Order Widget --------- */
 
-// Displays the current Order.
+    // Displays the current Order.
 
     var OrderWidget = WpBaseWidget.extend({
         template: 'OrderWidget',
@@ -417,13 +279,12 @@ odoo.define('weighing_point.screens', function (require) {
             if (this.wp.get_order()) {
                 this.bind_order_events();
             }
-
         },
+
         click_line: function (orderline, event) {
             this.wp.get_order().select_orderline(orderline);
             this.numpad_state.reset();
         },
-
 
         set_value: function (val) {
             var order = this.wp.get_order();
@@ -440,6 +301,7 @@ odoo.define('weighing_point.screens', function (require) {
                 }
             }
         },
+
         change_selected_order: function () {
             if (this.wp.get_order()) {
                 this.bind_order_events();
@@ -447,19 +309,23 @@ odoo.define('weighing_point.screens', function (require) {
                 this.renderElement();
             }
         },
+
         orderline_add: function () {
             this.numpad_state.reset();
             this.renderElement('and_scroll_to_bottom');
         },
+
         orderline_remove: function (line) {
             this.remove_orderline(line);
             this.numpad_state.reset();
             this.update_summary();
         },
+
         orderline_change: function (line) {
             this.rerender_orderline(line);
             this.update_summary();
         },
+
         bind_order_events: function () {
             var order = this.wp.get_order();
             order.unbind('change:client', this.update_summary, this);
@@ -474,8 +340,8 @@ odoo.define('weighing_point.screens', function (require) {
             lines.bind('remove', this.orderline_remove, this);
             lines.unbind('change', this.orderline_change, this);
             lines.bind('change', this.orderline_change, this);
-
         },
+
         render_orderline: function (orderline) {
             var el_str = QWeb.render('Orderline', {widget: this, line: orderline});
             var el_node = document.createElement('div');
@@ -489,10 +355,10 @@ odoo.define('weighing_point.screens', function (require) {
                     this.show_product_lot(orderline);
                 }.bind(this)));
             }
-
             orderline.node = el_node;
             return el_node;
         },
+
         remove_orderline: function (order_line) {
             if (this.wp.get_order().get_orderlines().length === 0) {
                 this.renderElement();
@@ -500,17 +366,20 @@ odoo.define('weighing_point.screens', function (require) {
                 order_line.node.parentNode.removeChild(order_line.node);
             }
         },
+
         rerender_orderline: function (order_line) {
             var node = order_line.node;
             var replacement_line = this.render_orderline(order_line);
             node.parentNode.replaceChild(replacement_line, node);
         },
+
         // overriding the openerp framework replace method for performance reasons
         replace: function ($target) {
             this.renderElement();
             var target = $target[0];
             target.parentNode.replaceChild(this.el, target);
         },
+
         renderElement: function (scrollbottom) {
             var order = this.wp.get_order();
             if (!order) {
@@ -541,6 +410,7 @@ odoo.define('weighing_point.screens', function (require) {
                 this.el.querySelector('.order-scroller').scrollTop = 100 * orderlines.length;
             }
         },
+
         update_summary: function () {
             var order = this.wp.get_order();
             if (!order.get_orderlines().length) {
@@ -553,6 +423,7 @@ odoo.define('weighing_point.screens', function (require) {
             this.el.querySelector('.summary .total > .value').textContent = this.format_currency(total);
             this.el.querySelector('.summary .total .subentry .value').textContent = this.format_currency(taxes);
         },
+
         show_product_lot: function (orderline) {
             this.wp.get_order().select_orderline(orderline);
             var order = this.wp.get_order();
@@ -562,12 +433,12 @@ odoo.define('weighing_point.screens', function (require) {
 
     /* ------ The Product Categories ------ */
 
-// Display and navigate the product categories.
-// Also handles searches.
-//  - set_category() to change the displayed category
-//  - reset_category() to go to the root category
-//  - perform_search() to search for products
-//  - clear_search()   does what it says.
+    // Display and navigate the product categories.
+    // Also handles searches.
+    //  - set_category() to change the displayed category
+    //  - reset_category() to go to the root category
+    //  - perform_search() to search for products
+    //  - clear_search()   does what it says.
 
     var ProductCategoriesWidget = WpBaseWidget.extend({
         template: 'ProductCategoriesWidget',
@@ -641,7 +512,7 @@ odoo.define('weighing_point.screens', function (require) {
                     var category_html = QWeb.render('CategoryButton', {
                         widget: this,
                         category: category,
-                        image_url: this.get_image_url(category),
+                        image_url: image_url,
                     });
                     category_html = _.str.trim(category_html);
                     var category_node = document.createElement('div');
@@ -749,15 +620,14 @@ odoo.define('weighing_point.screens', function (require) {
                 this.product_list_widget.set_product_list(products);
             }
         },
-
     });
 
     /* --------- The Product List --------- */
 
-// Display the list of products. 
-// - change the list with .set_product_list()
-// - click_product_action(), passed as an option, tells
-//   what to do when a product is clicked. 
+    // Display the list of products.
+    // - change the list with .set_product_list()
+    // - click_product_action(), passed as an option, tells
+    //   what to do when a product is clicked.
 
     var ProductListWidget = WpBaseWidget.extend({
         template: 'ProductListWidget',
@@ -797,23 +667,28 @@ odoo.define('weighing_point.screens', function (require) {
                 this.renderElement();
             }, this);
         },
+
         set_product_list: function (product_list) {
             console.log('[ProductListWidget] set_product_list');
             this.product_list = product_list;
             this.renderElement();
         },
+
         get_product_image_url: function (product) {
             return window.location.origin + '/web/image?model=product.product&field=image_medium&id=' + product.id;
         },
+
         replace: function ($target) {
             console.log('[ProductListWidget] replace');
             this.renderElement();
             var target = $target[0];
             target.parentNode.replaceChild(this.el, target);
         },
+
         calculate_cache_key: function (product, pricelist) {
             return product.id + ',' + pricelist.id;
         },
+
         _get_active_pricelist: function () {
             var current_order = this.wp.get_order();
             var current_pricelist = this.wp.default_pricelist;
@@ -824,6 +699,7 @@ odoo.define('weighing_point.screens', function (require) {
 
             return current_pricelist;
         },
+
         render_product: function (product) {
             console.log('[ProductListWidget] render_product');
             var current_pricelist = this._get_active_pricelist();
@@ -869,9 +745,9 @@ odoo.define('weighing_point.screens', function (require) {
 
     /* -------- The Action Buttons -------- */
 
-// Above the numpad and the actionpad, buttons
-// for extra actions and controls by weighing point
-// extensions modules.
+    // Above the numpad and the actionpad, buttons
+    // for extra actions and controls by weighing point
+    // extensions modules.
 
     var action_button_classes = [];
     var define_action_button = function (classe, options) {
@@ -901,6 +777,7 @@ odoo.define('weighing_point.screens', function (require) {
     var ActionButtonWidget = WpBaseWidget.extend({
         template: 'ActionButtonWidget',
         label: _t('Button'),
+
         renderElement: function () {
             var self = this;
             this._super();
@@ -908,11 +785,14 @@ odoo.define('weighing_point.screens', function (require) {
                 self.button_click();
             });
         },
+
         button_click: function () {
         },
+
         highlight: function (highlight) {
             this.$el.toggleClass('highlight', !!highlight);
         },
+
         // alternative highlight color
         altlight: function (altlight) {
             this.$el.toggleClass('altlight', !!altlight);
@@ -925,7 +805,6 @@ odoo.define('weighing_point.screens', function (require) {
         template: 'ProductScreenWidget',
 
         start: function () {
-
             var self = this;
 
             //this.order_widget = new OrderWidget(this, {
@@ -963,14 +842,12 @@ odoo.define('weighing_point.screens', function (require) {
 
         click_product: function (product) {
             console.log('[ProductScreenWidget] click_product');
-            var barcode = this.gui.get_current_screen_param('barcode');
+            var container_weight = this.gui.get_current_screen_param('container_weight');
 
-            if (barcode && barcode.type === 'container'){
-                product['container_weight'] = barcode.value; // add container_weight to product object
-            }
             this.chrome.widget.back_button.history_stack.push(this.gui.get_current_screen());
             this.gui.show_screen('selected-product', {
                 product:product,
+                container_weight:container_weight,
             });
         },
 
@@ -2223,8 +2100,8 @@ odoo.define('weighing_point.screens', function (require) {
     \*======================================*/
 
     /**
-     * The startup screen redirects
-     * to the following actions and screens:
+     * The startup screen redirects the following actions
+     * to the following screens :
      * - weigh filled bags (products screen)
      * - weigh empty containers (weighing screen)
      * - scan filled containers (scanning screen)
@@ -2243,12 +2120,12 @@ odoo.define('weighing_point.screens', function (require) {
 
             this.$('.products-screen').click(function () {
                 self.chrome.widget.back_button.history_stack.push(self.gui.get_current_screen());
-                self.gui.show_screen(self.products_screen );
+                self.gui.show_screen(self.products_screen);
             });
 
             this.$('.weighing-screen').click(function () {
                 self.chrome.widget.back_button.history_stack.push(self.gui.get_current_screen());
-                self.gui.show_screen(self.weighing_screen );
+                self.gui.show_screen(self.weighing_screen);
             });
 
             this.$('.scanning-screen').click(function () {
@@ -2265,24 +2142,38 @@ odoo.define('weighing_point.screens', function (require) {
     \*======================================*/
 
     /**
-     * The scanning screen
-     * ...
+     * The scanning screen redirects to the products screen
+     * with the params barcode when a container barcode is scanned
      */
 
     var ScanningScreenWidget = ScreenWidget.extend({
         template: 'ScanningScreenWidget',
 
-        previous_screen:'',
-        next_screen:'',
-
         show: function () {
+            console.log(this.gui.get_current_screen());
             this._super();
             var self = this;
-            console.log(this.gui.get_current_screen());
 
-            // TODO(Vincent) develop logic
+            this.wp.barcode_reader.set_action_callback({
+                'container': _.bind(self.barcode_container_action, self),
+            });
         },
 
+        // Note: move this to ScreenWidget to allow container barcode scanning from any screens
+        // what happens when a container barcode is scanned:
+        // redirection to the products screen with the barcode in params
+        barcode_container_action: function(barcode) {
+            console.log('[screens] barcode_container_action');
+            var self = this;
+            // for future improvements: check if container exists in db
+            if (self.wp.scan_container(barcode)){
+                self.chrome.widget.back_button.history_stack.push(self.gui.get_current_screen());
+                self.gui.show_screen('products', { container_weight: barcode.value }); // or container_weight:barcode.value ?
+            } else {
+                // for future improvements: add container to db
+                this.barcode_error_action(barcode);
+            }
+        },
 
     });
     gui.define_screen({name: 'scanning', widget: ScanningScreenWidget});
@@ -2299,16 +2190,13 @@ odoo.define('weighing_point.screens', function (require) {
     var WeighingScreenWidget = ScreenWidget.extend({
         template: 'WeighingScreenWidget',
 
-        previous_screen:'',
-        next_screen:'',
-
         show: function () {
             this._super();
             var self = this;
             console.log(this.gui.get_current_screen());
-
-            // TODO(Vincent) develop logic
         },
+
+        //TODO(Vincent) develop logic for label printing
 
     });
     gui.define_screen({name: 'weighing', widget: WeighingScreenWidget});
@@ -2319,6 +2207,9 @@ odoo.define('weighing_point.screens', function (require) {
 
     var SelectedProductWidget = WpBaseWidget.extend({
         template: 'SelectedProductWidget',
+
+        //TODO(Vincent) add container_weight for label printing
+
         init: function (parent, options) {
             console.log('[SelectedProductWidget] init');
             var self = this;
@@ -2335,47 +2226,32 @@ odoo.define('weighing_point.screens', function (require) {
                 this.renderElement();
             }, this);
         },
+
         get_product: function () {
             return this.gui.get_current_screen_param('product');
         },
-        get_container_weight_string: function(){
-            console.log('[SelectedProductWidget] get_container_weight_string');
-            var product = this.get_product();
 
-            if (product && product.container_weight) {
-                var container_weight = product.container_weight;
-                var defaultstr = (container_weight || 0).toFixed(3) + ' Kg';
-                if (!this.wp) {
-                    return defaultstr;
-                }
-                var unit_id = product.uom_id;
-                if (!unit_id) {
-                    return defaultstr;
-                }
-                var unit = this.wp.units_by_id[unit_id[0]];
-                var weight = round_pr(container_weight || 0, unit.rounding);
-                var weightstr = weight.toFixed(Math.ceil(Math.log(1.0 / unit.rounding) / Math.log(10)));
-                weightstr += ' ' + unit.name;
-                return weightstr;
-            }
-        },
         set_selected_product: function (product) {
             console.log('[SelectedProductWidget] set_selected_product');
             this.product = product;
             this.renderElement();
         },
+
         get_product_image_url: function (product) {
             return window.location.origin + '/web/image?model=product.product&field=image_medium&id=' + product.id;
         },
+
         replace: function ($target) {
             console.log('[SelectedProductWidget] replace');
             this.renderElement();
             var target = $target[0];
             target.parentNode.replaceChild(this.el, target);
         },
+
         calculate_cache_key: function (product, pricelist) {
             return product.id + ',' + pricelist.id;
         },
+
         _get_active_pricelist: function () {
             var current_order = this.wp.get_order();
             var current_pricelist = this.wp.default_pricelist;
@@ -2386,6 +2262,7 @@ odoo.define('weighing_point.screens', function (require) {
 
             return current_pricelist;
         },
+
         render_product: function (product) {
             console.log('[SelectedProductWidget] render_product');
             var current_pricelist = this._get_active_pricelist();
@@ -2438,26 +2315,24 @@ odoo.define('weighing_point.screens', function (require) {
     var SelectedProductScreenWidget = ScreenWidget.extend({
         template: 'SelectedProductScreenWidget',
 
+        // TODO(Vincent) add container_weight for label printing;
+
         start: function () {
             console.log('[SelectedProductScreenWidget] start');
-            var product = this.gui.get_current_screen_param('product');
             this.selected_product_widget = new SelectedProductWidget(this);
             this.selected_product_widget.replace(this.$('.placeholder-SelectedProductWidget'));
+
         },
 
         show: function () {
             console.log('[SelectedProductScreenWidget] show');
-            console.log(this.gui.get_current_screen());
-
             this._super();
+            console.log(this.gui.get_current_screen());
             var product = this.gui.get_current_screen_param('product');
-            console.log(product);
             this.selected_product_widget.set_selected_product(product);
         },
-        hide: function(){
-            this._super();
-            this.product = null;
-        }
+
+
     });
     gui.define_screen({name: 'selected-product', widget: SelectedProductScreenWidget});
 

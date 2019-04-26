@@ -33,6 +33,7 @@
                                     <!--<div class="control-buttons oe_hidden"></div>
                                     <div class="placeholder-ActionpadWidget"></div>
                                     <div class="placeholder-NumpadWidget"></div>-->
+
                                     <div class="placeholder-BackButtonWidget"></div>
 
                                 </div>
@@ -305,11 +306,7 @@
         <div class='product-container'>
             <div class="product-scroller touch-scrollable">
                 <div class="selected-product"></div>
-                <t t-if="widget.product and widget.product.container_weight">
-                    <div class='container-weight'>
-                        <t t-esc="widget.get_container_weight_string()" />
-                    </div>
-                </t>
+
             </div>
         </div>
     </t>
@@ -332,24 +329,11 @@
     </t>
 
     <t t-name="ScaleWidget">
-        <div class="scale-screen screen">
-            <div class="screen-content">
-                <div class="full-content">
-                    <div class='weight js-weight'>
-                        <t t-esc="widget.get_product_weight_string()" />
-                    </div>
-                        <div class="product-tare">
-                            <t t-if="widget.product and widget.product.container_weight">
-                                Tare : <t t-esc="widget.get_container_weight_string()"/>
-                            </t>
-                        </div>
-                    <div class='product-price'>
-                        <t t-esc="widget.format_currency(widget.get_product_price()) + '/' + widget.get_product_uom()" />
-                    </div>
-                    <div class='computed-price'>
-                    </div>
-                </div>
-            </div>
+        <div class="scale-widget">
+            <div class='weight js-weight'></div>
+            <div class="container-weight"></div>
+            <div class='product-price'></div>
+            <div class='computed-price'></div>
         </div>
     </t>
 
@@ -1741,6 +1725,5 @@
             <p class="close_button">close</p>
         </div>
     </t>
-
 
 </templates>

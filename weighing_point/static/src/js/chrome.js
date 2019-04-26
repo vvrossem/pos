@@ -32,23 +32,20 @@ odoo.define('weighing_point.chrome', function (require) {
     var ScaleWidget = WpBaseWidget.extend({
         template: 'ScaleWidget',
 
-        //TODO(Vincent) how to reset weight data?
-
         init: function (parent, options) {
             this._super(parent, options);
-            this.tare = 0;
+            this.container_weight = null;
         },
 
-        // TODO(Vincent) show doesn't work -> start
         start: function () {
             this._super();
-            console.log(this);
             var self = this;
             var queue = this.wp.proxy_queue;
 
             this.set_weight(0);
             this.renderElement();
 
+            // TODO(Vincent) improve it with toledo_scale information
             queue.schedule(function () {
                 return self.wp.proxy.scale_read().then(function (weight) {
                     self.set_weight(weight.weight);
@@ -56,9 +53,15 @@ odoo.define('weighing_point.chrome', function (require) {
             }, {duration: 500, repeat: true});
 
         },
+
         get_product: function () {
             return this.gui.get_current_screen_param('product');
         },
+
+        get_container_weight: function () {
+            return this.gui.get_current_screen_param('container_weight');
+        },
+
         _get_active_pricelist: function () {
             var current_order = this.wp.get_order();
             var current_pricelist = this.wp.default_pricelist;
@@ -68,20 +71,23 @@ odoo.define('weighing_point.chrome', function (require) {
             }
             return current_pricelist;
         },
+
         order_product: function () {
             this.wp.get_order().add_product(this.get_product(), {quantity: this.weight});
         },
+
         get_product_name: function () {
             var product = this.get_product();
             return (product ? product.display_name : undefined) || 'Unnamed Product';
         },
+
         get_product_price: function () {
             var product = this.get_product();
-            console.log(product);
             var pricelist = this._get_active_pricelist();
 
             return (product ? product.get_price(pricelist, this.weight) : 0) || 0;
         },
+
         get_product_uom: function () {
             var product = this.get_product();
             if (product) {
@@ -90,20 +96,23 @@ odoo.define('weighing_point.chrome', function (require) {
                 return 'kg';
             }
         },
+
+        // TODO(Vincent) improve container_weight logic
+        // TODO(Vincent) how to send container_weigh to label printing ?
         set_weight: function (weight) {
-            var product = this.get_product();
-            if (product && product.container_weight){
-                console.log(product.container_weight);
-                weight -= product.container_weight;
+            var container_weight = this.get_container_weight();
+            if (container_weight){
+                weight -= container_weight;
             }
             this.weight = weight;
-            console.log(this.weight);
-            this.$('.weight').text(this.get_product_weight_string());
-            this.$('.computed-price').text(this.get_computed_price_string());
-            this.$('.product-price').text(this.format_currency(this.get_product_price()) + '/' + this.get_product_uom());
-            this.$('.product-tare').text(this.get_container_weight_string());
+            this.container_weight = container_weight;
 
+            this.$('.weight').text(this.get_product_weight_string());
+            this.$('.container-weight').text(this.get_container_weight_string());
+            this.$('.product-price').text(this.format_currency(this.get_product_price()) + '/' + this.get_product_uom());
+            this.$('.computed-price').text(this.get_computed_price_string());
         },
+
         get_product_weight_string: function () {
             var product = this.get_product();
             var defaultstr = (this.weight || 0).toFixed(3) + ' kg';
@@ -120,27 +129,28 @@ odoo.define('weighing_point.chrome', function (require) {
             weightstr += ' ' + unit.name;
             return weightstr;
         },
-        get_container_weight_string: function(){
-            console.log('[ScaleWidget] get_container_weight_string');
-            var product = this.get_product();
-            if (product && product.container_weight){
-                var defaultstr = (product.container_weight || 0).toFixed(3) + ' Kg';
-                if (!product || !this.wp) {
-                    return defaultstr;
-                }
-                var unit_id = product.uom_id;
-                if (!unit_id) {
-                    return defaultstr;
-                }
-                var unit = this.wp.units_by_id[unit_id[0]];
-                var weight = round_pr(product.container_weight || 0, unit.rounding);
-                var weightstr = weight.toFixed(Math.ceil(Math.log(1.0 / unit.rounding) / Math.log(10)));
-                weightstr += ' ' + unit.name;
-                return weightstr;
-            }
-            return '';
 
+        get_container_weight_string: function(){
+            if (!this.container_weight){
+                return '';
+            }
+            var product = this.get_product();
+            var defaultstr = 'Container weight: ' + (this.container_weight).toFixed(3) + ' Kg';
+            if (!product || !this.wp) {
+                return defaultstr;
+            }
+            var unit_id = product.uom_id;
+            if (!unit_id) {
+                return defaultstr;
+            }
+            var unit = this.wp.units_by_id[unit_id[0]];
+            var weight = round_pr(this.container_weight || 0, unit.rounding);
+            var weightstr = 'Container weight: '
+                + weight.toFixed(Math.ceil(Math.log(1.0 / unit.rounding) / Math.log(10)))
+                + ' ' + unit.name;
+            return weightstr;
         },
+
         get_computed_price_string: function () {
             return this.format_currency(this.get_product_price() * this.weight);
         },
@@ -148,8 +158,7 @@ odoo.define('weighing_point.chrome', function (require) {
         //TODO(Vincent) move the logic ? use destroy instead?
         close: function () {
             this._super();
-            $('body').off('keypress', this.hotkey_handler);
-
+            //$('body').off('keypress', this.hotkey_handler);
             this.wp.proxy_queue.clear();
         },
     });
@@ -580,7 +589,6 @@ odoo.define('weighing_point.chrome', function (require) {
     });
 
 
-
     /* ------------ The Back Button ------------ */
 
     // The back button allows the user to go back to the previous screen.
@@ -592,9 +600,6 @@ odoo.define('weighing_point.chrome', function (require) {
             this.history_stack = [];
         },
 
-        //TODO(Vincent) reset search category
-
-        //TODO(Vincent) implement a stack for deeper history level
         start: function () {
             this._super();
             var self = this;
@@ -604,12 +609,12 @@ odoo.define('weighing_point.chrome', function (require) {
                 console.log('current screen=' + currentScreen);
                 console.log('previous screen=' + previousScreen);
                 if (previousScreen && previousScreen !== currentScreen) {
-                    self.gui.show_screen(previousScreen, {});
+                    // (Vincent) param refresh=true so ProductCategoriesWidget is reset when shown
+                    self.gui.show_screen(previousScreen, {}, true, null);
                 }
             });
         },
     });
-
 
     /*--------------------------------------*\
      |             THE CHROME               |
@@ -838,10 +843,12 @@ odoo.define('weighing_point.chrome', function (require) {
 
             popup.appendTo(this.$el);
         },
+
         loading_progress: function (fac) {
             this.$('.loader .loader-feedback').removeClass('oe_hidden');
             this.$('.loader .progress').removeClass('oe_hidden').css({'width': '' + Math.floor(fac * 100) + '%'});
         },
+
         loading_message: function (msg, progress) {
             this.$('.loader .loader-feedback').removeClass('oe_hidden');
             this.$('.loader .message').text(msg);
@@ -851,6 +858,7 @@ odoo.define('weighing_point.chrome', function (require) {
                 this.$('.loader .progress').addClass('oe_hidden');
             }
         },
+
         loading_skip: function (callback) {
             if (callback) {
                 this.$('.loader .loader-feedback').removeClass('oe_hidden');
@@ -861,15 +869,18 @@ odoo.define('weighing_point.chrome', function (require) {
                 this.$('.loader .button.skip').addClass('oe_hidden');
             }
         },
+
         loading_hide: function () {
             var self = this;
             this.$('.loader').animate({opacity: 0}, 1500, 'swing', function () {
                 self.$('.loader').addClass('oe_hidden');
             });
         },
+
         loading_show: function () {
             this.$('.loader').removeClass('oe_hidden').animate({opacity: 1}, 150, 'swing');
         },
+
         widgets: [
             {
                 'name': 'order_selector',
@@ -990,7 +1001,6 @@ odoo.define('weighing_point.chrome', function (require) {
 
             this.gui.set_startup_screen('startup');
             this.gui.set_default_screen('startup');
-
         },
 
         destroy: function () {

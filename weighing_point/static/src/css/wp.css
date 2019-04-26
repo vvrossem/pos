@@ -198,10 +198,10 @@ td {
     height: 100%;
 }
 .wp .window .subwindow.collapsed{
-    height: 0px;
+    height: 100%;
 }
 .wp .window .subwindow-container .collapsed{
-    height: 0px;
+    height: 100%;
 }
 .wp .subwindow .subwindow-container{
     display: table-cell;
@@ -527,6 +527,7 @@ td {
     background: #F0EEEE;
 }
 /*TODO(Vincent) change this*/
+
 /*  ********* The leftpane contains the order, numpad and paypad ********* */
 
 .wp .leftpane {
@@ -546,6 +547,8 @@ td {
 
 .wp .leftpane .pads {
     border-top: solid 3px rgb(110, 200, 155);
+    margin-bottom: 33%;
+    text-align: center;
 }
 
 /*  ********* The control buttons ********* */
@@ -1123,7 +1126,7 @@ td {
 .screen .screen-content{
     margin: 0px auto;
     max-width: 1024px;
-    text-align: left;
+    text-align: center;
     height: 100%;
     overflow: hidden;
     position: relative;
@@ -1279,6 +1282,8 @@ td {
 .screen .full-content .button.highlight:hover {
     background: rgb(120,210,165);
 }
+
+/* Layout for the Selected Product Screen */
 
 
 
@@ -1611,32 +1616,9 @@ td {
     }
 }
 
-/* d) The Scale screen */
+/* d) The Scale widget */
 
-.wp .scale-screen .product-price{
-    font-size: 25px;
-    margin: 16px;
-    text-align: center;
-    display: inline-block;
-    width: 40%;
-}
-.wp .scale-screen .computed-price{
-    font-size: 25px;
-    display: inline-block;
-    text-align: right;
-    margin: 16px;
-    margin-top: 0px;
-    padding: 16px;
-    background: white;
-    width: 40%;
-    border-radius: 3px;
-    font-family: Inconsolata;
-    font-weight: bold;
-    text-shadow: 0px 2px 0px rgb(210,210,210);
-    box-shadow: 0px 2px 0px rgb(225,225,225) inset;
-    float: right;
-}
-.wp .scale-screen .buy-product{
+.wp .scale-widget .buy-product{
     text-align: center;
     font-size: 32px;
     background: rgb(110,200,155);
@@ -1647,14 +1629,15 @@ td {
     cursor: pointer;
 }
 
-.wp .scale-screen .weight{
-    text-align: right;
-    margin: 16px;
+.wp .scale-widget .product-price,
+.wp .scale-widget .computed-price,
+.wp .scale-widget .weight{
+    text-align: center;
+    border: solid 1px black;
+    border-top: 0;
     background: white;
-    padding: 20px;
-    padding-right: 30px;
+    padding: 40px;
     font-size: 56px;
-    border-radius: 3px;
     font-family: Inconsolata;
     text-shadow: 0px 2px 0px rgb(210, 210, 210);
     box-shadow: 0px 2px 0px rgb(225,225,225) inset;
