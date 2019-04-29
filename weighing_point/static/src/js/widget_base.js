@@ -76,6 +76,11 @@ var WpBaseWidget = Widget.extend({
         }
         return value;
     },
+
+    get_currency: function(){
+        var currency = (this.wp && this.wp.currency) ? this.wp.currency : {symbol:'$', position: 'after', rounding: 0.01, decimals: 2};
+        return currency;
+    },
 });
 
 return WpBaseWidget;

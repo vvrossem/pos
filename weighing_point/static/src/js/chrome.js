@@ -21,6 +21,60 @@ odoo.define('weighing_point.chrome', function (require) {
     var round_pr = utils.round_precision;
 
 
+    /* -------- The Action Buttons -------- */
+
+    // below the scale widget
+    // buttons for extra actions and controls
+    // by weighing point extensions modules.
+    var action_button_classes = [];
+    var define_action_button = function (classe, options) {
+        options = options || {};
+
+        var classes = action_button_classes;
+        var index = classes.length;
+        var i;
+
+        if (options.after) {
+            for (i = 0; i < classes.length; i++) {
+                if (classes[i].name === options.after) {
+                    index = i + 1;
+                }
+            }
+        } else if (options.before) {
+            for (i = 0; i < classes.length; i++) {
+                if (classes[i].name === options.after) {
+                    index = i;
+                    break;
+                }
+            }
+        }
+        classes.splice(i, 0, classe);
+    };
+
+    var ActionButtonWidget = WpBaseWidget.extend({
+        template: 'ActionButtonWidget',
+        label: _t('Button'),
+
+        renderElement: function () {
+            var self = this;
+            this._super();
+            this.$el.click(function () {
+                self.button_click();
+            });
+        },
+
+        button_click: function () {
+        },
+
+        highlight: function (highlight) {
+            this.$el.toggleClass('highlight', !!highlight);
+        },
+
+        // alternative highlight color
+        altlight: function (altlight) {
+            this.$el.toggleClass('altlight', !!altlight);
+        },
+    });
 
     /*--------------------------------------*\
      |          THE SCALE WIDGET            |
@@ -42,8 +96,17 @@ odoo.define('weighing_point.chrome', function (require) {
             var self = this;
             var queue = this.wp.proxy_queue;
 
+
             this.set_weight(0);
             this.renderElement();
+
+            var uom = this.get_product_uom();
+            var currency = this.get_currency();
+
+            this.$('.weight-tag').text(uom);
+            this.$('.price-tag').text(currency.symbol + '/' + uom);
+            this.$('.total-tag').text('TOTAL ' + currency.symbol);
+
 
             // TODO(Vincent) improve it with toledo_scale information
             queue.schedule(function () {
@@ -97,25 +160,21 @@ odoo.define('weighing_point.chrome', function (require) {
             }
         },
 
-        // TODO(Vincent) improve container_weight logic
         // TODO(Vincent) how to send container_weigh to label printing ?
         set_weight: function (weight) {
             var container_weight = this.get_container_weight();
-            if (container_weight){
-                weight -= container_weight;
-            }
             this.weight = weight;
             this.container_weight = container_weight;
 
-            this.$('.weight').text(this.get_product_weight_string());
-            this.$('.container-weight').text(this.get_container_weight_string());
-            this.$('.product-price').text(this.format_currency(this.get_product_price()) + '/' + this.get_product_uom());
-            this.$('.computed-price').text(this.get_computed_price_string());
+            this.$('.tare').text(this.get_container_weight_string());
+            this.$('.weight').text(this.get_product_weight());
+            this.$('.price').text(this.format_currency_no_symbol(this.get_product_price()));
+            this.$('.total').text(this.get_computed_price_string());
         },
 
-        get_product_weight_string: function () {
+        get_product_weight: function () {
             var product = this.get_product();
-            var defaultstr = (this.weight || 0).toFixed(3) + ' kg';
+            var defaultstr = (this.weight || 0).toFixed(3);
             if (!product || !this.wp) {
                 return defaultstr;
             }
@@ -126,17 +185,13 @@ odoo.define('weighing_point.chrome', function (require) {
             var unit = this.wp.units_by_id[unit_id[0]];
             var weight = round_pr(this.weight || 0, unit.rounding);
             var weightstr = weight.toFixed(Math.ceil(Math.log(1.0 / unit.rounding) / Math.log(10)));
-            weightstr += ' ' + unit.name;
             return weightstr;
         },
 
         get_container_weight_string: function(){
-            if (!this.container_weight){
-                return '';
-            }
+            var defaultstr = (this.container_weight || 0).toFixed(3) + ' kg';
             var product = this.get_product();
-            var defaultstr = 'Container weight: ' + (this.container_weight).toFixed(3) + ' Kg';
-            if (!product || !this.wp) {
+            if (!this.container_weight || !product || !this.wp) {
                 return defaultstr;
             }
             var unit_id = product.uom_id;
@@ -145,14 +200,14 @@ odoo.define('weighing_point.chrome', function (require) {
             }
             var unit = this.wp.units_by_id[unit_id[0]];
             var weight = round_pr(this.container_weight || 0, unit.rounding);
-            var weightstr = 'Container weight: '
-                + weight.toFixed(Math.ceil(Math.log(1.0 / unit.rounding) / Math.log(10)))
+            var weightstr = weight.toFixed(Math.ceil(Math.log(1.0 / unit.rounding) / Math.log(10)))
                 + ' ' + unit.name;
             return weightstr;
         },
 
         get_computed_price_string: function () {
-            return this.format_currency(this.get_product_price() * this.weight);
+            var net_weight = this.container_weight ? (this.weight - this.container_weight) : this.weight;
+            return this.format_currency_no_symbol(this.get_product_price() * net_weight);
         },
 
         //TODO(Vincent) move the logic ? use destroy instead?
@@ -162,7 +217,6 @@ odoo.define('weighing_point.chrome', function (require) {
             this.wp.proxy_queue.clear();
         },
     });
-
 
     /* -------- The Order Selector -------- */
 
@@ -592,28 +646,48 @@ odoo.define('weighing_point.chrome', function (require) {
     /* ------------ The Back Button ------------ */
 
     // The back button allows the user to go back to the previous screen.
-    var BackButtonWidget = WpBaseWidget.extend({
-        template: 'BackButtonWidget',
+    var BackButton = ActionButtonWidget.extend({
+        template: 'BackButton',
+        history_stack: [],
 
-        init: function(parent, options){
-            this._super(parent, options);
-            this.history_stack = [];
-        },
-
-        start: function () {
+        button_click: function () {
             this._super();
-            var self = this;
-            this.$el.click(function () {
-                var previousScreen = self.history_stack.pop();
-                var currentScreen = self.gui.get_current_screen();
-                console.log('current screen=' + currentScreen);
-                console.log('previous screen=' + previousScreen);
-                if (previousScreen && previousScreen !== currentScreen) {
-                    // (Vincent) param refresh=true so ProductCategoriesWidget is reset when shown
-                    self.gui.show_screen(previousScreen, {}, true, null);
-                }
-            });
+            var previousScreen = this.history_stack.pop();
+            var currentScreen = this.gui.get_current_screen();
+            console.log('current screen=' + currentScreen);
+            console.log('previous screen=' + previousScreen);
+            if (previousScreen && previousScreen !== currentScreen) {
+                // (Vincent) param refresh=true so ProductCategoriesWidget is reset when shown
+                this.gui.show_screen(previousScreen, {}, true, null);
+            }
+
         },
+    });
+
+    define_action_button({
+        'name': 'back_button',
+        'widget': BackButton,
+    });
+
+    /* ------------ The Home Button ------------ */
+
+    // The home button allows the user to go to the startup screen.
+    // It clears the navigation history stack
+    var HomeButton = ActionButtonWidget.extend({
+        template: 'HomeButton',
+        startup_screen: 'startup',
+
+        button_click: function () {
+            this._super();
+            this.chrome.action_buttons.back_button.history_stack = [];
+            // (Vincent) param refresh=true so ProductCategoriesWidget is reset when shown
+            this.gui.show_screen(this.startup_screen, {}, true, null);
+        },
+    });
+
+    define_action_button({
+        'name': 'home_button',
+        'widget': HomeButton,
     });
 
     /*--------------------------------------*\
@@ -629,6 +703,7 @@ odoo.define('weighing_point.chrome', function (require) {
     // It is mainly composed of :
     // - a header, containing the header widgets
     // - a leftpane, containing the scale widget
+    //   and action buttons
     // - a rightpane, containing the screens
     //   (see screens.js)
     // - popups
@@ -942,11 +1017,7 @@ odoo.define('weighing_point.chrome', function (require) {
                 'name': 'scale_widget',
                 'widget': ScaleWidget,
                 'replace': '.placeholder-ScaleWidget'
-            }, {
-                'name': 'back_button',
-                'widget': BackButtonWidget,
-                'replace': '.placeholder-BackButtonWidget'
-            }
+            },
         ],
 
         // This method instantiates all the screens, widgets, etc.
@@ -988,6 +1059,7 @@ odoo.define('weighing_point.chrome', function (require) {
             }
             console.log('end screens');
 
+            console.log('start popups');
             this.popups = {};
             for (i = 0; i < this.gui.popup_classes.length; i++) {
                 classe = this.gui.popup_classes[i];
@@ -998,6 +1070,23 @@ odoo.define('weighing_point.chrome', function (require) {
                     this.gui.add_popup(classe.name, popup);
                 }
             }
+            console.log('end popups');
+
+            console.log('start action_buttons');
+            this.action_buttons = {};
+            var classes = action_button_classes;
+            for (var i = 0; i < classes.length; i++) {
+                var classe = classes[i];
+                if (!classe.condition || classe.condition.call(this)) {
+                    var widget = new classe.widget(this, {});
+                    widget.appendTo(this.$('.control-buttons'));
+                    this.action_buttons[classe.name] = widget;
+                }
+            }
+            if (_.size(this.action_buttons)) {
+                this.$('.control-buttons').removeClass('oe_hidden');
+            }
+            console.log('end action_buttons');
 
             this.gui.set_startup_screen('startup');
             this.gui.set_default_screen('startup');
@@ -1011,8 +1100,10 @@ odoo.define('weighing_point.chrome', function (require) {
 
     return {
         Chrome: Chrome,
+        ActionButtonWidget: ActionButtonWidget,
         ScaleWidget: ScaleWidget,
-        BackButtonWidget: BackButtonWidget,
+        BackButton: BackButton,
+        HomeButton:HomeButton,
         DebugWidget: DebugWidget,
         HeaderButtonWidget: HeaderButtonWidget,
         OrderSelectorWidget: OrderSelectorWidget,

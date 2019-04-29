@@ -15,7 +15,6 @@
             </div>
 
             <div class="wp-content">
-
                 <div class="leftpane">
                     <div class='window'>
                         <div class='subwindow'>
@@ -26,16 +25,11 @@
                                 </div>
                             </div>
                         </div>
-
-                        <div class='subwindow collapsed'>
+                        <div class="subwindow">
                             <div class='subwindow-container'>
                                 <div class='subwindow-container-fix pads'>
-                                    <!--<div class="control-buttons oe_hidden"></div>
-                                    <div class="placeholder-ActionpadWidget"></div>
-                                    <div class="placeholder-NumpadWidget"></div>-->
-
-                                    <div class="placeholder-BackButtonWidget"></div>
-
+                                    <!-- here goes the control buttons : back_button and home_button -->
+                                    <div class="control-buttons oe_hidden"></div>
                                 </div>
                             </div>
                         </div>
@@ -304,10 +298,7 @@
 
     <t t-name="SelectedProductWidget">
         <div class='product-container'>
-            <div class="product-scroller touch-scrollable">
-                <div class="selected-product"></div>
-
-            </div>
+            <div class="selected-product"></div>
         </div>
     </t>
 
@@ -318,11 +309,11 @@
                     <h1 class='product-name'>Selected product:</h1>
                 </div>
                 <div class="full-content">
-                    <span class="placeholder-SelectedProductWidget" />
-                    <span class='button next'>
+                    <div class="placeholder-SelectedProductWidget" />
+                    <div class='button next'>
                         Print label
-                        <i class='fa fa-angle-double-right'></i>
-                    </span>
+                        <i class='fa fa-print'></i>
+                    </div>
                 </div>
             </div>
         </div>
@@ -330,10 +321,24 @@
 
     <t t-name="ScaleWidget">
         <div class="scale-widget">
-            <div class='weight js-weight'></div>
-            <div class="container-weight"></div>
-            <div class='product-price'></div>
-            <div class='computed-price'></div>
+            <div class="scale-widget-container">
+                <div class="container-weight">
+                    <div class="tare-tag">TARE</div>
+                    <div class="tare"></div>
+                </div>
+                <div class="product-weight">
+                    <div class="weight-tag"></div>
+                    <div class="weight"></div>
+                </div>
+                <div class="product-price">
+                    <div class="price-tag"></div>
+                    <div class="price"></div>
+                </div>
+                <div class="computed-price">
+                    <div class="total-tag"></div>
+                    <div class="total"></div>
+                </div>
+            </div>
         </div>
     </t>
 
@@ -344,15 +349,18 @@
                     <h1>STARTUP SCREEN</h1>
                 </div>
                 <div class="full-content">
-                    <div class="button products-screen">
+                    <span class="button products-screen">
+                        <i class="fa fa-shopping-bag"></i>
                         Weigh a filled bag
-                    </div>
-                    <div class="button weighing-screen">
+                    </span>
+                    <span class="button weighing-screen">
+                        <i class="fa fa-beer"></i>
                         Weigh an empty container
-                    </div>
-                    <div class="button scanning-screen">
+                    </span>
+                    <span class="button scanning-screen">
+                        <i class="fa fa-barcode"></i>
                         Scan a filled container
-                    </div>
+                    </span>
                 </div>
             </div>
         </div>
@@ -378,7 +386,7 @@
                     <div>Weigh the empty container</div>
                     <span class='button next'>
                         Print label
-                        <i class='fa fa-angle-double-right'></i>
+                        <i class='fa fa-print'></i>
                     </span>
                 </div>
 
@@ -386,11 +394,20 @@
         </div>
     </t>
 
-    <t t-name="BackButtonWidget">
+    <t t-name="BackButton">
         <div class="control-button">
             <span class='button back'>
-                <i class='fa fa-angle-double-left'></i>
+                <i class='fa fa-arrow-left'></i>
                 Back
+            </span>
+        </div>
+    </t>
+
+    <t t-name="HomeButton">
+        <div class="control-button">
+            <span class='button home'>
+                <i class='fa fa-home'></i>
+                Home
             </span>
         </div>
     </t>

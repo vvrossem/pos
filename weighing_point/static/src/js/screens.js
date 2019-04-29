@@ -743,61 +743,7 @@ odoo.define('weighing_point.screens', function (require) {
         },
     });
 
-    /* -------- The Action Buttons -------- */
 
-    // Above the numpad and the actionpad, buttons
-    // for extra actions and controls by weighing point
-    // extensions modules.
-
-    var action_button_classes = [];
-    var define_action_button = function (classe, options) {
-        options = options || {};
-
-        var classes = action_button_classes;
-        var index = classes.length;
-        var i;
-
-        if (options.after) {
-            for (i = 0; i < classes.length; i++) {
-                if (classes[i].name === options.after) {
-                    index = i + 1;
-                }
-            }
-        } else if (options.before) {
-            for (i = 0; i < classes.length; i++) {
-                if (classes[i].name === options.after) {
-                    index = i;
-                    break;
-                }
-            }
-        }
-        classes.splice(i, 0, classe);
-    };
-
-    var ActionButtonWidget = WpBaseWidget.extend({
-        template: 'ActionButtonWidget',
-        label: _t('Button'),
-
-        renderElement: function () {
-            var self = this;
-            this._super();
-            this.$el.click(function () {
-                self.button_click();
-            });
-        },
-
-        button_click: function () {
-        },
-
-        highlight: function (highlight) {
-            this.$el.toggleClass('highlight', !!highlight);
-        },
-
-        // alternative highlight color
-        altlight: function (altlight) {
-            this.$el.toggleClass('altlight', !!altlight);
-        },
-    });
 
     /* -------- The Product Screen -------- */
 
@@ -807,10 +753,10 @@ odoo.define('weighing_point.screens', function (require) {
         start: function () {
             var self = this;
 
-            //this.order_widget = new OrderWidget(this, {
-            //    numpad_state: this.numpad.state,
-            //});
-            //this.order_widget.replace(this.$('.placeholder-OrderWidget'));
+            /*this.order_widget = new OrderWidget(this, {
+               numpad_state: this.numpad.state,
+            });
+            this.order_widget.replace(this.$('.placeholder-OrderWidget'));*/
 
             this.product_list_widget = new ProductListWidget(this, {
                 click_product_action: function (product) {
@@ -825,26 +771,13 @@ odoo.define('weighing_point.screens', function (require) {
             });
             this.product_categories_widget.replace(this.$('.placeholder-ProductCategoriesWidget'));
 
-            this.action_buttons = {};
-            var classes = action_button_classes;
-            for (var i = 0; i < classes.length; i++) {
-                var classe = classes[i];
-                if (!classe.condition || classe.condition.call(this)) {
-                    var widget = new classe.widget(this, {});
-                    widget.appendTo(this.$('.control-buttons'));
-                    this.action_buttons[classe.name] = widget;
-                }
-            }
-            if (_.size(this.action_buttons)) {
-                this.$('.control-buttons').removeClass('oe_hidden');
-            }
         },
 
         click_product: function (product) {
             console.log('[ProductScreenWidget] click_product');
             var container_weight = this.gui.get_current_screen_param('container_weight');
 
-            this.chrome.widget.back_button.history_stack.push(this.gui.get_current_screen());
+            this.chrome.action_buttons.back_button.history_stack.push(this.gui.get_current_screen());
             this.gui.show_screen('selected-product', {
                 product:product,
                 container_weight:container_weight,
@@ -877,9 +810,9 @@ odoo.define('weighing_point.screens', function (require) {
      |         THE CLIENT LIST              |
     \*======================================*/
 
-// The clientlist displays the list of customer,
-// and allows the cashier to create, edit and assign
-// customers.
+    // The clientlist displays the list of customer,
+    // and allows the cashier to create, edit and assign
+    // customers.
 
     var ClientListScreenWidget = ScreenWidget.extend({
         template: 'ClientListScreenWidget',
@@ -1968,133 +1901,6 @@ odoo.define('weighing_point.screens', function (require) {
     });
     gui.define_screen({name: 'payment', widget: PaymentScreenWidget});
 
-    var set_fiscal_position_button = ActionButtonWidget.extend({
-        template: 'SetFiscalPositionButton',
-        init: function (parent, options) {
-            this._super(parent, options);
-
-            this.wp.get('orders').bind('add remove change', function () {
-                this.renderElement();
-            }, this);
-
-            this.wp.bind('change:selectedOrder', function () {
-                this.renderElement();
-            }, this);
-        },
-        button_click: function () {
-            var self = this;
-
-            var no_fiscal_position = [{
-                label: _t("None"),
-            }];
-            var fiscal_positions = _.map(self.wp.fiscal_positions, function (fiscal_position) {
-                return {
-                    label: fiscal_position.name,
-                    item: fiscal_position
-                };
-            });
-
-            var selection_list = no_fiscal_position.concat(fiscal_positions);
-            self.gui.show_popup('selection', {
-                title: _t('Select tax'),
-                list: selection_list,
-                confirm: function (fiscal_position) {
-                    var order = self.wp.get_order();
-                    order.fiscal_position = fiscal_position;
-                    // This will trigger the recomputation of taxes on order lines.
-                    // It is necessary to manually do it for the sake of consistency
-                    // with what happens when changing a customer.
-                    _.each(order.orderlines.models, function (line) {
-                        line.set_quantity(line.quantity);
-                    });
-                    order.trigger('change');
-                },
-                is_selected: function (fiscal_position) {
-                    return fiscal_position === self.wp.get_order().fiscal_position;
-                }
-            });
-        },
-        get_current_fiscal_position_name: function () {
-            var name = _t('Tax');
-            var order = this.wp.get_order();
-
-            if (order) {
-                var fiscal_position = order.fiscal_position;
-
-                if (fiscal_position) {
-                    name = fiscal_position.display_name;
-                }
-            }
-            return name;
-        },
-    });
-
-    define_action_button({
-        'name': 'set_fiscal_position',
-        'widget': set_fiscal_position_button,
-        'condition': function () {
-            return this.wp.fiscal_positions.length > 0;
-        },
-    });
-
-    var set_pricelist_button = ActionButtonWidget.extend({
-        template: 'SetPricelistButton',
-        init: function (parent, options) {
-            this._super(parent, options);
-
-            this.wp.get('orders').bind('add remove change', function () {
-                this.renderElement();
-            }, this);
-
-            this.wp.bind('change:selectedOrder', function () {
-                this.renderElement();
-            }, this);
-        },
-        button_click: function () {
-            var self = this;
-
-            var pricelists = _.map(self.wp.pricelists, function (pricelist) {
-                return {
-                    label: pricelist.name,
-                    item: pricelist
-                };
-            });
-
-            self.gui.show_popup('selection', {
-                title: _t('Select pricelist'),
-                list: pricelists,
-                confirm: function (pricelist) {
-                    var order = self.wp.get_order();
-                    order.set_pricelist(pricelist);
-                },
-                is_selected: function (pricelist) {
-                    return pricelist.id === self.wp.get_order().pricelist.id;
-                }
-            });
-        },
-        get_current_pricelist_name: function () {
-            var name = _t('Pricelist');
-            var order = this.wp.get_order();
-
-            if (order) {
-                var pricelist = order.pricelist;
-
-                if (pricelist) {
-                    name = pricelist.display_name;
-                }
-            }
-            return name;
-        },
-    });
-
-    define_action_button({
-        'name': 'set_pricelist',
-        'widget': set_pricelist_button,
-        'condition': function () {
-            return this.wp.pricelists.length > 1;
-        },
-    });
-
      /*--------------------------------------*\
      |         THE STARTUP SCREEN           |
     \*======================================*/
@@ -2119,17 +1925,17 @@ odoo.define('weighing_point.screens', function (require) {
             var self = this;
 
             this.$('.products-screen').click(function () {
-                self.chrome.widget.back_button.history_stack.push(self.gui.get_current_screen());
+                self.chrome.action_buttons.back_button.history_stack.push(self.gui.get_current_screen());
                 self.gui.show_screen(self.products_screen);
             });
 
             this.$('.weighing-screen').click(function () {
-                self.chrome.widget.back_button.history_stack.push(self.gui.get_current_screen());
+                self.chrome.action_buttons.back_button.history_stack.push(self.gui.get_current_screen());
                 self.gui.show_screen(self.weighing_screen);
             });
 
             this.$('.scanning-screen').click(function () {
-                self.chrome.widget.back_button.history_stack.push(self.gui.get_current_screen());
+                self.chrome.action_buttons.back_button.history_stack.push(self.gui.get_current_screen());
                 self.gui.show_screen(self.scanning_screen);
             });
         },
@@ -2167,7 +1973,7 @@ odoo.define('weighing_point.screens', function (require) {
             var self = this;
             // for future improvements: check if container exists in db
             if (self.wp.scan_container(barcode)){
-                self.chrome.widget.back_button.history_stack.push(self.gui.get_current_screen());
+                self.chrome.action_buttons.back_button.history_stack.push(self.gui.get_current_screen());
                 self.gui.show_screen('products', { container_weight: barcode.value }); // or container_weight:barcode.value ?
             } else {
                 // for future improvements: add container to db
@@ -2316,7 +2122,6 @@ odoo.define('weighing_point.screens', function (require) {
         template: 'SelectedProductScreenWidget',
 
         // TODO(Vincent) add container_weight for label printing;
-
         start: function () {
             console.log('[SelectedProductScreenWidget] start');
             this.selected_product_widget = new SelectedProductWidget(this);
@@ -2332,28 +2137,20 @@ odoo.define('weighing_point.screens', function (require) {
             this.selected_product_widget.set_selected_product(product);
         },
 
-
     });
     gui.define_screen({name: 'selected-product', widget: SelectedProductScreenWidget});
 
     return {
         ReceiptScreenWidget: ReceiptScreenWidget,
-        ActionButtonWidget: ActionButtonWidget,
-        define_action_button: define_action_button,
         ScreenWidget: ScreenWidget,
         PaymentScreenWidget: PaymentScreenWidget,
         ScanningScreenWidget:ScanningScreenWidget,
         OrderWidget: OrderWidget,
-        //NumpadWidget: NumpadWidget,
         ProductScreenWidget: ProductScreenWidget,
         ProductListWidget: ProductListWidget,
         ClientListScreenWidget: ClientListScreenWidget,
-        //ActionpadWidget: ActionpadWidget,
         DomCache: DomCache,
         ProductCategoriesWidget: ProductCategoriesWidget,
-        //ScaleScreenWidget: ScaleScreenWidget,
-        set_fiscal_position_button: set_fiscal_position_button,
-        set_pricelist_button: set_pricelist_button,
     };
 
 });

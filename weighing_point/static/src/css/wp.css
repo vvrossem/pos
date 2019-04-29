@@ -198,10 +198,10 @@ td {
     height: 100%;
 }
 .wp .window .subwindow.collapsed{
-    height: 100%;
+    height: 0px;
 }
 .wp .window .subwindow-container .collapsed{
-    height: 100%;
+    height: 0px;
 }
 .wp .subwindow .subwindow-container{
     display: table-cell;
@@ -315,7 +315,7 @@ td {
     background: #393939;
 }
 
-/*  a) The left part of the top-bar */
+/*  The left part of the top-bar */
 
 .wp .wp-branding{
     position: absolute;
@@ -347,7 +347,7 @@ td {
     cursor: pointer;
 }
 
-/*  b) The right part of the top-bar */
+/*  The right part of the top-bar */
 
 .wp .wp-rightheader {
     position: absolute;
@@ -450,7 +450,7 @@ td {
     -webkit-overflow-scrolling: touch;
 }
 
-/*  c) The session buttons */
+/*  The session buttons */
 
 .wp .wp-rightheader .header-button{
     float: right;
@@ -481,7 +481,7 @@ td {
     font-weight: bold;
 }
 
-/*  c) The notifications indicator */
+/*  The notifications indicator */
 
 .wp .oe_status{
     float:right; 
@@ -526,9 +526,8 @@ td {
     bottom: 0;
     background: #F0EEEE;
 }
-/*TODO(Vincent) change this*/
 
-/*  ********* The leftpane contains the order, numpad and paypad ********* */
+/*  ********* The leftpane contains scale widget and back button widget ********* */
 
 .wp .leftpane {
     -webkit-box-sizing: border-box;
@@ -541,13 +540,10 @@ td {
     top:0px;
     bottom:0;
     border-right: solid 1px #CECBCB;
-    border-right: solid 3px #787878;
-    background: #e2e2e2;
 }
 
 .wp .leftpane .pads {
     border-top: solid 3px rgb(110, 200, 155);
-    margin-bottom: 33%;
     text-align: center;
 }
 
@@ -559,7 +555,6 @@ td {
     -webkit-flex-flow: row wrap;
     flex-flow: row wrap;
     padding: 8px 16px 0px 11px;
-    margin-bottom: -6px;
 }
 .wp .control-button {
     -webkit-flex-grow: 1;
@@ -572,7 +567,7 @@ td {
     text-align: center;
     border-radius: 3px;
     padding: 0px 10px;
-    font-size: 18px;
+    font-size: 20px;
     margin-left: 6px;
     margin-bottom: 6px;
     cursor: pointer;
@@ -803,7 +798,7 @@ td {
     text-align: center;
 }
 
-/*  ********* The product list  ********* */
+/*  ********* The product list / selected product  ********* */
 
 .wp .product-list {
     padding: 10px;
@@ -824,6 +819,7 @@ td {
     -webkit-transform: translate3d(0,0,0);
 
 }
+
 .wp .product-list-container {
     position:absolute;
     top:0px;
@@ -1021,7 +1017,7 @@ td {
     color: #7C7BAD;
 }
 
-/*  e) the product */
+/*  the product / selected product */
 
 .wp .product {
     position:relative;
@@ -1089,6 +1085,69 @@ td {
     padding-top:15px;
 }
 
+.wp .selected-product .product{
+    position:relative;
+    vertical-align: top;
+    display: inline-block;
+    line-height: 200px;
+    font-size: 22px;
+    margin: 16px !important;
+    width: 244px;
+    height: 230px;
+    background:#fff;
+    border: 1px solid #e2e2e2;
+    border-radius: 3px;
+    border-bottom-width: 3px;
+    overflow: hidden;
+}
+.wp .selected-product .product .product-img {
+    position: relative;
+    width: 240px;
+    height: 200px;
+    background: white;
+    text-align: center;
+}
+
+.wp .selected-product .product .product-img img {
+    max-height: 100px;
+    max-width:  120px;
+    vertical-align: middle;
+}
+
+.wp .selected-product .product .price-tag {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    vertical-align: top;
+    color: white;
+    line-height: 26px;
+    background: #7f82ac;
+    padding: 2px 5px;
+    border-radius: 2px;
+}
+
+.wp .selected-product .product .product-name {
+    position: absolute;
+    -webkit-box-sizing: border-box;
+       -moz-box-sizing: border-box;
+        -ms-box-sizing: border-box;
+            box-sizing: border-box;
+    bottom:0;
+    top:auto;
+    line-height: 28px;
+    width:100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    background: -webkit-linear-gradient(-90deg,rgba(255,255,255,0),rgba(255,255,255,1), rgba(255,255,255,1));
+    background:    -moz-linear-gradient(-90deg,rgba(255,255,255,0),rgba(255,255,255,1), rgba(255,255,255,1));
+    background:     -ms-linear-gradient(-90deg,rgba(255,255,255,0),rgba(255,255,255,1), rgba(255,255,255,1));
+    /* troublesome in latest webkit
+    background:         linear-gradient(-90deg,rgba(255,255,255,0),rgba(255,255,255,1), rgba(255,255,255,1));
+    */
+    /*background:#FFF;*/
+    padding: 3px;
+    padding-top:15px;
+}
 
 /*  ********* The Screens  ********* */
 
@@ -1618,6 +1677,14 @@ td {
 
 /* d) The Scale widget */
 
+.wp .scale-widget-container {
+    position:absolute;
+    top:0px;
+    bottom:0px;
+    left:0px;
+    right:0px;
+}
+
 .wp .scale-widget .buy-product{
     text-align: center;
     font-size: 32px;
@@ -1628,10 +1695,12 @@ td {
     margin: 16px;
     cursor: pointer;
 }
-
+.wp .scale-widget .container-weight,
+.wp .scale-widget .product-weight,
 .wp .scale-widget .product-price,
-.wp .scale-widget .computed-price,
-.wp .scale-widget .weight{
+.wp .scale-widget .computed-price{
+    display:block;
+    position:relative;
     text-align: center;
     border: solid 1px black;
     border-top: 0;
@@ -1643,6 +1712,17 @@ td {
     box-shadow: 0px 2px 0px rgb(225,225,225) inset;
 }
 
+.wp .scale-widget .container-weight .tare-tag,
+.wp .scale-widget .product-weight .weight-tag,
+.wp .scale-widget .product-price .price-tag,
+.wp .scale-widget .computed-price .total-tag{
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    vertical-align: top;
+    padding: 2px 5px;
+    font-size: 30px;
+}
 
 /* e) The Client List Screen */
 
