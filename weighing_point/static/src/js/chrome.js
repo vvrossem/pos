@@ -396,7 +396,7 @@ odoo.define('weighing_point.chrome', function (require) {
             };
             this.dragstart_handler = function (event) {
                 self.dragging = true;
-                self.dragwp = eventpos(event);
+                self.dragpos = eventpos(event);
             };
             this.dragmove_handler = function (event) {
                 if (self.dragging) {
