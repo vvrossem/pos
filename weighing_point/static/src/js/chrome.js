@@ -108,7 +108,7 @@ odoo.define('weighing_point.chrome', function (require) {
             this.$('.total-tag').text('TOTAL ' + currency.symbol);
 
 
-            // TODO(Vincent) improve it with toledo_scale information
+            // TODO(Vincent) improve it with toledo_scale logic?
             queue.schedule(function () {
                 return self.wp.proxy.scale_read().then(function (weight) {
                     self.set_weight(weight.weight);
@@ -160,7 +160,7 @@ odoo.define('weighing_point.chrome', function (require) {
             }
         },
 
-        // TODO(Vincent) how to send container_weigh to label printing ?
+        // TODO(Vincent) send container_weigh to label printing
         set_weight: function (weight) {
             var container_weight = this.get_container_weight();
             this.weight = weight;
@@ -679,9 +679,11 @@ odoo.define('weighing_point.chrome', function (require) {
 
         button_click: function () {
             this._super();
-            this.chrome.action_buttons.back_button.history_stack = [];
-            // (Vincent) param refresh=true so ProductCategoriesWidget is reset when shown
-            this.gui.show_screen(this.startup_screen, {}, true, null);
+            var currentScreen = this.gui.get_current_screen();
+            if (currentScreen != this.startup_screen) {
+                this.chrome.action_buttons.back_button.history_stack = [];
+                this.gui.show_screen(this.startup_screen, {});
+            }
         },
     });
 
