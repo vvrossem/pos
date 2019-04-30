@@ -80,6 +80,7 @@ odoo.define('pos_container.tour.tare', function (require) {
     confirm_scan(),
     check_selected_orderline("Check: empty container in the orderline", ".product-name:contains('Container without product')"),
     check_selected_orderline("Check: the name is 'Container'", ".info:contains('Container')"),
+    check_selected_orderline("Check: the quantity is 0", ".info em:contains('0.000')"),
     {
         content: "select product",
         trigger: ".product:contains('Whiteboard Pen')", //UoM = kg

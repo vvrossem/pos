@@ -76,10 +76,10 @@ odoo.define('pos_container.models_and_db', function (require) {
             attr.order = this;
             var product = this.pos.get_container_product();
             var line = new models.Orderline({}, {
-                pos: this.pos, order: this,
-                quantity: 0, product: product, });
+				pos: this.pos, order: this, product: product});
 
             line.set_container(container);
+            line.set_quantity(0);
             this.orderlines.add(line);
 
             this.select_orderline(this.get_last_orderline());
