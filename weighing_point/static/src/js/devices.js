@@ -115,6 +115,7 @@ var ProxyDevice  = core.Class.extend(mixins.PropertiesMixin,{
         this.custom_payment_status = this.default_payment_status;
 
         this.receipt_queue = [];
+        this.container_label_queue = [];
 
         this.notifications = {};
         this.bypass_proxy = false;
@@ -440,6 +441,32 @@ var ProxyDevice  = core.Class.extend(mixins.PropertiesMixin,{
                             return;
                         }
                         self.receipt_queue.unshift(r);
+                    });
+            }
+        }
+        send_printing_job();
+    },
+
+    print_container_label: function(label){
+        var self = this;
+        if(label){
+            this.container_label_queue.push(label);
+        }
+        function send_printing_job(){
+            if (self.container_label_queue.length > 0){
+                var l = self.container_label_queue.shift();
+                self.message('print_xml_container_label',{ label: l },{ timeout: 5000 })
+                    .then(function(){
+                        send_printing_job();
+                    },function(error){
+                        if (error) {
+                            self.wp.gui.show_popup('error-traceback',{
+                                'title': _t('Printing Error: ') + error.data.message,
+                                'body':  error.data.debug,
+                            });
+                            return;
+                        }
+                        self.container_label_queue.unshift(l);
                     });
             }
         }

@@ -210,6 +210,10 @@ odoo.define('weighing_point.chrome', function (require) {
             return this.format_currency_no_symbol(this.get_product_price() * net_weight);
         },
 
+        get_scale_weight: function(){
+            return this.weight;
+        },
+
         //TODO(Vincent) move the logic ? use destroy instead?
         close: function () {
             this._super();

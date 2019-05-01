@@ -1989,8 +1989,9 @@ odoo.define('weighing_point.screens', function (require) {
     \*======================================*/
 
     /**
-     * The weighing screen
-     * ...
+     * The weighing screen allows
+     * to print a container label
+     * with the proxy (iotbox
      */
 
     var WeighingScreenWidget = ScreenWidget.extend({
@@ -2000,10 +2001,63 @@ odoo.define('weighing_point.screens', function (require) {
             this._super();
             var self = this;
             console.log(this.gui.get_current_screen());
+            console.log(this.get_container_weight());
+            //this.render_container_label();
         },
 
-        //TODO(Vincent) develop logic for label printing
+        render_container_label: function () {
+            this.$('.wp-container-label').html(QWeb.render('LabelContainer', this.get_container_label_render_env()));
+        },
 
+        get_container_label_render_env: function () {
+            //var order = this.wp.get_order();
+            var container_weight = this.get_container_weight(); // TODO(Vincent) implement
+            return {
+                widget: this,
+                wp: this.wp,
+                //order: order,
+                label: order.export_for_printing(),
+                //orderlines: order.get_orderlines(),
+                //paymentlines: order.get_paymentlines(),
+            };
+        },
+
+        renderElement: function () {
+            console.log('[WeighingScreenWidget] renderElement');
+            var self = this;
+            this._super();
+            this.$('.button.print-container-label').click(function () {
+                if (!self._locked) {
+                    self.print();
+                }
+            });
+        },
+
+        print: function () {
+            if (!this.wp.config.iface_print_via_proxy) {
+                this.gui.show_popup('error', {
+                    title: _t('No Printer'),
+                    body: _t('todo'),
+                });
+            } else {    // proxy (xml) printing
+                this.print_xml();
+                this.lock_screen(false);
+            }
+        },
+
+        print_xml: function () {
+            // TODO(Vincent) XmlContainerLabel
+            var label = QWeb.render('XmlContainerLabel', this.get_container_label_render_env());
+
+            this.wp.proxy.print_container_label(label);
+            //this.wp.get_order()._printed = true;
+        },
+
+
+        get_container_weight:function(){
+            //TODO(Vincent) how to detect change on scale weight ?
+            return this.chrome.widget.scale_widget.get_scale_weight();
+        },
     });
     gui.define_screen({name: 'weighing', widget: WeighingScreenWidget});
 
