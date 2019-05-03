@@ -12,6 +12,11 @@ odoo.define('pos_container.models_and_db', function (require) {
     var models = require('point_of_sale.models');
     var rpc = require('web.rpc');
 
+	var utils = require('web.utils');
+	var field_utils = require('web.field_utils');
+	var round_di = utils.round_decimals;
+	var round_pr = utils.round_precision;
+
     // include not available => extend
     models.PosModel = models.PosModel.extend({
         get_container_product: function(){
@@ -218,20 +223,18 @@ odoo.define('pos_container.models_and_db', function (require) {
             return this.tare_mode;
         },
         set_tare: function(tare){
-            this.tare = tare;
+			if(tare === 'remove'){
+				this.order.remove_orderline(this);
+				return;
+			}
+            this.tare = parseFloat(tare) || 0;
             this.container = null;
-            if(this.tare[0] == '.')
-            {
-                this.tare = '0' + this.tare
+            if (this.gross_weight && this.gross_weight != 'NaN'){
+                this.set_quantity(this.gross_weight - parseFloat(tare));
             }
-            if (this.gross_weight && this.gross_weight != 'NaN')
-            {
-                this.set_quantity(this.gross_weight - tare);
-            }
-            else
-            {
+            else{
                 this.gross_weight = this.quantity;
-                this.set_quantity(this.quantity - tare);
+                this.set_quantity(this.quantity - parseFloat(tare));
             }
             this.trigger('change', this);
         },
@@ -245,6 +248,38 @@ odoo.define('pos_container.models_and_db', function (require) {
             this.gross_weight = weight;
             this.trigger('change', this);
         },
+		set_quantity: function(quantity, keep_price){
+			// copied from odoo core
+			this.order.assert_editable();
+			if(quantity === 'remove'){
+				this.order.remove_orderline(this);
+				return;
+			}else{
+				var quant = parseFloat(quantity) || 0;
+				var unit = this.get_unit();
+				if(unit){
+					if (unit.rounding) {
+						this.quantity    = round_pr(quant, unit.rounding);
+						var decimals = this.pos.dp['Product Unit of Measure'];
+						this.quantity = round_di(this.quantity, decimals)
+						this.quantityStr = field_utils.format.float(this.quantity, {digits: [69, decimals]});
+					} else {
+						this.quantity    = round_pr(quant, 1);
+						this.quantityStr = this.quantity.toFixed(0);
+					}
+				}else{
+					this.quantity    = quant;
+					this.quantityStr = '' + this.quantity;
+				}
+			}
+			// surcharge starts here
+			if (this.tare){
+				console.log('tare ' + this.tare);
+				console.log('tare ' + parseFloat(this.tare));
+				console.log('quantity ' + this.quantity);
+				this.set_gross_weight(this.quantity + parseFloat(this.tare));
+			}
+		},
         export_as_JSON: function(){
             var pack_lot_ids = [];
             if (this.has_product_lot){

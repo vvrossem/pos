@@ -164,7 +164,19 @@ odoo.define('pos_container.tour.tare', function (require) {
     click_numpad(2),
     check_selected_orderline("Check: orderline in MAN tare mode", ".pos-right-align:contains('MAN')"),
     check_selected_orderline("Check: orderline's product is the Pen", ".product-name:contains('Whiteboard Pen')"),
-    check_selected_orderline("Check: the quantity is the tared weight", ".info:contains('0.100')"),
+    check_selected_orderline("Check: the quantity is the tared weight", ".info em:contains('0.100')"),
+    {
+        content: "switch numpad to quantity mode",
+        trigger: ".mode-button[data-mode='quantity']",
+    },
+    click_numpad(0),
+    click_numpad('.'),
+    click_numpad(6),
+    check_selected_orderline("Check: orderline in MAN tare mode", ".pos-right-align:contains('MAN')"),
+    check_selected_orderline("Check: orderline's product is the Pen", ".product-name:contains('Whiteboard Pen')"),
+    check_selected_orderline("Check: the quantity is 0.6", ".info em:contains('0.600')"),
+    check_selected_orderline("Check: the tare is unchanged", ".info:contains('0.2')"),
+    check_selected_orderline("Check: the gross weight is the tare + the quantity", ".info:contains('Gross : 0.8 kg')"),
     {
         content: "Add a unit product",
         trigger: ".product:contains('Large Cabinet')",
@@ -175,6 +187,7 @@ odoo.define('pos_container.tour.tare', function (require) {
     click_numpad(1),
     click_numpad(0),
     check_selected_orderline("Check: orderline in MAN tare mode", ".pos-right-align:contains('MAN')"),
+    check_selected_orderline("Check: the undiscounted price is still 320", ".info:contains('320.00')"),
     {
         content: "Add a unit product",
         trigger: ".product:contains('Large Cabinet')",
