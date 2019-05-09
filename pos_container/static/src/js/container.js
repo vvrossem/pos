@@ -246,6 +246,9 @@ odoo.define('pos_container.container', function (require) {
 
         close: function(){
             this._super();
+			if (this.pos.config.iface_vkeyboard && this.chrome.widget.keyboard) {
+				this.chrome.widget.keyboard.hide();
+			}
         },
 
         auto_back: true,
@@ -341,6 +344,10 @@ odoo.define('pos_container.container', function (require) {
             this.$('.next,.add-container').click(function(){
                 self.create_container();
             });
+
+			if(this.pos.config.iface_vkeyboard && this.chrome.widget.keyboard){
+				this.chrome.widget.keyboard.connect($(this.el.querySelector('.container-name input')));
+			}
         },
         get_product: function(){
             return this.pos.get_container_product();
@@ -388,7 +395,12 @@ odoo.define('pos_container.container', function (require) {
                 }
             });
         },
-
+        close: function(){
+            this._super();
+			if (this.pos.config.iface_vkeyboard && this.chrome.widget.keyboard) {
+				this.chrome.widget.keyboard.hide();
+			}
+        },
     });
 
     gui.define_screen({
