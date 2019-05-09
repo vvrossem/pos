@@ -223,10 +223,6 @@ odoo.define('pos_container.models_and_db', function (require) {
             return this.tare_mode;
         },
         set_tare: function(tare){
-			if(tare === 'remove'){
-				this.order.remove_orderline(this);
-				return;
-			}
             this.tare = parseFloat(tare) || 0;
             this.container = null;
             if (this.gross_weight && this.gross_weight != 'NaN'){
@@ -272,13 +268,17 @@ odoo.define('pos_container.models_and_db', function (require) {
 					this.quantityStr = '' + this.quantity;
 				}
 			}
+			// just like in sale.order changing the quantity will recompute the unit price
+			if(! keep_price && ! this.price_manually_set){
+				this.set_unit_price(this.product.get_price(this.order.pricelist, this.get_quantity()));
+				this.order.fix_tax_included_price(this);
+			}
+
 			// surcharge starts here
 			if (this.tare){
-				console.log('tare ' + this.tare);
-				console.log('tare ' + parseFloat(this.tare));
-				console.log('quantity ' + this.quantity);
 				this.set_gross_weight(this.quantity + parseFloat(this.tare));
 			}
+			this.trigger('change', this);
 		},
         export_as_JSON: function(){
             var pack_lot_ids = [];

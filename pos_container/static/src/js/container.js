@@ -246,9 +246,9 @@ odoo.define('pos_container.container', function (require) {
 
         close: function(){
             this._super();
-			if (this.pos.config.iface_vkeyboard && this.chrome.widget.keyboard) {
-				this.chrome.widget.keyboard.hide();
-			}
+            if (this.pos.config.iface_vkeyboard && this.chrome.widget.keyboard) {
+                this.chrome.widget.keyboard.hide();
+            }
         },
 
         auto_back: true,
@@ -312,7 +312,7 @@ odoo.define('pos_container.container', function (require) {
             var container = this.gui.get_current_screen_param('container');
             if (container){
                 var order = this.pos.get_order();
-                var orderline = order.get_last_orderline();
+                var orderline = order.get_selected_orderline();
                 orderline.set_container(container);
                 var old_orderline = this.gui.get_current_screen_param(
                     'old_orderline');
@@ -345,9 +345,9 @@ odoo.define('pos_container.container', function (require) {
                 self.create_container();
             });
 
-			if(this.pos.config.iface_vkeyboard && this.chrome.widget.keyboard){
-				this.chrome.widget.keyboard.connect($(this.el.querySelector('.container-name input')));
-			}
+            if(this.pos.config.iface_vkeyboard && this.chrome.widget.keyboard){
+                this.chrome.widget.keyboard.connect($(this.el.querySelector('.container-name input')));
+            }
         },
         get_product: function(){
             return this.pos.get_container_product();
@@ -397,9 +397,9 @@ odoo.define('pos_container.container', function (require) {
         },
         close: function(){
             this._super();
-			if (this.pos.config.iface_vkeyboard && this.chrome.widget.keyboard) {
-				this.chrome.widget.keyboard.hide();
-			}
+            if (this.pos.config.iface_vkeyboard && this.chrome.widget.keyboard) {
+                this.chrome.widget.keyboard.hide();
+            }
         },
     });
 
@@ -412,14 +412,13 @@ odoo.define('pos_container.container', function (require) {
         set_value: function(val) {
             this._super(val);
             var order = this.pos.get_order();
-            var oline = order.get_selected_orderline();
-            if (oline) {
+            if (order.get_selected_orderline()) {
                 var mode = this.numpad_state.get('mode');
                 if( mode === 'tare'){
-                    oline.set_tare(val);
+                    order.get_selected_orderline().set_tare(val);
                 }
                 if (['tare', 'discount', 'price'].indexOf(mode) != -1) {
-                    oline.set_tare_mode('MAN');
+                    order.get_selected_orderline().set_tare_mode('MAN');
                 }
             }
         },
