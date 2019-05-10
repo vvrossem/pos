@@ -65,6 +65,7 @@ exports.WpModel = Backbone.Model.extend({
         this.default_pricelist = null;
         this.order_sequence = 1;
         window.wpmodel = this;
+        this.zpl2 = null;
 
         // these dynamic attributes can be watched for change by other models or widgets
         this.set({

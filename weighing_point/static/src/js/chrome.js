@@ -12,8 +12,6 @@ odoo.define('weighing_point.chrome', function (require) {
     var BarcodeEvents = require('barcodes.BarcodeEvents').BarcodeEvents;
     var utils = require('web.utils');
 
-
-
     var _t = core._t;
     var _lt = core._lt;
     var QWeb = core.qweb;
@@ -210,7 +208,7 @@ odoo.define('weighing_point.chrome', function (require) {
             return this.format_currency_no_symbol(this.get_product_price() * net_weight);
         },
 
-        get_scale_weight: function(){
+        get_weight: function(){
             return this.weight;
         },
 

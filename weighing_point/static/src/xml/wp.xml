@@ -382,11 +382,12 @@
                 <div class="top-content">
                     <h1>Weigh the empty container</h1>
                 </div>
-                <div class="centered-content touch-scrollable">
+                <div class="full-content touch-scrollable">
                     <div class='button print-container-label'>
                         Print label
                         <i class='fa fa-print'></i>
                     </div>
+                    <img id="barcode"></img>
                     <div class="wp-container-label">
                     </div>
                 </div>
