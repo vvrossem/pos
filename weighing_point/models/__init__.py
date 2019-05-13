@@ -10,6 +10,7 @@ from . import wp_config
 from . import wp_order
 from . import wp_session
 from . import product
+from . import container
 from . import res_partner
 from . import res_users
 from . import res_config_settings

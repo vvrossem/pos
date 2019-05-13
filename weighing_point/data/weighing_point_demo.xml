@@ -296,4 +296,22 @@
           <field name="available_in_wp" eval="True"/>
           <field name="wp_categ_id" ref="wp_category_miscellaneous"/>
         </record>
+
+        <record id="container_1" model="container.container">
+            <field name="name">Container 1</field>
+            <field name="barcode">0498765456789</field>
+            <field name="weight">0.123</field>
+        </record>
+
+        <record id="container_2" model="container.container">
+            <field name="name">Container 2</field>
+            <field name="barcode">0490987654356</field>
+            <field name="weight">1.234</field>
+        </record>
+
+        <record id="container_3" model="container.container">
+            <field name="name">Container 3</field>
+            <field name="barcode">0490987654398</field>
+            <field name="weight">10.567</field>
+    </record>
 </odoo>

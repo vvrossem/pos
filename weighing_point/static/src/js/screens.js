@@ -2033,7 +2033,7 @@ odoo.define('weighing_point.screens', function (require) {
         print: function () {
             var container_weight = this.get_container_weight();
             this._rpc({
-                route: '/printer_zpl2/print_test_label',
+                route: '/printer_zpl2/print_label',
                 params: {container_weight: container_weight}
             }).then(result => console.log(result), err => console.log(err));
 
@@ -2057,7 +2057,6 @@ odoo.define('weighing_point.screens', function (require) {
             this.wp.proxy.print_container_label(label);
             //this.wp.get_order()._printed = true;
         },
-
 
         get_container_weight:function(){
             //TODO(Vincent) how to detect change on scale weight ?
