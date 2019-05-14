@@ -1975,7 +1975,7 @@ odoo.define('weighing_point.screens', function (require) {
             // for future improvements: check if container exists in db
             if (self.wp.scan_container(barcode)){
                 self.chrome.action_buttons.back_button.history_stack.push(self.gui.get_current_screen());
-                self.gui.show_screen('products', { container_weight: barcode.value }); // or container_weight:barcode.value ?
+                self.gui.show_screen('products', { container_weight: barcode.value });
             } else {
                 // for future improvements: add container to db
                 this.barcode_error_action(barcode);
@@ -2003,18 +2003,6 @@ odoo.define('weighing_point.screens', function (require) {
             var self = this;
             console.log(this.gui.get_current_screen());
             console.log(this.get_container_weight());
-            //JsBarcode("#barcode","hi!"); //TODO(Vincent) remove script
-            //this.render_container_label();
-        },
-
-        get_container_label_render_env: function () {
-            //var order = this.wp.get_order();
-            var container_weight = this.get_container_weight();
-            return {
-                widget: this,
-                wp: this.wp,
-                label: container_weight,
-            };
         },
 
         renderElement: function () {
@@ -2022,18 +2010,15 @@ odoo.define('weighing_point.screens', function (require) {
             var self = this;
             this._super();
             this.$('.button.print-container-label').click(function () {
-                if (!self._locked) {
-                    console.log('[WeighingScreenWidget] button.print-container-label click');
-                    self.print();
-                }
+                console.log('[WeighingScreenWidget] button.print-container-label click');
+                self.print();
             });
-
         },
 
         print: function () {
             var container_weight = this.get_container_weight();
             this._rpc({
-                route: '/printer_zpl2/print_label',
+                route: '/printer_zpl2/print_container_label',
                 params: {container_weight: container_weight}
             }).then(result => console.log(result), err => console.log(err));
 
@@ -2048,14 +2033,6 @@ odoo.define('weighing_point.screens', function (require) {
                 //this.print_xml();
 
             }*/
-        },
-
-        print_xml: function () {
-            // TODO(Vincent) create XmlContainerLabel in wp.xml
-            var label = QWeb.render('XmlContainerLabel', this.get_container_label_render_env());
-
-            this.wp.proxy.print_container_label(label);
-            //this.wp.get_order()._printed = true;
         },
 
         get_container_weight:function(){
@@ -2079,6 +2056,7 @@ odoo.define('weighing_point.screens', function (require) {
             console.log('[SelectedProductWidget] init');
             var self = this;
             this._super(parent, options);
+            this.model = options.model;
 
             this.product = null;
             this.product_cache = new DomCache();
@@ -2180,20 +2158,56 @@ odoo.define('weighing_point.screens', function (require) {
     var SelectedProductScreenWidget = ScreenWidget.extend({
         template: 'SelectedProductScreenWidget',
 
-        // TODO(Vincent) add container_weight for label printing;
         start: function () {
             console.log('[SelectedProductScreenWidget] start');
-            this.selected_product_widget = new SelectedProductWidget(this);
+            this.selected_product_widget = new SelectedProductWidget(this, {});
             this.selected_product_widget.replace(this.$('.placeholder-SelectedProductWidget'));
-
         },
 
         show: function () {
-            console.log('[SelectedProductScreenWidget] show');
             this._super();
+            console.log('[SelectedProductScreenWidget] show');
             console.log(this.gui.get_current_screen());
-            var product = this.gui.get_current_screen_param('product');
+            var product = this.get_product();
             this.selected_product_widget.set_selected_product(product);
+        },
+
+        renderElement: function () {
+            console.log('[SelectedProductScreenWidget] renderElement');
+            var self = this;
+            this._super();
+            this.$('.button.print-product-label').click(function () {
+                console.log('[SelectedProductScreenWidget] button.print-product-label click');
+                self.print();
+            });
+        },
+
+        print: function () {
+            var product = this.get_product();
+            console.log(product);
+            var net_weight = this.chrome.widget.scale_widget.get_net_weight();
+            console.log(net_weight);
+            this._rpc({
+                route: '/printer_zpl2/print_product_label',
+                // FIXME: backbone product.toJSON() or JSON.stringify(product) returns empty object {}
+                params: {
+                    product_id: product.id,
+                    product_barcode: product.barcode,
+                    net_weight: net_weight,
+                    }
+            }).then(result => {
+                console.log(result);
+
+            }, err => {
+                console.log(err);
+                this.gui.show_popup('error', {
+                    title: _t('Printer Error'),
+                });
+            });
+        },
+
+        get_product: function(){
+            return this.gui.get_current_screen_param('product');
         },
 
     });

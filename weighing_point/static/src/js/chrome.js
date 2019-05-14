@@ -158,7 +158,6 @@ odoo.define('weighing_point.chrome', function (require) {
             }
         },
 
-        // TODO(Vincent) send container_weigh to label printing
         set_weight: function (weight) {
             var container_weight = this.get_container_weight();
             this.weight = weight;
@@ -203,8 +202,12 @@ odoo.define('weighing_point.chrome', function (require) {
             return weightstr;
         },
 
+        get_net_weight:function(){
+            return this.container_weight ? (this.weight - this.container_weight) : this.weight;
+        },
+
         get_computed_price_string: function () {
-            var net_weight = this.container_weight ? (this.weight - this.container_weight) : this.weight;
+            var net_weight = this.get_net_weight();
             return this.format_currency_no_symbol(this.get_product_price() * net_weight);
         },
 

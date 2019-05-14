@@ -308,9 +308,9 @@
                 <div class="top-content">
                     <h1 class='product-name'>Selected product:</h1>
                 </div>
-                <div class="full-content">
+                <div class="full-content touch-scrollable">
                     <div class="placeholder-SelectedProductWidget" />
-                    <div class='button next'>
+                    <div class='button print-product-label'>
                         Print label
                         <i class='fa fa-print'></i>
                     </div>
@@ -387,11 +387,7 @@
                         Print label
                         <i class='fa fa-print'></i>
                     </div>
-                    <img id="barcode"></img>
-                    <div class="wp-container-label">
-                    </div>
                 </div>
-
             </div>
         </div>
     </t>
