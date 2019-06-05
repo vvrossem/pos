@@ -12,10 +12,10 @@ odoo.define('pos_container.models_and_db', function (require) {
     var models = require('point_of_sale.models');
     var rpc = require('web.rpc');
 
-	var utils = require('web.utils');
-	var field_utils = require('web.field_utils');
-	var round_di = utils.round_decimals;
-	var round_pr = utils.round_precision;
+    var utils = require('web.utils');
+    var field_utils = require('web.field_utils');
+    var round_di = utils.round_decimals;
+    var round_pr = utils.round_precision;
 
     // include not available => extend
     models.PosModel = models.PosModel.extend({
@@ -67,6 +67,25 @@ odoo.define('pos_container.models_and_db', function (require) {
             }, function(type,err){ def.reject(); });
            return def;
         },
+        // load placeholder product for containers.
+        // it is done here to load it even if inactivated.
+        load_placeholder_product: function(){
+            var self = this;
+            var fields = _.find(this.models,function(model){
+                return model.model === 'product.product';
+            }).fields;
+            var domain = [['barcode', '=', 'CONTAINER'], ['active', '=', false]];
+            // no need to load it when active because it is already done in standard
+            return rpc.query({
+                model: 'product.product',
+                method: 'search_read',
+                args: [domain, fields],
+            }).then(function(products){
+                self.db.add_products(_.map(products, function (product) {
+                    return new models.Product({}, product);
+                }));
+            });
+        },
     });
 
     models.Order = models.Order.extend({
@@ -81,7 +100,7 @@ odoo.define('pos_container.models_and_db', function (require) {
             attr.order = this;
             var product = this.pos.get_container_product();
             var line = new models.Orderline({}, {
-				pos: this.pos, order: this, product: product});
+                pos: this.pos, order: this, product: product});
 
             line.set_container(container);
             line.set_quantity(0);
@@ -244,43 +263,43 @@ odoo.define('pos_container.models_and_db', function (require) {
             this.gross_weight = this.get_value_rounded(weight);
             this.trigger('change', this);
         },
-		set_quantity: function(quantity, keep_price){
-			// copied from odoo core
-			this.order.assert_editable();
-			if(quantity === 'remove'){
-				this.order.remove_orderline(this);
-				return;
-			}else{
-				var quant = parseFloat(quantity) || 0;
-				var unit = this.get_unit();
-				if(unit){
-					if (unit.rounding) {
-						this.quantity    = round_pr(quant, unit.rounding);
-						var decimals = this.pos.dp['Product Unit of Measure'];
-						this.quantity = round_di(this.quantity, decimals)
-						this.quantityStr = field_utils.format.float(this.quantity, {digits: [69, decimals]});
-					} else {
-						this.quantity    = round_pr(quant, 1);
-						this.quantityStr = this.quantity.toFixed(0);
-					}
-				}else{
-					this.quantity    = quant;
-					this.quantityStr = '' + this.quantity;
-				}
-			}
-			// just like in sale.order changing the quantity will recompute the unit price
-			if(! keep_price && ! this.price_manually_set){
-				this.set_unit_price(this.product.get_price(this.order.pricelist, this.get_quantity()));
-				this.order.fix_tax_included_price(this);
-			}
+        set_quantity: function(quantity, keep_price){
+            // copied from odoo core
+            this.order.assert_editable();
+            if(quantity === 'remove'){
+                this.order.remove_orderline(this);
+                return;
+            }else{
+                var quant = parseFloat(quantity) || 0;
+                var unit = this.get_unit();
+                if(unit){
+                    if (unit.rounding) {
+                        this.quantity    = round_pr(quant, unit.rounding);
+                        var decimals = this.pos.dp['Product Unit of Measure'];
+                        this.quantity = round_di(this.quantity, decimals)
+                        this.quantityStr = field_utils.format.float(this.quantity, {digits: [69, decimals]});
+                    } else {
+                        this.quantity    = round_pr(quant, 1);
+                        this.quantityStr = this.quantity.toFixed(0);
+                    }
+                }else{
+                    this.quantity    = quant;
+                    this.quantityStr = '' + this.quantity;
+                }
+            }
+            // just like in sale.order changing the quantity will recompute the unit price
+            if(! keep_price && ! this.price_manually_set){
+                this.set_unit_price(this.product.get_price(this.order.pricelist, this.get_quantity()));
+                this.order.fix_tax_included_price(this);
+            }
 
-			// surcharge starts here
-			if (this.tare){
-				this.set_gross_weight(this.quantity + parseFloat(this.tare));
-			}
-			this.trigger('change', this);
-		},
-		get_value_rounded: function(value){
+            // surcharge starts here
+            if (this.tare){
+                this.set_gross_weight(this.quantity + parseFloat(this.tare));
+            }
+            this.trigger('change', this);
+        },
+        get_value_rounded: function(value){
             var value = parseFloat(value) || 0;
             var unit = this.get_unit();
             if(unit){
@@ -292,8 +311,8 @@ odoo.define('pos_container.models_and_db', function (require) {
                     value = round_pr(value, 1);
                 }
             }
-			return value
-		},
+            return value
+        },
         export_as_JSON: function(){
             var pack_lot_ids = [];
             if (this.has_product_lot){
@@ -469,6 +488,7 @@ odoo.define('pos_container.models_and_db', function (require) {
         fields: ['name','barcode', 'weight'],
         loaded: function(self, containers){
             self.db.add_containers(containers);
+            return self.load_placeholder_product();
         },
     });
 
