@@ -11,6 +11,10 @@ odoo.define('pos_container.models_and_db', function (require) {
     var PosDB = require('point_of_sale.DB');
     var models = require('point_of_sale.models');
     var rpc = require('web.rpc');
+    var config = require('web.config');
+
+    var core = require('web.core');
+    var QWeb = core.qweb;
 
     var utils = require('web.utils');
     var field_utils = require('web.field_utils');
