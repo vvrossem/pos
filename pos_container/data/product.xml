@@ -14,4 +14,7 @@
         <field name="to_weight" eval="True"/>
         <field name="active" eval="False"/>
     </record>
+    <record id="temporary_container_product_product_template" model="product.template">
+        <field name="active" eval="False"/>
+    </record>
 </odoo>
