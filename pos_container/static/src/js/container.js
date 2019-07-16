@@ -408,6 +408,16 @@ odoo.define('pos_container.container', function (require) {
         widget: ContainerScaleScreenWidget,
     });
 
+	screens.ProductListWidget.include({
+		render_product: function(product){
+			if(product.barcode != 'CONTAINER'){
+				return this._super(product);
+			} else {
+				return document.createElement('div');
+			}
+		}
+	});
+
     screens.OrderWidget.include({
         set_value: function(val) {
             this._super(val);
