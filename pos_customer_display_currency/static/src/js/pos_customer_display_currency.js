@@ -51,7 +51,6 @@ odoo.define('pos_customer_display_currency.pos_customer_display_currency', funct
             switch(type) {
                 case 'add_update_line':
                     line = data['line'];
-
                     if (mode === 'quantity') {
                         l21 = line.get_quantity_str_with_uom()
                             + ' x '
@@ -232,10 +231,10 @@ odoo.define('pos_customer_display_currency.pos_customer_display_currency', funct
          */
         get_quantity_str_with_uom: function(){
             var unit = this.get_unit();
-            if(unit && unit.measure_type === 'weight'){
-                return this.quantityStr + ' ' + unit.name;
+            if(unit && !unit.is_pos_groupable){
+                return this.get_quantity_str() + ' ' + unit.name;
             }else{
-                return this.quantity;
+                return round_pr(this.get_quantity_str(), 0.1);
             }
         },
 
