@@ -348,6 +348,11 @@ odoo.define('pos_customer_display.pos_customer_display', function (require) {
             }
             return res;
         },
+
+        show: function () {
+            this._super();
+            this.pos.prepare_text_customer_display('add_paymentline', {});
+        },
     });
 
     gui.Gui.include({
@@ -363,12 +368,4 @@ odoo.define('pos_customer_display.pos_customer_display', function (require) {
             this.pos.prepare_text_customer_display('openPOS', {});
         },
     });
-
-    screens.PaymentScreenWidget.extend({
-        show: function () {
-            this._super();
-            this.pos.prepare_text_customer_display('add_paymentline', {});
-        },
-    });
-
 });
