@@ -131,11 +131,18 @@ odoo.define('pos_customer_display_currency.pos_customer_display_currency', funct
                 case 'add_container':
                     line = data['line'];
                     container = line.get_container();
-                    lines_to_send = [
+                    previous_lines_to_send = [
                         this.proxy.align_left(container.name, line_length),
                         this.proxy.align_right(container.weight.toString() + ' kg', line_length)
                     ];
-                    this.proxy.send_text_customer_display(lines_to_send, line_length);
+                    this.proxy.send_text_customer_display(previous_lines_to_send, line_length);
+
+                    total = this.get('selectedOrder').get_total_with_tax().toFixed(currency_rounding) + currency_char;
+                    total_lines = [
+                        this.proxy.align_left(_t("TOTAL:"), line_length),
+                        this.proxy.align_right(total, line_length)
+                    ];
+                    setTimeout(function() {this.proxy.send_text_customer_display(total_lines, line_length); }.bind(this), 3000);
                     break;
 
                 case 'remove_orderline':
