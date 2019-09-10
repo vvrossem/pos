@@ -253,7 +253,7 @@ odoo.define('pos_customer_display_currency.pos_customer_display_currency', funct
             if(unit && !unit.is_pos_groupable){
                 return this.get_quantity_str() + ' ' + unit.name;
             }else{
-                return round_pr(this.get_quantity_str(), 0.1);
+                return round_pr(this.quantity, 0.1);
             }
         },
 
