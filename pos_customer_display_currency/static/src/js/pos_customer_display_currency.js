@@ -47,29 +47,65 @@ odoo.define('pos_customer_display_currency.pos_customer_display_currency', funct
             var l22 = "";
             var total = "";
             var mode = $('.selected-mode').attr('data-mode'); // numpad selected mode
-
             switch(type) {
                 case 'add_update_line':
                     line = data['line'];
-                    if (mode === 'quantity') {
+                    if (mode === 'tare' || (line.qty_manually_set && mode === 'quantity')) {
+                        // first display "Manual Entry"
+                        l21 = line.get_quantity_str_with_uom()
+                            + ' x '
+                            + line.get_unit_price_with_uom_currency(currency_char, currency_rounding);
+                        previous_lines_to_send = [
+                            this.proxy.align_left(_t('Manual Entry'), line_length),
+                            this.proxy.align_right(l21, line_length)
+                        ];
+                        this.proxy.send_text_customer_display(previous_lines_to_send, line_length);
+
+                        // then display total after 3s
+                        total = this.get('selectedOrder').get_total_with_tax().toFixed(currency_rounding) + currency_char;
+                        total_lines = [this.proxy.align_left(_t("TOTAL:"), line_length),
+                            this.proxy.align_right(total, line_length)
+                        ];
+                        setTimeout(function() {this.proxy.send_text_customer_display(total_lines, line_length); }.bind(this), 3000);
+
+                    } else if (mode === 'quantity' && !line.qty_manually_set) {
+                        // first display added/updated product
                         l21 = line.get_quantity_str_with_uom()
                             + ' x '
                             + line.get_unit_price_with_uom_currency(currency_char, currency_rounding);
                         l22 = ' ' + line.get_display_price().toFixed(currency_rounding) + currency_char;
-                        lines_to_send = [
+                        previous_lines_to_send = [
                             this.proxy.align_left(line.get_product().display_name, line_length - l22.length) + l22,
                             this.proxy.align_left(l21, line_length)
                         ];
+                        this.proxy.send_text_customer_display(previous_lines_to_send, line_length);
+
+                        // then display total after 3s
+                        total = this.get('selectedOrder').get_total_with_tax().toFixed(currency_rounding) + currency_char;
+                        total_lines = [
+                            this.proxy.align_left(_t("TOTAL:"), line_length),
+                            this.proxy.align_right(total, line_length)
+                        ];
+                        setTimeout(function() {this.proxy.send_text_customer_display(total_lines, line_length); }.bind(this), 3000);
 
                     } else if (mode === 'discount') {
-                        // display discount information
+                        // first display discount information
                         var discount = line.get_discount();
                         product = line.get_product();
                         l22 = ' ' + line.get_base_price().toFixed(currency_rounding) + currency_char;
-                        lines_to_send = [
+                        previous_lines_to_send = [
                             this.proxy.align_left(product.display_name, line_length - l22.length) + l22,
                             this.proxy.align_left(_t("Discount:") + discount + '%', line_length)
                         ];
+                        this.proxy.send_text_customer_display(previous_lines_to_send, line_length);
+
+                        // then display total after 3s
+                        total = this.get('selectedOrder').get_total_with_tax().toFixed(currency_rounding) + currency_char;
+                        total_lines = [
+                            this.proxy.align_left(_t("TOTAL:"), line_length),
+                            this.proxy.align_right(total, line_length)
+                        ];
+                        setTimeout(function() {this.proxy.send_text_customer_display(total_lines, line_length); }.bind(this), 3000);
 
                     } else if (mode === 'price') {
                         // first display "manual entry"
@@ -80,36 +116,15 @@ odoo.define('pos_customer_display_currency.pos_customer_display_currency', funct
                             this.proxy.align_left(_t('Manual Entry'), line_length),
                             this.proxy.align_right(l21, line_length)
                         ];
-                        // then display price information
+                        this.proxy.send_text_customer_display(previous_lines_to_send, line_length);
+
+                        // then display price information after 3s
                         l22 = ' ' + line.get_display_price().toFixed(currency_rounding) + currency_char;
                         lines_to_send = [
                             this.proxy.align_left(line.get_product().display_name, line_length - l22.length) + l22,
                             this.proxy.align_left(l21, line_length)
                         ];
-
-                    } else if (mode === 'tare'){
-                        // /!\ container always null because of set_tare() (this.container = null) /!\
-                        container = line.get_container();
-                        product = line.get_product();
-                        var tare = line.get_tare();
-
-                        // first display "manual tare"
-                        previous_lines_to_send = [
-                            this.proxy.align_left(_t('Manual Tare'), line_length),
-                            this.proxy.align_right(tare.toString() + 'kg', line_length)
-                        ];
-
-                        // then display price information (only if orderline is a product)
-                        if (product && !container){
-                            l21 = line.get_quantity_str_with_uom()
-                                + ' x '
-                                + line.get_unit_price_with_uom_currency(currency_char, currency_rounding);
-                            l22 = ' ' + line.get_display_price().toFixed(currency_rounding) + currency_char;
-                            lines_to_send = [
-                                this.proxy.align_left(line.get_product().display_name, line_length - l22.length) + l22,
-                                this.proxy.align_left(l21, line_length)
-                            ];
-                        }
+                        setTimeout(function() {this.proxy.send_text_customer_display(lines_to_send, line_length); }.bind(this), 3000);
                     }
                     break;
 
@@ -120,17 +135,18 @@ odoo.define('pos_customer_display_currency.pos_customer_display_currency', funct
                         this.proxy.align_left(container.name, line_length),
                         this.proxy.align_right(container.weight.toString() + ' kg', line_length)
                     ];
+                    this.proxy.send_text_customer_display(lines_to_send, line_length);
                     break;
 
                 case 'remove_orderline':
-                    // first click on the backspace button set the amount to 0 => we can't precise the deleted qunatity and price
+                    // first click on the backspace button set the amount to 0
+                    // => we can't precise the deleted quantity and price
                     line = data['line'];
-                    container = line.get_container();
                     product = line.get_product();
-                    if (container) {
+                    if (line.container) {
                         lines_to_send = [
                              this.proxy.align_left(_t("Delete Container"), line_length),
-                             this.proxy.align_right(container.name, line_length)
+                             this.proxy.align_right(line.container.name, line_length)
                         ];
 
                     } else if (product) {
@@ -138,6 +154,18 @@ odoo.define('pos_customer_display_currency.pos_customer_display_currency', funct
                             this.proxy.align_left(_t("Delete Item"), line_length),
                             this.proxy.align_right(product.display_name, line_length)
                         ];
+                    }
+                    this.proxy.send_text_customer_display(lines_to_send, line_length);
+
+                    // then display total after 3s
+                    var order = this.get('selectedOrder');
+                    if (order){
+                        total = order.get_total_with_tax().toFixed(currency_rounding) + currency_char;
+                        total_lines = [
+                            this.proxy.align_left(_t("TOTAL:"), line_length),
+                            this.proxy.align_right(total, line_length)
+                        ];
+                        setTimeout(function() {this.proxy.send_text_customer_display(total_lines, line_length); }.bind(this), 3000);
                     }
                     break;
 
@@ -147,6 +175,7 @@ odoo.define('pos_customer_display_currency.pos_customer_display_currency', funct
                         this.proxy.align_left(_t("TOTAL:"), line_length),
                         this.proxy.align_right(total, line_length)
                     ];
+                    this.proxy.send_text_customer_display(lines_to_send, line_length);
                     break;
 
                 case 'remove_paymentline':
@@ -156,6 +185,7 @@ odoo.define('pos_customer_display_currency.pos_customer_display_currency', funct
                         this.proxy.align_left(_t("Cancel Payment"), line_length),
                         this.proxy.align_right(line.cashregister.journal_id[1], line_length - 1 - amount.length) + ' ' + amount
                     ];
+                    this.proxy.send_text_customer_display(lines_to_send, line_length);
                     break;
 
                 case 'update_payment':
@@ -164,6 +194,7 @@ odoo.define('pos_customer_display_currency.pos_customer_display_currency', funct
                         this.proxy.align_left(_t("Your Change:"), line_length),
                         this.proxy.align_right(change, line_length)
                     ];
+                    this.proxy.send_text_customer_display(lines_to_send, line_length);
                     break;
 
                 // same display for both types
@@ -173,6 +204,7 @@ odoo.define('pos_customer_display_currency.pos_customer_display_currency', funct
                         this.proxy.align_center(this.config.customer_display_msg_next_l1, line_length),
                         this.proxy.align_center(this.config.customer_display_msg_next_l2, line_length)
                     ];
+                    this.proxy.send_text_customer_display(lines_to_send, line_length);
                     break;
 
                 case 'closePOS':
@@ -180,34 +212,14 @@ odoo.define('pos_customer_display_currency.pos_customer_display_currency', funct
                         this.proxy.align_center(this.config.customer_display_msg_closed_l1, line_length),
                         this.proxy.align_center(this.config.customer_display_msg_closed_l2, line_length)
                     ];
+                    this.proxy.send_text_customer_display(lines_to_send, line_length);
                     break;
 
                 default:
                     console.warn('Unknown message type');
                     return;
             }
-
-            var order = this.get('selectedOrder');
-            if (order){
-                total = order.get_total_with_tax().toFixed(currency_rounding) + currency_char;
-                total_lines = [this.proxy.align_left(_t("TOTAL:"), line_length),
-                    this.proxy.align_right(total, line_length)
-                ];
-            }
-            if (previous_lines_to_send){
-                this.proxy.send_text_customer_display(previous_lines_to_send, line_length);
-                setTimeout(function() {this.proxy.send_text_customer_display(lines_to_send, line_length); }.bind(this), 2000);
-                if (total_lines){
-                    setTimeout(function() {this.proxy.send_text_customer_display(total_lines, line_length); }.bind(this), 4500);
-                }
-            } else {
-                this.proxy.send_text_customer_display(lines_to_send, line_length);
-                if (total_lines){
-                    setTimeout(function() {this.proxy.send_text_customer_display(total_lines, line_length); }.bind(this), 2500);
-                }
-            }
         },
-
     });
 
     devices.ProxyDevice = devices.ProxyDevice.extend({
@@ -255,7 +267,6 @@ odoo.define('pos_customer_display_currency.pos_customer_display_currency', funct
     var OrderSuper = models.Order;
 
     models.Order = models.Order.extend({
-
         /**
          * @extends add_container from models_and_db.js (module: pos_container)
          */
@@ -278,7 +289,20 @@ odoo.define('pos_customer_display_currency.pos_customer_display_currency', funct
         start: function () {
             this._super();
             this.pos.prepare_currency_data_customer_display();
-        }
+        },
     });
 
+    screens.OrderWidget.include({
+        set_value: function(val) {
+            var order = this.pos.get_order();
+            var selected_orderline = order.get_selected_orderline();
+            if (selected_orderline) {
+                var mode = this.numpad_state.get('mode');
+                if( mode === 'quantity' ) {
+                    selected_orderline.qty_manually_set = true;
+                }
+            }
+            this._super(val);
+        },
+    });
 });
