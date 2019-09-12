@@ -16,5 +16,22 @@ odoo.define('pos_toledo_product.devices', function (require) {
         reset_weight: function () {
             return this.message('reset_weight');
         },
+
+        scale_read_data_price_tare: function(price, tare){
+            console.log(price);
+            console.log(tare);
+            var self = this;
+            var ret = new $.Deferred();
+            if (self.use_debug_weight) {
+                return (new $.Deferred()).resolve({weight:this.debug_weight, unit:'kg', info:'ok'});
+            }
+            this.message('scale_price_tare',{price:price, tare:tare})
+                .then(function(weight){
+                    ret.resolve(weight);
+                }, function(){
+                    ret.resolve({weight:0.0, unit:'kg', info:'ko'});
+                });
+            return ret;
+        },
     });
 });

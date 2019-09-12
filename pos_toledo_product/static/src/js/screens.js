@@ -14,22 +14,52 @@ odoo.define('pos_toledo_product.screens', function (require) {
         show: function () {
             var self = this;
             var queue = this.pos.proxy_queue;
+            var product = this.get_product();
+            var container = this.gui.get_current_screen_param('container')
+            console.log(container);
 
             this.set_weight(0);
             this.renderElement();
 
             self.pos.proxy.reset_weight();
+            if (container) {
+                // format price
 
-            queue.schedule(function () {
-                return self.pos.proxy.scale_read().then(function (scale_answer) {
-                    self.set_weight(scale_answer.weight);
-                    if ((scale_answer.info === '30' || scale_answer.info === '31') && scale_answer.weight !== 0) {
-                        self.gui.show_screen(self.next_screen);
-                        // add product *after* switching screen to scroll properly
-                        self.order_product();
-                    }
-                });
-            }, {duration: 500, repeat: true});
+                // format tare
+                var tare = String(Math.abs(container.weight)*1000);
+                console.log(tare);
+                while (tare.length < 4) {
+                    tare = '0' + tare;
+                    console.log(tare);
+                }
+                tare = tare.substring(0, 4);
+                console.log(tare);
+
+                queue.schedule(function () {
+                    return self.pos.proxy.scale_read_data_price_tare('000000', tare).then(function (scale_answer) {
+                        console.log(scale_answer);
+                        self.set_weight(scale_answer.weight);
+                        if ((scale_answer.info === '30' || scale_answer.info === '31') && scale_answer.weight !== 0) {
+                            self.gui.show_screen(self.next_screen);
+                            // add product *after* switching screen to scroll properly
+                            self.order_product();
+                        }
+                    });
+                }, {duration: 500, repeat: true});
+
+
+            } else {
+                queue.schedule(function () {
+                    return self.pos.proxy.scale_read().then(function (scale_answer) {
+                        self.set_weight(scale_answer.weight);
+                        if ((scale_answer.info === '30' || scale_answer.info === '31') && scale_answer.weight !== 0) {
+                            self.gui.show_screen(self.next_screen);
+                            // add product *after* switching screen to scroll properly
+                            self.order_product();
+                        }
+                    });
+                }, {duration: 500, repeat: true});
+            }
             this._super();
         },
     });
