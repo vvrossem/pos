@@ -300,7 +300,6 @@ odoo.define('pos_customer_display_currency.pos_customer_display_currency', funct
             var selected_orderline = order.get_selected_orderline();
             if (selected_orderline) {
                 var mode = this.numpad_state.get('mode');
-                console.log(mode);
                 if( mode === 'quantity' ) {
                     selected_orderline.qty_manually_set = true;
                 }
