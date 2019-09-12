@@ -14,6 +14,7 @@ odoo.define('pos_toledo_container.screens', function (require) {
         show: function () {
             var self = this;
             var queue = this.pos.proxy_queue;
+            var priceStr = '000000';
 
             this.set_weight(0);
             this.renderElement();
@@ -21,8 +22,7 @@ odoo.define('pos_toledo_container.screens', function (require) {
             self.pos.proxy.reset_weight();
 
             queue.schedule(function () {
-
-                return self.pos.proxy.scale_read().then(function (scale_answer) {
+                return self.pos.proxy.scale_read_data_price(priceStr).then(function (scale_answer) {
                     self.set_weight(scale_answer.weight);
                     if ((scale_answer.info === '30' || scale_answer.info === '31') && scale_answer.weight !== 0) {
                         self.gui.show_screen(self.next_screen);
