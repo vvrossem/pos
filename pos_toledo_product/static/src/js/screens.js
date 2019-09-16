@@ -71,7 +71,7 @@ odoo.define('pos_toledo_product.screens', function (require) {
                     return self.pos.proxy.scale_read_data_price_tare(price, tare).then(function (scale_answer) {
                         self.set_weight(scale_answer.weight);
                         self.set_price(scale_answer.price);
-                        if ((scale_answer.info === '30' || scale_answer.info === '31') && scale_answer.weight !== 0) {
+                        if ((scale_answer.error === '30' || scale_answer.error === '31') && scale_answer.weight !== 0) {
                             self.gui.show_screen(self.next_screen);
                             // add product *after* switching screen to scroll properly
                             self.order_product();
@@ -85,7 +85,7 @@ odoo.define('pos_toledo_product.screens', function (require) {
                     return self.pos.proxy.scale_read_data_price(price).then(function (scale_answer) {
                         self.set_weight(scale_answer.weight);
                         self.set_price(scale_answer.price);
-                        if ((scale_answer.info === '30' || scale_answer.info === '31') && scale_answer.weight !== 0) {
+                        if ((scale_answer.error === '30' || scale_answer.error === '31') && scale_answer.weight !== 0) {
                             self.gui.show_screen(self.next_screen);
                             // add product *after* switching screen to scroll properly
                             self.order_product();

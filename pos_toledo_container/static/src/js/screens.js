@@ -24,7 +24,7 @@ odoo.define('pos_toledo_container.screens', function (require) {
             queue.schedule(function () {
                 return self.pos.proxy.scale_read_data_price(priceStr).then(function (scale_answer) {
                     self.set_weight(scale_answer.weight);
-                    if ((scale_answer.info === '30' || scale_answer.info === '31') && scale_answer.weight !== 0) {
+                    if ((scale_answer.error === '30' || scale_answer.error === '31') && scale_answer.weight !== 0) {
                         self.gui.show_screen(self.next_screen);
                         self.create_container();
                     }
