@@ -306,12 +306,12 @@ odoo.define('pos_container.container', function (require) {
 
     screens.ScaleScreenWidget.include({
         order_product: function(){
-            this._super();
             // Replace the orderline if the product is the placeholder
             // container product.
             var container = this.gui.get_current_screen_param('container');
             if (container){
                 var order = this.pos.get_order();
+                order.add_product(this.get_product(),{ quantity: this.weight, price: this.price });
                 var orderline = order.get_selected_orderline();
                 orderline.set_container(container);
                 var old_orderline = this.gui.get_current_screen_param(
@@ -319,10 +319,12 @@ odoo.define('pos_container.container', function (require) {
                 if (old_orderline){
                     order.remove_orderline(old_orderline);
                 }
-                orderline.set_quantity(this.weight - container.weight);
-                orderline.set_gross_weight(this.weight);
+                orderline.set_quantity(this.weight);
+                orderline.set_gross_weight(this.weight + container.weight);
                 orderline.set_tare_mode('AUTO');
                 orderline.trigger('change', orderline);
+            } else {
+                this._super();
             }
         },
     });

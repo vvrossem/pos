@@ -14,12 +14,23 @@ odoo.define('pos_toledo_product.devices', function (require) {
 
         // reset the weight on the scale.
         reset_weight: function () {
-            return this.message('reset_weight');
+            var ret = new $.Deferred();
+            this.message('reset_weight').then(function(status) {
+                ret.resolve(status)
+            });
+            return ret;
+        },
+
+        reset_tare: function(){
+            var ret = new $.Deferred();
+            this.message('scale_price',{price: '000000'})
+                .then(function(weight){
+                    ret.resolve(weight);
+                });
+            return ret;
         },
 
         scale_read_data_price_tare: function(price, tare){
-            console.log(price);
-            console.log(tare);
             var self = this;
             var ret = new $.Deferred();
             if (self.use_debug_weight) {
