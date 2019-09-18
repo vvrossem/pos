@@ -15,17 +15,17 @@ odoo.define('pos_toledo_container.devices', function (require) {
             return this.message('reset_weight');
         },
 
-        scale_read_data_price: function(price){
+        scale_read_data_price: function (price) {
             var self = this;
             var ret = new $.Deferred();
             if (self.use_debug_weight) {
-                return (new $.Deferred()).resolve({weight:this.debug_weight, unit:'kg', info:'ok'});
+                return (new $.Deferred()).resolve({weight: this.debug_weight, unit: 'kg', info: 'ok'});
             }
-            this.message('scale_price',{price:price})
-                .then(function(weight){
+            this.message('scale_price', {price: price})
+                .then(function (weight) {
                     ret.resolve(weight);
-                }, function(){
-                    ret.resolve({weight:0.0, unit:'kg', info:'ko'});
+                }, function () {
+                    ret.resolve({weight: 0.0, unit: 'kg', info: 'ko'});
                 });
             return ret;
         },

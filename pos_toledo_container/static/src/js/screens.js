@@ -14,7 +14,7 @@ odoo.define('pos_toledo_container.screens', function (require) {
         show: function () {
             var self = this;
             var queue = this.pos.proxy_queue;
-            var priceStr = '000000';
+            var priceStr = '001000';
 
             this.set_weight(0);
             this.renderElement();
