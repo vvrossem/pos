@@ -10,6 +10,16 @@ odoo.define('pos_toledo_product.screens', function (require) {
 
     var screens = require('point_of_sale.screens');
 
+    screens.ProductScreenWidget.include({
+       show: function(reset){
+           this._super(reset);
+           var container = this.gui.get_current_screen_param('container');
+           if (container) {
+               this.pos.proxy.reset_tare();
+           }
+       },
+    });
+
     screens.ScaleScreenWidget.include({
         set_price: function(price){
             this.price = price;
@@ -37,7 +47,6 @@ odoo.define('pos_toledo_product.screens', function (require) {
             }
             tare = tare.substring(0, 4);
             return tare;
-
         },
 
         format_price: function (product_price) {
@@ -47,19 +56,19 @@ odoo.define('pos_toledo_product.screens', function (require) {
             }
             price = price.substring(0, 6);
             return price;
-
         },
 
         show: function () {
             var self = this;
             var queue = this.pos.proxy_queue;
-            var container = this.gui.get_current_screen_param('container')
+            var container = this.gui.get_current_screen_param('container');
 
-            this.set_weight(0);
-            this.set_price(0);
+            this.pos.proxy.reset_weight().then(function() {
+                self.set_weight(0);
+                self.set_price(0);
+            });
+
             this.renderElement();
-
-            self.pos.proxy.reset_weight();
 
             // format price
             var price = this.format_price(this.get_product_price());

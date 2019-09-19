@@ -12,7 +12,11 @@ odoo.define('pos_toledo_container.devices', function (require) {
 
     devices.ProxyDevice.include({
         reset_weight: function () {
-            return this.message('reset_weight');
+            var ret = new $.Deferred();
+            this.message('reset_weight').then(function(status) {
+                ret.resolve(status)
+            });
+            return ret;
         },
 
         scale_read_data_price: function (price) {

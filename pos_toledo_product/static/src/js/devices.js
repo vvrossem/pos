@@ -11,8 +11,6 @@ odoo.define('pos_toledo_product.devices', function (require) {
     var devices = require('point_of_sale.devices');
 
     devices.ProxyDevice.include({
-
-        // reset the weight on the scale.
         reset_weight: function () {
             var ret = new $.Deferred();
             this.message('reset_weight').then(function(status) {
@@ -22,10 +20,26 @@ odoo.define('pos_toledo_product.devices', function (require) {
         },
 
         reset_tare: function(){
+            var price = '001000'; // bizerba doesn't accept '000000' as unit price
             var ret = new $.Deferred();
-            this.message('scale_price',{price: '000000'})
+            this.message('scale_price',{price: price})
                 .then(function(weight){
                     ret.resolve(weight);
+                });
+            return ret;
+        },
+
+        scale_read_data_price: function (price) {
+            var self = this;
+            var ret = new $.Deferred();
+            if (self.use_debug_weight) {
+                return (new $.Deferred()).resolve({weight: this.debug_weight, unit: 'kg', info: 'ok'});
+            }
+            this.message('scale_price', {price: price})
+                .then(function (weight) {
+                    ret.resolve(weight);
+                }, function () {
+                    ret.resolve({weight: 0.0, unit: 'kg', info: 'ko'});
                 });
             return ret;
         },
