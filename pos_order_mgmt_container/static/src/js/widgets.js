@@ -8,9 +8,14 @@ odoo.define('pos_order_mgmt_container.widgets', function (require) {
     var pos = require('pos_container.models_and_db');
 
     screens.OrderListScreenWidget.include({
-        _prepare_orderlines_from_order_data: function (order, order_data, orderLines) {
+        _prepare_orderlines_from_order_data: function (
+			order, order_data, action) {
+
+            var orderLines = order_data.line_ids || order_data.lines || [];
+
             var self = this;
-            _.each(orderLines, function(line) {
+            _.each(orderLines, function (orderLine) {
+                var line = orderLine;
                 // In case of local data
                 if (line.length === 3) {
                     line = line[2];
@@ -24,10 +29,15 @@ odoo.define('pos_order_mgmt_container.widgets', function (require) {
                 if (_.isUndefined(product)) {
                     self.unknown_products.push(String(line.product_id));
                 } else {
+                    var qty = line.qty;
+                    if (['return'].indexOf(action) !== -1) {
+                        // Invert line quantities
+                        qty *= -1;
+                    }
                     // Create a new order line
                     order.add_product(product, {
                         price: line.price_unit,
-                        quantity: order_data.return ? line.qty * -1 : line.qty,
+                        quantity: qty,
                         discount: line.discount,
                         merge: false,
                     });
