@@ -11,31 +11,31 @@ odoo.define('pos_toledo_product.screens', function (require) {
     var screens = require('point_of_sale.screens');
 
     screens.ProductScreenWidget.include({
-       show: function(reset){
-           this._super(reset);
-           var container = this.gui.get_current_screen_param('container');
-           if (container) {
-               this.pos.proxy.reset_tare();
-           }
-       },
+        show: function (reset) {
+            this._super(reset);
+            var container = this.gui.get_current_screen_param('container');
+            if (container) {
+                this.pos.proxy.reset_tare();
+            }
+        },
     });
 
     screens.ScaleScreenWidget.include({
-        set_price: function(price){
+        set_price: function (price) {
             this.price = price;
             this.$('.price').text(this.format_currency(price));
             this.$('.computed-price').text(this.format_currency(price));
         },
 
-        get_price: function(){
+        get_price: function () {
             return this.price;
         },
 
-        get_computed_price_string: function(){
+        get_computed_price_string: function () {
             return this.format_currency(this.price);
         },
 
-        set_weight: function(weight){
+        set_weight: function (weight) {
             this.weight = weight;
             this.$('.weight').text(this.get_product_weight_string());
         },
@@ -63,12 +63,12 @@ odoo.define('pos_toledo_product.screens', function (require) {
             var queue = this.pos.proxy_queue;
             var container = this.gui.get_current_screen_param('container');
 
-            this.pos.proxy.reset_weight().then(function() {
-                self.set_weight(0);
-                self.set_price(0);
-            });
-
-            this.renderElement();
+            queue.schedule(function () {
+                return self.pos.proxy.reset_weight().then(function () {
+                    self.set_weight(0);
+                    self.set_price(0);
+                });
+            }, {duration: 500});
 
             // format price
             var price = this.format_price(this.get_product_price());
