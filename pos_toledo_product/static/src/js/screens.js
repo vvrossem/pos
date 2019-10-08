@@ -42,19 +42,13 @@ odoo.define('pos_toledo_product.screens', function (require) {
 
         format_tare: function (container) {
             var tare = (Math.abs(container.weight) * 1000).toString();
-            while (tare.length < 4) {
-                tare = '0' + tare;
-            }
-            tare = tare.substring(0, 4);
+            tare = ("0000" + tare).slice(-4);
             return tare;
         },
 
         format_price: function (product_price) {
             var price = (product_price * 1000).toString();
-            while (price.length < 6) {
-                price = '0' + price
-            }
-            price = price.substring(0, 6);
+            price = ("000000" + price).slice(-6);
             return price;
         },
 
