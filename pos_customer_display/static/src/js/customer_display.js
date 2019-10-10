@@ -214,8 +214,8 @@ odoo.define('pos_customer_display.pos_customer_display', function (require) {
         AND when you create a new order line via add_product().
         So, when you add a product, we call prepare_text_customer_display() twice...
         but I haven't found any good solution to avoid this -- Alexis */
-        set_quantity: function (quantity) {
-            var res = OrderlineSuper.prototype.set_quantity.call(this, quantity);
+        set_quantity: function (quantity, keep_price) {
+            var res = OrderlineSuper.prototype.set_quantity.call(this, quantity, keep_price);
             if (quantity != 'remove') {
 
                 var line = this;
