@@ -12,7 +12,6 @@ class ModuleHash(models.Model):
 
     @api.multi
     def _compute_hash(self):
-        print(self)
         whitelist = [
             'pos_container',
             'pos_customer_display',
@@ -23,6 +22,5 @@ class ModuleHash(models.Model):
         ]
         for record in self:
             if record.name in whitelist:
-                print(record.name)
                 module_path = get_module_path(record.name)
                 record.hash = dirhash(module_path, 'sha256', excluded_extensions=['pyc'])
