@@ -95,7 +95,7 @@ odoo.define('pos_container.container', function (require) {
 
             this.$('.container-list-contents').delegate('.container-line',
                     'click', function(event){
-                self.line_select(event,$(this),parseInt($(this).data('id')));
+                self.line_select(event,$(this),$(this).data('id'));
             });
 
             var search_timeout = null;
@@ -123,29 +123,34 @@ odoo.define('pos_container.container', function (require) {
         delete_selected_container: function(){
             var self = this;
 
-            rpc.query({
-                model: 'pos.container',
-                method: 'unlink',
-                args: [self.container.id],
-            }).then(function(){
-                self.deleted_container(self.container.id);
-            },function(err,ev){
-                ev.preventDefault();
-                var error_body = _t('Your Internet connection is probably down.');
-                    if (err.data) {
-                        var except = err.data;
-                        error_body = except.arguments && except.arguments[0] || except.message || error_body;
+			if (!self.container.id){
+				self.deleted_container(self.container.barcode)
+			}
+			else {
+                rpc.query({
+                    model: 'pos.container',
+                    method: 'unlink',
+                    args: [self.container.id],
+                }).then(function(){
+                    self.deleted_container(self.container.barcode);
+                },function(err,ev){
+                    ev.preventDefault();
+                    var error_body = _t('Your Internet connection is probably down.');
+                        if (err.data) {
+                            var except = err.data;
+                            error_body = except.arguments && except.arguments[0] || except.message || error_body;
+                        }
+                        self.gui.show_popup('error',{
+                            'title': _t('Error: Could not Save Changes'),
+                            'body': error_body,
+                        });
                     }
-                    self.gui.show_popup('error',{
-                        'title': _t('Error: Could not Save Changes'),
-                        'body': error_body,
-                    });
-                }
-            );
+                );
+			}
         },
-        deleted_container: function(id){
+        deleted_container: function(barcode){
             var self = this;
-            this.pos.db.remove_containers([id]);
+            this.pos.db.remove_containers([barcode]);
             this.$('.container-list .highlight').remove();
             this.container = null;
         },
@@ -202,8 +207,8 @@ odoo.define('pos_container.container', function (require) {
             }
             $button.toggleClass('oe_hidden', !this.container);
         },
-        line_select: function(event,$line,id){
-            var container = this.pos.db.get_container_by_id(id);
+        line_select: function(event,$line,barcode){
+            var container = this.pos.db.get_container_by_barcode(barcode);
             this.$('.container-list .lowlight').removeClass('lowlight');
             if ( $line.hasClass('highlight') ){
                 $line.removeClass('highlight');
@@ -239,7 +244,7 @@ odoo.define('pos_container.container', function (require) {
 
                 if (curr_container) {
                     last_orderline.set_container(
-                        self.pos.db.get_container_by_id(curr_container.id));
+                        self.pos.db.get_container_by_barcode(curr_container.barcode));
                 }
             });
         },
@@ -368,34 +373,13 @@ odoo.define('pos_container.container', function (require) {
             fields.barcode = this.gui.get_current_screen_param('barcode') || false;
             fields.name = fields.name || _t('Container');
 
-            rpc.query({
-                model: 'pos.container',
-                method: 'create_from_ui',
-                args: [fields],
-            }).then(function(container_id){
-                self.created_container(container_id);
-            },function(err,ev){
-                ev.preventDefault();
-                var error_body = _t('Your Internet connection is probably down.');
-                    if (err.data) {
-                        var except = err.data;
-                        error_body = except.arguments && except.arguments[0] || except.message || error_body;
-                    }
-                    self.gui.show_popup('error',{
-                        'title': _t('Error: Could not Save Changes'),
-                        'body': error_body,
-                    });
-                }
-            );
+			this.pos.push_container(fields).then(
+				this.pushed_container(fields["barcode"])
+			);
         },
-        created_container: function(container_id){
+		pushed_container: function(barcode){
             var self = this;
-            self.pos.load_new_containers().then(function(){
-                var container = self.pos.db.get_container_by_id(container_id);
-                if (container) {
-                    self.gui.show_screen(self.next_screen);
-                }
-            });
+			self.gui.show_screen(self.next_screen);
         },
         close: function(){
             this._super();
