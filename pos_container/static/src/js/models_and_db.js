@@ -583,7 +583,7 @@ odoo.define('pos_container.models_and_db', function (require) {
             try {
                 query = query.replace(/[\[\]\(\)\+\*\?\.\-\!\&\^\$\|\~\_\{\}\:\,\\\/]/g,'.');
                 query = query.replace(' ','.+');
-                var re = RegExp("([0-9]+):.*?"+query,"gi");
+                var re = RegExp("([0-9]+):\\|([0-9]*"+query+"[0-9]*\\|\|[0-9]*\\|.*?"+query+")","gi");
             } catch(e) {
                 return [];
             }
@@ -591,7 +591,8 @@ odoo.define('pos_container.models_and_db', function (require) {
             for(var i = 0; i < this.limit; i++) {
                var r = re.exec(this.container_search_string);
                 if(r) {
-                    var barcode = Number(r[1]);
+                    // r[1] = id, r[2] = barcode
+                    var barcode = r[2].substring(0, r[2].indexOf("\|"));
                     results.push(this.get_container_by_barcode(barcode));
                 } else {
                     break;
