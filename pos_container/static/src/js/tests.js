@@ -85,7 +85,7 @@ odoo.define('pos_container.tour.tare', function (require) {
         content: "select product",
         trigger: ".product:contains('Whiteboard Pen')", //UoM = kg
     },
-    set_weight(0.3),
+    set_weight(0.2),
     confirm_weight(),
     {
         content: "validate weight",
