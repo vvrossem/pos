@@ -140,11 +140,11 @@ odoo.define('pos_container.models_and_db', function (require) {
                     timeout: timeout,
                 })
                 .then(function (server_ids) {
-					//self.db.remove_containers(containers);
-					_.each(containers, function(container, key){
-						container["id"] = server_ids[key]
-					});
-					//self.db.add_containers(containers)
+                    //self.db.remove_containers(containers);
+                    _.each(containers, function(container, key){
+                        container["id"] = server_ids[key]
+                    });
+                    //self.db.add_containers(containers)
                     self.set('failed',false);
                     return server_ids;
                 }).fail(function (type, error){
@@ -168,26 +168,26 @@ odoo.define('pos_container.models_and_db', function (require) {
         },
 
         // wrapper around the _save_to_server that updates the synch status widget
-		// it is modified to send containers before orders
+        // it is modified to send containers before orders
         _flush_orders: function(orders, options) {
             var self = this;
             this.set('synch',{ state: 'connecting', pending: orders.length});
 
             return self._save_containers_to_server(self.db.get_containers_sorted())
-				.then(function(container_ids) {
-					for (var i=0; i < orders.length; i++){
-						if (orders[i].data.lines) {
-						    for (var j=0; j < orders[i].data.lines[0].length; j++){
-						    	var orderline = orders[i].data.lines[0][j]
-						        if ( !orderline.container_id && orderline.container_barcode) {
-						        	orderline.container_id = self.db.get_container_by_barcode(orderline.container_barcode).id;
-						    		delete orderline["container_barcode"]
-						        }
-						    }
-						}
-					}
-			        self._save_to_server(orders, options)
-				}).done(function (server_ids) {
+                .then(function(container_ids) {
+                    for (var i=0; i < orders.length; i++){
+                        if (orders[i].data.lines) {
+                            for (var j=0; j < orders[i].data.lines[0].length; j++){
+                                var orderline = orders[i].data.lines[0][j]
+                                if ( !orderline.container_id && orderline.container_barcode) {
+                                    orderline.container_id = self.db.get_container_by_barcode(orderline.container_barcode).id;
+                                    delete orderline["container_barcode"]
+                                }
+                            }
+                        }
+                    }
+                    self._save_to_server(orders, options)
+                }).done(function (server_ids) {
                     var pending = self.db.get_orders().length;
 
                     self.set('synch', {
