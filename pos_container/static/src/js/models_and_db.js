@@ -500,7 +500,8 @@ odoo.define('pos_container.models_and_db', function (require) {
             if(container.name) {
                 str += '|' + container.name;
             }
-            str = '' + container.id + ':' + str.replace(':','') + '\n';
+			var id = container.id || 0;
+            str = '' + id + ':' + str.replace(':','') + '\n';
 
             return str;
         },
