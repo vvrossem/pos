@@ -14,17 +14,18 @@ odoo.define('pos_toledo_container.screens', function (require) {
         show: function () {
             var self = this;
             var queue = this.pos.proxy_queue;
-
-            this.set_weight(0);
-            this.renderElement();
-
-            self.pos.proxy.reset_weight();
+            var priceStr = '001000'; // bizerba doesn't accept '000000' as unit price
 
             queue.schedule(function () {
+                return self.pos.proxy.reset_weight().then(function () {
+                    self.set_weight(0);
+                });
+            }, {duration: 500});
 
-                return self.pos.proxy.scale_read().then(function (scale_answer) {
+            queue.schedule(function () {
+                return self.pos.proxy.scale_read_data_price(priceStr).then(function (scale_answer) {
                     self.set_weight(scale_answer.weight);
-                    if ((scale_answer.info === '30' || scale_answer.info === '31') && scale_answer.weight !== 0) {
+                    if ((scale_answer.error === '30' || scale_answer.error === '31') && scale_answer.weight !== 0) {
                         self.gui.show_screen(self.next_screen);
                         self.create_container();
                     }
@@ -33,5 +34,4 @@ odoo.define('pos_toledo_container.screens', function (require) {
             this._super();
         },
     });
-
 });
