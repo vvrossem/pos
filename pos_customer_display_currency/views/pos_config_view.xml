@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<odoo>
+    <record id="view_pos_config_form" model="ir.ui.view">
+        <field name="name">pos_customer_display_currency.pos.config.form</field>
+        <field name="model">pos.config</field>
+        <field name="inherit_id" ref="point_of_sale.pos_config_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='customer_display_line_length']/.." position="before">
+                <div class="row">
+                    <label for="customer_display_currency_char" class="col-lg-3 o_light_label"/>
+                    <field name="customer_display_currency_char"/>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

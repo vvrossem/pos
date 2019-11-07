@@ -434,4 +434,8 @@ odoo.define('pos_container.container', function (require) {
         },
     });
 
+    return {
+        ContainerScaleScreenWidget: ContainerScaleScreenWidget,
+    };
+
 });
