@@ -62,7 +62,7 @@
      </t>
 
     <t t-name="ContainerLine">
-        <tr class="container-line" t-att-data-id="container.id">
+        <tr class="container-line" t-att-data-id="container.barcode">
             <td>
                 <t t-esc="container.name"/>
             </td>

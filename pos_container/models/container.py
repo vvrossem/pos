@@ -32,10 +32,14 @@ class Container(models.Model):
     ]
 
     @api.model
-    def create_from_ui(self, container):
-        container_id = container.pop('id', False)
-        if container_id:  # Modifying existing container
-            self.browse(container_id).write(container)
-        else:
-            container_id = self.create(container).id
-        return container_id
+    def create_from_ui(self, containers):
+        # retourne la liste des ids dans le même ordre que la liste fournie
+        container_ids = []
+        for container in containers:
+            container_id = container.pop('id', False)
+            if container_id:  # Modifying existing container
+                self.browse(container_id).write(container)
+            else:
+                container_id = self.create(container).id
+            container_ids.append(container_id)
+        return container_ids

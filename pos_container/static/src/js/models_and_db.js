@@ -90,6 +90,121 @@ odoo.define('pos_container.models_and_db', function (require) {
                 }));
             });
         },
+
+        // saves the container locally and try to send it to the backend.
+        // it returns a deferred that succeeds after having tried to send the container and all the other pending containers.
+        push_container: function(container, opts) {
+            opts = opts || {};
+            var self = this;
+
+            if(container){
+                this.db.add_containers([container]);
+            }
+
+            var pushed = new $.Deferred();
+
+            this.flush_mutex.exec(function(){
+                var flushed = self._save_containers_to_server(self.db.get_containers_sorted(), opts);
+
+                flushed.always(function(ids){
+                    pushed.resolve();
+                });
+
+                return flushed;
+            });
+            return pushed;
+        },
+
+        // send an array of containers to the server
+        // available options:
+        // - timeout: timeout for the rpc call in ms
+        // returns a deferred that resolves with the list of
+        // server generated ids for the sent containers
+        _save_containers_to_server: function (containers, options) {
+            var self = this;
+            var containers= containers.filter(container => !( "id" in container))
+            if (!containers || !containers.length) {
+                var result = $.Deferred();
+                result.resolve([]);
+                return result;
+            }
+
+            options = options || {};
+            var timeout = typeof options.timeout === 'number' ? options.timeout : 7500 * containers.length;
+
+            return rpc.query({
+                    model: 'pos.container',
+                    method: 'create_from_ui',
+                    args: containers,
+                }, {
+                    timeout: timeout,
+                })
+                .then(function (server_ids) {
+                    //self.db.remove_containers(containers);
+                    _.each(containers, function(container, key){
+                        container["id"] = server_ids[key]
+                    });
+                    //self.db.add_containers(containers)
+                    self.set('failed',false);
+                    return server_ids;
+                }).fail(function (type, error){
+                    if(error.code === 200 ){    // Business Logic Error, not a connection problem
+                        //if warning do not need to display traceback!!
+                        if (error.data.exception_type == 'warning') {
+                            delete error.data.debug;
+                        }
+
+                        // Hide error if already shown before ...
+                        if ((!self.get('failed') || options.show_error) && !options.to_invoice) {
+                            self.gui.show_popup('error-traceback',{
+                                'title': error.data.message,
+                                'body':  error.data.debug
+                            });
+                        }
+                        self.set('failed',error);
+                    }
+                    console.error('Failed to send containers:', containers);
+                });
+        },
+
+        // wrapper around the _save_to_server that updates the synch status widget
+        // it is modified to send containers before orders
+        _flush_orders: function(orders, options) {
+            var self = this;
+            this.set('synch',{ state: 'connecting', pending: orders.length});
+
+            return self._save_containers_to_server(self.db.get_containers_sorted())
+                .then(function(container_ids) {
+                    for (var i=0; i < orders.length; i++){
+                        if (orders[i].data.lines) {
+                            for (var j=0; j < orders[i].data.lines[0].length; j++){
+                                var orderline = orders[i].data.lines[0][j]
+                                if ( !orderline.container_id && orderline.container_barcode) {
+                                    orderline.container_id = self.db.get_container_by_barcode(orderline.container_barcode).id;
+                                    delete orderline["container_barcode"]
+                                }
+                            }
+                        }
+                    }
+                    self._save_to_server(orders, options)
+                }).done(function (server_ids) {
+                    var pending = self.db.get_orders().length;
+
+                    self.set('synch', {
+                        state: pending ? 'connecting' : 'connected',
+                        pending: pending
+                    });
+
+                    return server_ids;
+                }).fail(function(error, event){
+                    var pending = self.db.get_orders().length;
+                    if (self.get('failed')) {
+                        self.set('synch', { state: 'error', pending: pending });
+                    } else {
+                        self.set('synch', { state: 'disconnected', pending: pending });
+                    }
+                });
+        },
     });
 
     models.Order = models.Order.extend({
@@ -337,6 +452,7 @@ odoo.define('pos_container.models_and_db', function (require) {
                 //custom starts here
                 tare: this.get_tare(),
                 container_id: this.get_container() ? this.get_container().id : null,
+                container_barcode: this.get_container() ? this.get_container().barcode : null,
                 container_weight: this.get_container() ? this.get_container().weight : null,
             };
         },
@@ -384,7 +500,8 @@ odoo.define('pos_container.models_and_db', function (require) {
             if(container.name) {
                 str += '|' + container.name;
             }
-            str = '' + container.id + ':' + str.replace(':','') + '\n';
+			var id = container.id || 0;
+            str = '' + id + ':' + str.replace(':','') + '\n';
 
             return str;
         },
@@ -395,7 +512,7 @@ odoo.define('pos_container.models_and_db', function (require) {
                 var container = containers[i];
 
                 if (this.container_write_date &&
-                    this.container_by_id[container.id] &&
+                    this.container_by_barcode[container.barcode] &&
                     new Date(this.container_write_date).getTime() + 1000 >=
                     new Date(container.write_date).getTime() ) {
                     // FIXME: The write_date is stored with milisec precision in the database
@@ -406,10 +523,10 @@ odoo.define('pos_container.models_and_db', function (require) {
                 } else if ( new_write_date < container.write_date ) {
                     new_write_date  = container.write_date;
                 }
-                if (!this.container_by_id[container.id]) {
-                    this.container_sorted.push(container.id);
+                if (!this.container_by_barcode[container.barcode]) {
+                    this.container_sorted.push(container.barcode);
                 }
-                this.container_by_id[container.id] = container;
+                this.container_by_barcode[container.barcode] = container;
 
                 updated_count += 1;
             }
@@ -418,27 +535,27 @@ odoo.define('pos_container.models_and_db', function (require) {
 
             if (updated_count) {
                 // If there were updates, we need to completely
-                // rebuild the search string and the barcode indexing
+                // rebuild the search string and the id indexing
 
                 this.container_search_string = "";
-                this.container_by_barcode = {};
+                this.container_by_id = {};
 
-                for (var id in this.container_by_id) {
-                    var container = this.container_by_id[id];
+                for (var barcode in this.container_by_barcode) {
+                    var container = this.container_by_barcode[barcode];
 
-                    if(container.barcode){
-                        this.container_by_barcode[container.barcode] = container;
+                    if(container.id){
+                        this.container_by_id[container.id] = container;
                     }
                     this.container_search_string += this._container_search_string(container);
                 }
             }
             return updated_count;
         },
-        remove_containers: function(ids){
-            for(var i = 0; i < ids.length; i++) {
-                var container = this.container_by_id[ids[i]];
+        remove_containers: function(barcodes){
+            for(var i = 0; i < barcodes.length; i++) {
+                var container = this.container_by_barcode[barcodes[i]];
                 if (container){
-                    var index_s = this.container_sorted.indexOf(container.id);
+                    var index_s = this.container_sorted.indexOf(container.barcode);
                     this.container_sorted.splice(index_s, 1);
                     delete this.container_by_id[container.id];
                     delete this.container_by_barcode[container.barcode];
@@ -458,7 +575,7 @@ odoo.define('pos_container.models_and_db', function (require) {
             max_count = max_count ? Math.min(this.container_sorted.length, max_count) : this.container_sorted.length;
             var containers = [];
             for (var i = 0; i < max_count; i++) {
-                containers.push(this.container_by_id[this.container_sorted[i]]);
+                containers.push(this.container_by_barcode[this.container_sorted[i]]);
             }
 
             return containers;
@@ -467,7 +584,7 @@ odoo.define('pos_container.models_and_db', function (require) {
             try {
                 query = query.replace(/[\[\]\(\)\+\*\?\.\-\!\&\^\$\|\~\_\{\}\:\,\\\/]/g,'.');
                 query = query.replace(' ','.+');
-                var re = RegExp("([0-9]+):.*?"+query,"gi");
+                var re = RegExp("([0-9]+):\\|([0-9]*"+query+"[0-9]*\\|\|[0-9]*\\|.*?"+query+")","gi");
             } catch(e) {
                 return [];
             }
@@ -475,8 +592,9 @@ odoo.define('pos_container.models_and_db', function (require) {
             for(var i = 0; i < this.limit; i++) {
                var r = re.exec(this.container_search_string);
                 if(r) {
-                    var id = Number(r[1]);
-                    results.push(this.get_container_by_id(id));
+                    // r[1] = id, r[2] = barcode
+                    var barcode = r[2].substring(0, r[2].indexOf("\|"));
+                    results.push(this.get_container_by_barcode(barcode));
                 } else {
                     break;
                 }
