@@ -361,14 +361,14 @@ odoo.define('pos_container.models_and_db', function (require) {
             return this.tare_mode;
         },
         set_tare: function(tare){
-            this.tare = this.get_value_rounded(tare);
+            this.tare = this.get_value_rounded(tare).toFixed(3);
             this.container = null;
             if (this.gross_weight && this.gross_weight != 'NaN'){
-                this.set_quantity(this.gross_weight - parseFloat(tare));
+                this.set_quantity(this.gross_weight - parseFloat(this.tare));
             }
             else{
-                this.gross_weight = this.quantity;
-                this.set_quantity(this.quantity - parseFloat(tare));
+                this.set_gross_weight(this.quantity);
+                this.set_quantity(this.quantity - parseFloat(this.tare));
             }
             this.trigger('change', this);
         },
@@ -379,7 +379,7 @@ odoo.define('pos_container.models_and_db', function (require) {
             return this.gross_weight;
         },
         set_gross_weight: function(weight){
-            this.gross_weight = this.get_value_rounded(weight);
+            this.gross_weight = this.get_value_rounded(weight).toFixed(3);
             this.trigger('change', this);
         },
         set_quantity: function(quantity, keep_price){
@@ -430,7 +430,7 @@ odoo.define('pos_container.models_and_db', function (require) {
                     value = round_pr(value, 1);
                 }
             }
-            return value
+            return value;
         },
         export_as_JSON: function(){
             var pack_lot_ids = [];
