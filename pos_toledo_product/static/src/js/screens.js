@@ -22,17 +22,17 @@ odoo.define('pos_toledo_product.screens', function (require) {
 
     screens.ScaleScreenWidget.include({
         set_price: function (price) {
-            this.price = price;
-            this.$('.price').text(this.format_currency(price));
-            this.$('.computed-price').text(this.format_currency(price));
+            if (!price) {
+                this.$('.computed-price').text(this.get_computed_price_string());
+            } else {
+                this.price = price;
+                //this.$('.price').text(this.format_currency(price));
+                this.$('.computed-price').text(this.format_currency(price));
+            }
         },
 
         get_price: function () {
             return this.price;
-        },
-
-        get_computed_price_string: function () {
-            return this.format_currency(this.price);
         },
 
         set_weight: function (weight) {
@@ -55,6 +55,7 @@ odoo.define('pos_toledo_product.screens', function (require) {
         show: function () {
             var self = this;
             var queue = this.pos.proxy_queue;
+
             var container = this.gui.get_current_screen_param('container');
 
             queue.schedule(function () {
