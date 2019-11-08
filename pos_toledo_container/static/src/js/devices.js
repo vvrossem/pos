@@ -16,7 +16,7 @@ odoo.define('pos_toledo_container.devices', function (require) {
             this.message('reset_weight').then(function (status) {
                 ret.resolve(status)
             }, function () {
-                ret.resolve({weight: 0.0, price: 0.0, unit: 'kg', info: 'ko'})
+                ret.resolve({weight: 0.0, unit: 'kg', info: 'ko'})
             });
             return ret;
         },
@@ -25,18 +25,13 @@ odoo.define('pos_toledo_container.devices', function (require) {
             var self = this;
             var ret = new $.Deferred();
             if (self.use_debug_weight) {
-                return (new $.Deferred()).resolve({
-                    weight: this.debug_weight,
-                    price: this.debug_price,
-                    unit: 'kg',
-                    info: 'ok'
-                });
+                return (new $.Deferred()).resolve({weight: this.debug_weight, unit: 'kg', info: 'ok'});
             }
             this.message('scale_price', {price: price})
                 .then(function (weight) {
                     ret.resolve(weight);
                 }, function () {
-                    ret.resolve({weight: 0.0, price: 0.0, unit: 'kg', info: 'ko'});
+                    ret.resolve({weight: 0.0, unit: 'kg', info: 'ko'});
                 });
             return ret;
         },

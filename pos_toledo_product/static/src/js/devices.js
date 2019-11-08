@@ -73,7 +73,6 @@ odoo.define('pos_toledo_product.devices', function (require) {
         },
 
         debug_set_weight: function (kg) {
-            console.log(kg);
             this._super(kg);
             this.debug_price = NaN;
         },
