@@ -355,6 +355,7 @@ odoo.define('pos_container.models_and_db', function (require) {
         set_tare_mode: function(mode){
             if (['MAN', 'AUTO'].indexOf(mode) != -1){
                 this.tare_mode = mode;
+                this.trigger('change', this);
             }
         },
         get_tare_mode: function() {

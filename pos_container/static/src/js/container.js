@@ -413,7 +413,7 @@ odoo.define('pos_container.container', function (require) {
                 if( mode === 'tare'){
                     order.get_selected_orderline().set_tare(val);
                 }
-                if (['tare', 'discount', 'price'].indexOf(mode) != -1) {
+                if (['tare', 'discount', 'price', 'quantity'].indexOf(mode) != -1) {
                     order.get_selected_orderline().set_tare_mode('MAN');
                 }
             }
