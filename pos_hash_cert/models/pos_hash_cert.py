@@ -11,6 +11,7 @@ _logger = logging.getLogger(__name__)
 CERT_DIR = config.get('certified_modules_directory', 'pos_certified_modules')
 USER_DIR = os.path.expanduser("~")
 
+
 class ModuleHash(models.Model):
     _inherit = 'ir.module.module'
 
