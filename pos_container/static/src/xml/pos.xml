@@ -279,7 +279,7 @@
     <t t-extend="XmlReceipt">
         <t t-jquery='.orderlines' t-operation='inner'>              
             <t t-foreach='receipt.orderlines' t-as='line'>
-                <t t-if="line.tare_mode == undefined">
+                <t t-if="line.tare_mode == undefined and line.product_barcode != 'CONTAINER'">
                     <t t-set='simple' t-value='line.discount === 0 and line.unit_name === "Unit(s)" and line.quantity === 1' />
                     <t t-if='simple'>
                         <line>
@@ -351,14 +351,14 @@
                                     <value t-att-value-decimals='pos.currency.decimals'><t t-esc='line.price_display' /></value>
                                 </right>
                             </line>
+                            <t t-if='line.container'>
+                                <line indent='1'>
+                                    <left>
+                                        Tare : <t t-esc='line.container.weight' /><t t-esc='line.unit_name' />
+                                    </left>
+                                </line>
+                            </t>
                         </t>
-                    </t>
-                    <t t-if='line.container'>
-                        <line indent='1'>
-                            <left>
-                                Tare : <t t-esc='line.container.weight' /><t t-esc='line.unit_name' />
-                            </left>
-                        </line>
                     </t>
                 </t>
                 <div>------------------</div>
@@ -399,14 +399,14 @@
                                     <value t-att-value-decimals='pos.currency.decimals'><t t-esc='line.price_display' /></value>
                                 </right>
                             </line>
+                            <t t-if='line.tare'>
+                                <line indent='1'>
+                                    <left>
+                                        Tare : <t t-esc='line.tare' /><t t-esc='line.unit_name' />
+                                    </left>
+                                </line>
+                            </t>
                         </t>
-                    </t>
-                    <t t-if='line.tare'>
-                        <line indent='1'>
-                            <left>
-                                Tare : <t t-esc='line.tare' /><t t-esc='line.unit_name' />
-                            </left>
-                        </line>
                     </t>
                 </t>
             </t>

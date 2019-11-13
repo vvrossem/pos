@@ -476,6 +476,7 @@ odoo.define('pos_container.models_and_db', function (require) {
                 tare:               this.get_tare(),
                 tare_mode:          this.get_tare_mode(),
                 gross_weight:       this.get_gross_weight(),
+                product_barcode:    this.get_product().barcode,
             };
         },
     });
